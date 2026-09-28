@@ -17,10 +17,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+
 def load_data():
     try:
-        alerts = pd.read_csv("data/mock_alerts.csv")
-        cases = pd.read_csv("data/mock_cases.csv")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        alerts = pd.read_csv(os.path.join(base_dir, "data", "mock_alerts.csv"))
+        cases = pd.read_csv(os.path.join(base_dir, "data", "mock_cases.csv"))
         # Convert timestamps
         alerts['created_at'] = pd.to_datetime(alerts['created_at'])
         alerts['closed_at'] = pd.to_datetime(alerts['closed_at'])
@@ -77,30 +80,51 @@ def get_execution_gaps():
 
 @app.get("/api/findings/nlp-templated")
 def get_nlp_findings():
-    # In a full implementation, we'd use SentenceTransformers here.
-    # For MVP, we simulate the NLP catching identical strings.
     _, cases = load_data()
-    if cases is None:
+    if cases is None or cases.empty:
         return {"error": "Data not found"}
+        
+    # Lazy load the model to save startup time
+    try:
+        from sentence_transformers import SentenceTransformer
+        from sklearn.cluster import DBSCAN
+        from sklearn.metrics.pairwise import cosine_distances
+        # Using a small, fast model suitable for sentence similarity
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+    except ImportError:
+        return {"error": "Required libraries (sentence-transformers, scikit-learn) not installed"}
         
     findings = []
     
-    # Simulate NLP duplicate detection by finding exact value counts for simplicity in MVP
-    text_counts = cases['investigation_text'].value_counts()
-    templated_texts = text_counts[text_counts > 1].index.tolist()
+    texts = cases['investigation_text'].tolist()
     
-    suspicious_cases = cases[cases['investigation_text'].isin(templated_texts)]
+    # Generate embeddings
+    embeddings = model.encode(texts)
     
-    for text in templated_texts:
-        cases_with_text = suspicious_cases[suspicious_cases['investigation_text'] == text]
+    # Compute cosine distances and cluster using DBSCAN
+    # eps=0.15 means vectors with a cosine distance <= 0.15 (i.e., similarity >= 0.85) will be clustered
+    distances = cosine_distances(embeddings)
+    db = DBSCAN(eps=0.15, min_samples=2, metric='precomputed')
+    labels = db.fit_predict(distances)
+    
+    cases['cluster'] = labels
+    unique_labels = set(labels)
+    
+    for label in unique_labels:
+        if label == -1:
+            continue # -1 represents noise (unique texts)
+            
+        cluster_cases = cases[cases['cluster'] == label]
+        sample_text = cluster_cases.iloc[0]['investigation_text']
+        
         findings.append({
-            "finding_id": f"FND-NLP-{hash(text) % 10000}",
-            "type": "Templated Investigation",
+            "finding_id": f"FND-NLP-{hash(sample_text) % 10000}",
+            "type": "Templated Investigation (Semantic)",
             "severity": "Medium",
-            "description": f"Found {len(cases_with_text)} cases using identical investigation text. Indicates copy-paste behavior.",
+            "description": f"Found {len(cluster_cases)} cases with highly similar investigation text. Indicates copy-paste or templated behavior.",
             "evidence": {
-                "text_snippet": text[:100] + "...",
-                "case_ids": cases_with_text['case_id'].tolist()
+                "text_snippet": sample_text[:100] + "...",
+                "case_ids": cluster_cases['case_id'].tolist()
             }
         })
 

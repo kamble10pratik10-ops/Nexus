@@ -12,25 +12,38 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSummary = async () => {
       try {
-        const [summaryRes, gapsRes, nlpRes] = await Promise.all([
-          axios.get(`${API_URL}/dashboard/summary`),
-          axios.get(`${API_URL}/findings/execution-gaps`),
-          axios.get(`${API_URL}/findings/nlp-templated`)
-        ]);
-        
-        setSummary(summaryRes.data);
-        setExecutionGaps(gapsRes.data.findings || []);
-        setNlpFindings(nlpRes.data.findings || []);
+        const res = await axios.get(`${API_URL}/dashboard/summary`);
+        setSummary(res.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching summary:", error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchData();
+
+    const fetchGaps = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/findings/execution-gaps`);
+        setExecutionGaps(res.data.findings || []);
+      } catch (error) {
+        console.error("Error fetching gaps:", error);
+      }
+    };
+
+    const fetchNlp = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/findings/nlp-templated`);
+        setNlpFindings(res.data.findings || []);
+      } catch (error) {
+        console.error("Error fetching NLP findings:", error);
+      }
+    };
+
+    fetchSummary();
+    fetchGaps();
+    fetchNlp();
   }, []);
 
   const gaugeOption = {
