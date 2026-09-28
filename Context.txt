@@ -1,0 +1,60 @@
+# SAT-SA Nexus: Evidence-Driven Supervisory Analytics for Critical-Sector SOCs
+
+## Tagline
+From "SOC reports" to "SOC evidence."
+
+## Core Proposition
+SAT-SA Nexus converts periodic SOC operational evidence into explainable supervisory signals. It detects execution gaps, negative space, metric-evidence divergence, and peer anomalies, then prioritizes the small subset of entities and cases that a human supervisor should review. 
+
+**Market Positioning:** We are not replacing the SOC stack (SIEM, SOAR, UEBA, etc.). We independently assess the evidence produced by the SOC stack. The system sits above SOCs to determine whether the SOC's operational evidence demonstrates that the SOC is actually functioning effectively.
+
+## Architecture & Key Principles
+- **Batch-First:** Designed for periodic submissions (CSV, JSON, DB, API). Explicitly excludes continuous collection, real-time monitoring, and SIEM functionality.
+- **Offline / Air-gapped:** 100% local processing. No internet, no cloud, no SaaS, no external AI APIs.
+- **Evidence -> Capability Assessment -> Supervisory Priority:** Risk scoring is not the center; evidence quality and supervisory priority are.
+- **Explainability:** Every finding explains WHAT happened, WHY it is suspicious, WHAT evidence supports it, WHAT benchmark was used, and WHAT the supervisor should inspect.
+- **Validation Loop:** Designed to be validated against expert manual review.
+
+## Six Core Innovations
+1. **Expected Evidence Graph:** Determines what evidence should exist (e.g., Asset -> Telemetry -> Alert -> Case -> Escalation -> Response) and calculates Evidence Chain Completeness.
+2. **Execution Gap Engine:** Answers "Does operational behaviour match claimed capability?" Flags closure anomalies, escalation mismatches, shallow investigation depths, and templated investigation repetitions.
+3. **Negative Space Engine:** Answers "What expected evidence is missing?" Operates across multiple layers (Asset->Telemetry gap, Telemetry->Alert gap, Alert->Case gap, Case->Escalation gap).
+4. **Metric-Evidence Divergence:** Answers "Do good-looking KPIs correspond to good operational evidence?" (e.g., MTTR looks great, but investigation depth is suspiciously low).
+5. **Supervisory Priority Engine:** Prioritizes which entities/cases deserve scarce human review based on a configurable Supervisory Priority Score (SPS), decoupled from objective security risk.
+6. **Tamper-Evident Audit Ledger:** A tamper-evident cryptographic hash chain mapping Dataset Hash + Rule Version + Finding Hash to ensure every finding and review action is fully auditable (without requiring a blockchain network).
+
+## The Four Analytical Engines
+1. **Evidence Quality Engine:** Before judging the SOC, it calculates data completeness, schema validity, timestamp consistency, and linkage coverage to provide an **Analytics Confidence Score**.
+2. **Execution Gap Engine:** Detects when a SOC appears compliant on paper but operational evidence contradicts it (e.g., critical alerts closed in 90s without escalation).
+3. **Negative Space Engine:** The strongest differentiator. Correlates declared monitoring with actual telemetry/alert generation (e.g., Critical DB asset declared under monitoring but generated no authentication alerts).
+4. **Peer Benchmarking:** Builds peer groups (by sector, scale, maturity) and calculates metrics using robust statistics (MAD, IQR, robust z-score) instead of naive mean/std.
+
+## Hybrid AI Architecture
+Deliberately avoids relying on a single giant "Black-Box LLM".
+- **Layer 1 - Deterministic (Python/Pandas/Polars):** Rules engine for missing cases, rapid closures, missing escalations.
+- **Layer 2 - Statistical (Robust Z-score, MAD, IQR):** Detects sudden activity drops, changes in workload distribution, and peer deviations.
+- **Layer 3 - Machine Learning (Isolation Forest, DBScan):** Entity and case behavior anomalies, peer-group anomalies.
+- **Layer 4 - NLP (sentence-transformers locally):** Investigation similarity analysis to detect copy-paste / templated lazy investigations.
+
+## Tech Stack
+- **Frontend:** React, TypeScript, Tailwind CSS, Apache ECharts (all locally bundled).
+- **Backend:** Python, FastAPI, Pydantic.
+- **Analytics:** Polars, Pandas, NumPy, SciPy, scikit-learn.
+- **NLP:** Local embedding models (sentence-transformers), FAISS.
+- **Database:** PostgreSQL (relational tables and joins simulate the Evidence Graph).
+
+## Data Model (Entities)
+- `ENTITY`: sector, size_band, criticality, observation windows.
+- `ASSET`: asset_type, criticality, monitoring_expected.
+- `ALERT`: severity, category, status, timestamps, disposition.
+- `CASE`: investigation_text, investigation_actions, timestamps.
+- `ESCALATION`: escalated, escalation_level.
+- `RESPONSE`: response_action, result.
+- `EXPECTED_EVIDENCE`: sector, asset_type, expected workflows.
+- `FINDING`: finding_type, severity, priority, confidence, explanation.
+
+## Execution & Delivery Strategy (MVP)
+- **Ingest:** CSV/JSON ingestion and schema validation.
+- **Process:** Data normalization, execution-gap rules, negative-space engine, and peer benchmarking.
+- **Dashboard UI:** "Command Centre" featuring Supervisory Overview, Entity Comparison, Finding Details, interactive Evidence Graph, and a Review Queue.
+- **Focus:** Show how SAT-SA Nexus reduces the search space for human reviewers rather than attempting to replace auditors entirely.

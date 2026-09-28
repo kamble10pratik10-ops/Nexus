@@ -1,0 +1,6 @@
+entity_id,sector,size_band,criticality
+ENT-001,Finance,Large,High
+ENT-002,Healthcare,Medium,High
+ENT-003,Energy,Large,Critical
+ENT-004,Retail,Small,Low
+ENT-005,Technology,Medium,Medium

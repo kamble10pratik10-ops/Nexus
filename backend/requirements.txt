@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pandas
+polars
+scikit-learn
+sentence-transformers
+faiss-cpu
+pydantic
+python-multipart
