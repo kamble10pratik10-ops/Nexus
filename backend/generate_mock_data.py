@@ -3,9 +3,13 @@ import numpy as np
 import random
 from datetime import datetime, timedelta
 import os
+import json
 
 # Create data directory if it doesn't exist
 os.makedirs("data", exist_ok=True)
+
+# 0. Initialize Ground Truth labels
+ground_truth = []
 
 # 1. Generate Mock Entities
 entities = pd.DataFrame({
@@ -31,6 +35,7 @@ assets = pd.DataFrame(assets_data)
 assets.to_csv("data/mock_assets.csv", index=False)
 
 # 3. Generate Mock Alerts
+# --- New fields for Feature 1 (Metric Integrity): closed_by, original_severity, sla_reset ---
 alerts_data = []
 current_time = datetime.now()
 
@@ -45,27 +50,119 @@ categories = [
 for i in range(1, 150): # Generated 150 alerts for a better demo
     asset = random.choice(assets_data)
     created_at = current_time - timedelta(days=random.randint(0, 30), hours=random.randint(0, 24), minutes=random.randint(0, 60))
+    alert_id = f"ALT-{i:04d}"
     
     severity = random.choice(["Critical", "High", "Medium", "Low"])
+    original_severity = severity  # Default: no change
+    
+    # === Feature 1: Severity Downgrade Injection ===
+    # ~8% of alerts have severity downgraded (Critical->Medium or High->Low)
+    if random.random() < 0.08:
+        if severity == "Critical":
+            severity = "Medium"
+        elif severity == "High":
+            severity = "Low"
+        ground_truth.append({
+            "engine": "Metric Integrity", "type": "Severity Downgrade",
+            "entity_id": asset["entity_id"], "target_id": alert_id
+        })
+    
+    # === Feature 1: Automation Blending ===
+    # ~30% of alerts are closed by SOAR/automation, rest by human analysts
+    if random.random() < 0.30:
+        closed_by = "SOAR"
+    else:
+        closed_by = random.choice(["Analyst-A", "Analyst-B", "Analyst-C", "Analyst-D"])
+    
+    # === Feature 1: SLA Reset Injection ===
+    sla_reset = False
     
     # Introduce execution gaps: "Critical" alerts closed in < 90 seconds
     if i % 15 == 0 and severity == "Critical":
         closed_at = created_at + timedelta(seconds=random.randint(15, 85)) # Suspiciously fast
         disposition = "False Positive"
-    else:
+        ground_truth.append({
+            "engine": "Execution Gaps", "type": "Fast Closure",
+            "entity_id": asset["entity_id"], "target_id": alert_id
+        })
+    # === Feature 2: Round-Number Duration Injection ===
+    elif i % 12 == 0:
+        # Exactly 5, 10, 15, 30, or 60 minutes — suspiciously round
+        round_minutes = random.choice([5, 10, 15, 30, 60])
+        closed_at = created_at + timedelta(minutes=round_minutes)
+        disposition = random.choice(["True Positive", "False Positive", "Benign"])
+        if not any(gt["type"] == "Round-Number Duration Clustering" for gt in ground_truth):
+            ground_truth.append({
+                "engine": "Evidence Forensics", "type": "Round-Number Duration Clustering",
+                "entity_id": "ALL"
+            })
+    # === Feature 2: Uniform Inter-Arrival Injection for ENT-004 ===
+    elif asset["entity_id"] == "ENT-004" and i % 5 == 0:
+        # Force uniform 120-minute spacing from a base time for this entity
+        base = current_time - timedelta(days=15)
+        created_at = base + timedelta(minutes=120 * (i // 5))
         closed_at = created_at + timedelta(minutes=random.randint(15, 240))
         disposition = random.choice(["True Positive", "False Positive", "Benign"])
+        # We flag the entity, not individual alerts, for this engine
+        if not any(gt["type"] == "Uniform Inter-Arrival (Fabrication Risk)" and gt["entity_id"] == "ENT-004" for gt in ground_truth):
+            ground_truth.append({
+                "engine": "Evidence Forensics", "type": "Uniform Inter-Arrival (Fabrication Risk)",
+                "entity_id": "ENT-004"
+            })
+    else:
+        # === Feature 1: SLA Reset Injection (~5% of alerts) ===
+        if random.random() < 0.05:
+            sla_reset = True
+            # Close just inside SLA after a reset (looks like clock was restarted)
+            closed_at = created_at + timedelta(minutes=random.randint(200, 260))
+            ground_truth.append({
+                "engine": "Metric Integrity", "type": "SLA Clock Reset",
+                "entity_id": asset["entity_id"], "target_id": alert_id
+            })
+        else:
+            closed_at = created_at + timedelta(minutes=random.randint(15, 240))
+        disposition = random.choice(["True Positive", "False Positive", "Benign"])
+
+    # === Feature 10: Peer Blind-Spot Injection ===
+    # ENT-004 never sees PowerShell or DNS Exfil -- blind spot only visible cross-entity
+    if asset["entity_id"] == "ENT-004":
+        alert_category = random.choice([
+            "Ransomware Indicator (T1486)",
+            "Brute Force Authentication (T1110)",
+            "Possible SQL Injection (T1190)"
+        ])
+        if not any(gt["type"] == "Peer Blind-Spot (Missing Detection)" and gt["entity_id"] == "ENT-004" for gt in ground_truth):
+            ground_truth.append({
+                "engine": "Peer Blind-Spot", "type": "Peer Blind-Spot (Missing Detection)",
+                "entity_id": "ENT-004"
+            })
+    else:
+        alert_category = random.choice(categories)
+
+    import re
+    match = re.search(r'\((T\d+(?:\.\d+)?)\)', alert_category)
+    technique_id = match.group(1) if match else "Unknown"
+    rule_id = f"RULE-{abs(hash(alert_category)) % 1000:03d}"
+    log_source = random.choice(["Windows Event Logs", "Palo Alto Networks", "CrowdStrike Falcon", "AWS CloudTrail"])
+    native_ioc = f"{random.randint(10, 200)}.{random.randint(10, 200)}.{random.randint(10, 200)}.{random.randint(1, 255)}"
 
     alerts_data.append({
-        "alert_id": f"ALT-{i:04d}",
+        "alert_id": alert_id,
         "entity_id": asset["entity_id"],
         "asset_id": asset["asset_id"],
         "severity": severity,
-        "category": random.choice(categories),
+        "original_severity": original_severity,
+        "category": alert_category,
+        "rule_id": rule_id,
+        "technique_id": technique_id,
+        "log_source": log_source,
+        "native_ioc": native_ioc,
         "status": "Closed",
         "created_at": created_at.isoformat(),
         "closed_at": closed_at.isoformat(),
-        "disposition": disposition
+        "disposition": disposition,
+        "closed_by": closed_by,
+        "sla_reset": sla_reset
     })
 alerts = pd.DataFrame(alerts_data)
 alerts.to_csv("data/mock_alerts.csv", index=False)
@@ -82,41 +179,114 @@ lazy_templates = [
 
 # Genuine, detailed investigation templates
 good_templates_sql = [
-    "Investigated SQLi alert originating from 192.168.1.{x}. WAF blocked the payload (SELECT * FROM users). Verified no data exfiltration occurred.",
-    "Reviewed WAF logs for SQLi attempt. The request contained a basic union-based injection string. Payload was successfully dropped by the edge router."
+    "Investigated SQLi alert originating from {ip}. WAF blocked the payload (SELECT * FROM users). Verified no data exfiltration occurred.",
+    "Reviewed WAF logs for SQLi attempt from {ip}. The request contained a basic union-based injection string. Payload was successfully dropped by the edge router."
 ]
 
 good_templates_auth = [
-    "Detected 50+ failed login attempts for user account. Verified with the user that they forgot their password. Reset AD credentials.",
-    "Investigated brute force alert on the VPN portal. The source IP 45.33.{x}.{y} is a known exit node. IP has been added to the blocklist."
+    "Detected 50+ failed login attempts for user account from {ip}. Verified with the user that they forgot their password. Reset AD credentials.",
+    "Investigated brute force alert on the VPN portal. The source IP {ip} is a known exit node. IP has been added to the blocklist."
 ]
+
+# === Feature 3: Empty / minimal investigation templates (zombie-like) ===
+empty_templates = [
+    "",
+    "Closed.",
+    "N/A",
+    "See previous case.",
+    "Duplicate.",
+]
+
+case_index = 0
+deleted_case_ids = set()  # Track which IDs are "deleted" for Feature 2
 
 for idx, alert in enumerate(alerts_data):
     if random.random() > 0.2: # 80% of alerts become cases
         
+        # === Feature 2: Case-ID Gap Injection ===
+        # Skip some case IDs to simulate deleted records (~5% chance)
+        if random.random() < 0.05:
+            deleted_case_ids.add(case_index)
+            if not any(gt["type"] == "Case-ID Sequence Gap (Deleted Records)" for gt in ground_truth):
+                ground_truth.append({
+                    "engine": "Evidence Forensics", "type": "Case-ID Sequence Gap (Deleted Records)",
+                    "entity_id": "ALL"
+                })
+            case_index += 1  # Skip this ID
+            
+        case_id = f"CAS-{case_index:04d}"
+        
+        # === Feature 3: Empty/zombie investigation injection (~10%) ===
+        if random.random() < 0.10:
+            investigation_text = random.choice(empty_templates)
+            investigation_actions = 0
+            ground_truth.append({
+                "engine": "Investigation Quality", "type": "Zombie Case (No Evidence)",
+                "entity_id": alert["entity_id"], "target_id": case_id
+            })
         # Inject the lazy "templated" text for NLP to catch
-        if idx % 7 == 0:
+        elif idx % 7 == 0:
             investigation_text = random.choice(lazy_templates)
+            investigation_actions = random.randint(1, 3)
+            ground_truth.append({
+                "engine": "NLP", "type": "Templated Investigation (Semantic)",
+                "entity_id": alert["entity_id"], "target_id": case_id
+            })
+        # Add Hard Negatives: Legitimate SOAR templates that shouldn't be flagged as lazy
+        elif idx % 9 == 0:
+            investigation_text = "SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP verified against internal allowlist. Auto-closed."
+            investigation_actions = 5
+            # We DO NOT append to ground truth here because it's a hard negative (legit)
+            
         else:
-            x = random.randint(10, 250)
-            y = random.randint(10, 250)
-            if "SQL" in alert["category"]:
-                investigation_text = random.choice(good_templates_sql).replace("{x}", str(x))
-            elif "Authentication" in alert["category"]:
-                investigation_text = random.choice(good_templates_auth).replace("{x}", str(x)).replace("{y}", str(y))
+            # === Feature 8: Rubric Grounding Defect Injection ===
+            # Analyst cites a generic/fake IP instead of the actual native_ioc
+            if random.random() < 0.15: # 15% of cases have grounded defects
+                cited_ip = "8.8.8.8"
+                ground_truth.append({
+                    "engine": "Investigation Quality", "type": "Rubric Grounding Failure (Gaming)",
+                    "entity_id": alert["entity_id"], "target_id": case_id
+                })
             else:
-                investigation_text = f"Analyzed {alert['category']} on {alert['asset_id']}. CrowdStrike sensor logged process execution tree. Determined to be a scheduled IT script running out of band. Closed as {alert['disposition']}."
+                cited_ip = alert["native_ioc"]
+                
+            if "SQL" in alert["category"]:
+                investigation_text = random.choice(good_templates_sql).replace("{ip}", cited_ip)
+            elif "Authentication" in alert["category"]:
+                investigation_text = random.choice(good_templates_auth).replace("{ip}", cited_ip)
+            else:
+                investigation_text = f"Analyzed {alert['category']} on {alert['asset_id']}. Source IP {cited_ip} was checked. CrowdStrike sensor logged process execution tree. Closed as {alert['disposition']}."
+            investigation_actions = random.randint(1, 15)
+            
+        escalated = random.choice([True, False, False])
+        if alert["severity"] == "Critical" and not escalated and alert.get("disposition") == "True Positive":
+            ground_truth.append({
+                "engine": "Execution Gaps", "type": "Broken Evidence Chain (No Escalation)",
+                "entity_id": alert["entity_id"], "target_id": case_id
+            })
             
         cases_data.append({
-            "case_id": f"CAS-{idx:04d}",
+            "case_id": case_id,
             "alert_id": alert["alert_id"],
             "entity_id": alert["entity_id"],
             "investigation_text": investigation_text,
-            "investigation_actions": random.randint(1, 15),
-            "escalated": random.choice([True, False, False]), # Less likely to be escalated
+            "investigation_actions": investigation_actions,
+            "escalated": escalated, # Use the fixed variable
             "created_at": alert["created_at"]
         })
+        case_index += 1
 cases = pd.DataFrame(cases_data)
 cases.to_csv("data/mock_cases.csv", index=False)
 
-print("Highly realistic Hackathon mock data generated successfully in the 'data' directory.")
+print(f"Enhanced mock data generated. {len(alerts_data)} alerts, {len(cases_data)} cases.")
+print(f"  Injected: {sum(1 for a in alerts_data if a['severity'] != a['original_severity'])} severity downgrades")
+print(f"  Injected: {sum(1 for a in alerts_data if a['closed_by'] == 'SOAR')} SOAR closures")
+print(f"  Injected: {sum(1 for a in alerts_data if a['sla_reset'])} SLA resets")
+print(f"  Injected: {len(deleted_case_ids)} case-ID gaps (deleted records)")
+print(f"  Injected: {sum(1 for c in cases_data if c['investigation_actions'] == 0)} zombie cases")
+
+# Save ground truth labels
+with open("data/ground_truth.json", "w") as f:
+    json.dump(ground_truth, f, indent=2)
+print(f"Ground truth labels saved: {len(ground_truth)} anomalies injected.")
+
