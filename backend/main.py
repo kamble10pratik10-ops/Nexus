@@ -1,17 +1,39 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from typing import Any, Dict, Literal, Optional
 import pandas as pd
 import numpy as np
 from datetime import datetime
 from collections import Counter
+from contextlib import asynccontextmanager
 import re
 import json
 import hashlib
 import hmac
 
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+try:
+    from .api_support import append_review, read_reviews, resolve_evidence_records
+    from .database import DatabaseConfigurationError, dispose_engine, get_engine
+except ImportError:  # Supports running ``uvicorn main:app`` from backend/.
+    from api_support import append_review, read_reviews, resolve_evidence_records
+    from database import DatabaseConfigurationError, dispose_engine, get_engine
+
 # Setup FastAPI
-app = FastAPI(title="SAT-SA Nexus API", description="Supervisory Analytics for SOCs")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    dispose_engine()
+
+
+app = FastAPI(
+    title="SAT-SA Nexus API",
+    description="Supervisory Analytics for SOCs",
+    lifespan=lifespan,
+)
 
 # Allow CORS for the frontend
 app.add_middleware(
@@ -22,6 +44,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "SAT-SA Nexus API"}
+
+
+@app.get("/health/ready")
+def readiness_check():
+    try:
+        with get_engine().connect() as connection:
+            connection.execute(text("SELECT 1"))
+    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
+    return {"status": "ready", "service": "SAT-SA Nexus API"}
+
+@app.get("/v1/models")
+def get_dummy_models():
+    """Dummy endpoint to satisfy local LLM browser extensions (e.g. Codeium, LM Studio) that poll /v1/models."""
+    return {"object": "list", "data": []}
+
+
 import os
 from dotenv import load_dotenv
 
@@ -31,35 +73,77 @@ load_dotenv()
 
 def load_data():
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        alerts = pd.read_csv(os.path.join(base_dir, "data", "mock_alerts.csv"))
-        cases = pd.read_csv(os.path.join(base_dir, "data", "mock_cases.csv"))
-        events_path = os.path.join(base_dir, "data", "mock_alert_events.csv")
-        if os.path.exists(events_path):
-            events = pd.read_csv(events_path)
+        engine = get_engine()
+        with engine.connect() as connection:
+            alerts = pd.read_sql_table("alerts", connection)
+            cases = pd.read_sql_table("cases", connection)
+            try:
+                events = pd.read_sql_table("events", connection)
+            except ValueError:
+                events = pd.DataFrame()
+
+        if not events.empty:
             events['timestamp'] = pd.to_datetime(events['timestamp'])
-        else:
-            events = pd.DataFrame()
-        # Convert timestamps
         alerts['created_at'] = pd.to_datetime(alerts['created_at'])
         alerts['closed_at'] = pd.to_datetime(alerts['closed_at'])
         return alerts, cases, events
-    except Exception as e:
-        print(f"Error loading data: {e}")
-        return None, None, None
+    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
 
 def load_assets():
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        assets = pd.read_csv(os.path.join(base_dir, "data", "mock_assets.csv"))
+        engine = get_engine()
+        with engine.connect() as connection:
+            assets = pd.read_sql_table("assets", connection)
         return assets
-    except Exception as e:
-        print(f"Error loading assets: {e}")
-        return None
+    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
 
 @app.get("/")
 def read_root():
     return {"status": "SAT-SA Nexus Backend Running"}
+
+class SimulationPayload(BaseModel):
+    alert_id: str
+    entity_id: str
+    asset_id: str
+    severity: str
+    category: str
+    created_at: str
+    closed_at: str
+    disposition: str
+    closed_by: str
+    case_id: str
+    investigation_text: str
+    investigation_actions: int
+    escalated: bool
+
+@app.post("/api/ingest/simulation")
+def ingest_simulation(payload: SimulationPayload):
+    try:
+        engine = get_engine()
+        with engine.begin() as conn:
+            # Insert into alerts
+            conn.execute(
+                text("""
+                INSERT INTO alerts (alert_id, entity_id, asset_id, severity, original_severity, category, rule_id, technique_id, log_source, native_ioc, status, created_at, closed_at, disposition, closed_by, sla_reset)
+                VALUES (:aid, :eid, :asid, :sev, :sev, :cat, 'RULE-SIM', 'T1110', 'Simulated', '1.1.1.1', 'Closed', :cat_at, :cl_at, :disp, :cby, false)
+                """),
+                {"aid": payload.alert_id, "eid": payload.entity_id, "asid": payload.asset_id, "sev": payload.severity, "cat": payload.category, "cat_at": payload.created_at, "cl_at": payload.closed_at, "disp": payload.disposition, "cby": payload.closed_by}
+            )
+            # Insert into cases
+            conn.execute(
+                text("""
+                INSERT INTO cases (case_id, alert_id, entity_id, investigation_text, investigation_actions, escalated, created_at)
+                VALUES (:cid, :aid, :eid, :itxt, :iact, :esc, :cat_at)
+                """),
+                {"cid": payload.case_id, "aid": payload.alert_id, "eid": payload.entity_id, "itxt": payload.investigation_text, "iact": payload.investigation_actions, "esc": payload.escalated, "cat_at": payload.created_at}
+            )
+        return {"status": "success", "message": f"Ingested {payload.alert_id} into Supabase"}
+    except IntegrityError as exc:
+        raise HTTPException(status_code=409, detail="Simulation data conflicts with an existing record") from exc
+    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # THREE-STATE OUTCOME CLASSIFIER
@@ -89,16 +173,62 @@ def classify_outcome(has_positive_evidence: bool, has_contradicting_evidence: bo
 @app.get("/api/dashboard/summary")
 def get_dashboard_summary():
     alerts, cases, events = load_data()
+    assets = load_assets()
     if alerts is None:
         return {"error": "Data not found"}
         
     total_alerts = len(alerts)
-    total_cases = len(cases)
+    total_cases = len(cases) if cases is not None else 0
+    
+    # ── Measured Data-Quality Indicators ──
+    # These replace the former hardcoded "analytics_confidence_score: 85"
+    
+    # 1. Case Coverage: % of alerts that have a matching investigation case
+    case_alert_ids = set(cases['alert_id'].dropna().unique()) if cases is not None and not cases.empty else set()
+    alerts_with_cases = len([a for a in alerts['alert_id'] if a in case_alert_ids])
+    case_coverage_pct = round((alerts_with_cases / total_alerts) * 100, 1) if total_alerts > 0 else 0
+    
+    # 2. Field Completeness: % of key fields that are non-null across alerts
+    key_fields = ['alert_id', 'entity_id', 'severity', 'category', 'disposition', 'created_at', 'closed_at']
+    available_fields = [f for f in key_fields if f in alerts.columns]
+    if available_fields:
+        non_null_counts = alerts[available_fields].notna().sum().sum()
+        total_cells = len(alerts) * len(available_fields)
+        field_completeness_pct = round((non_null_counts / total_cells) * 100, 1) if total_cells > 0 else 0
+    else:
+        field_completeness_pct = 0
+    
+    # 3. Linkage Integrity: % of cases whose alert_id actually exists in the alerts table
+    alert_ids_set = set(alerts['alert_id'].dropna().unique())
+    if cases is not None and not cases.empty:
+        linked_cases = len([c for c in cases['alert_id'] if c in alert_ids_set])
+        linkage_pct = round((linked_cases / len(cases)) * 100, 1) if len(cases) > 0 else 0
+    else:
+        linkage_pct = 0
+    
+    # 4. Audit Trail Depth: whether events/audit data is present
+    audit_trail_present = events is not None and not events.empty
+    audit_event_count = len(events) if audit_trail_present else 0
+    
+    # 5. Asset Coverage: % of alerts referencing a known asset
+    if assets is not None and not assets.empty and 'asset_id' in alerts.columns:
+        known_assets = set(assets['asset_id'].dropna().unique())
+        alerts_with_asset = alerts['asset_id'].dropna().isin(known_assets).sum()
+        asset_coverage_pct = round((alerts_with_asset / total_alerts) * 100, 1) if total_alerts > 0 else 0
+    else:
+        asset_coverage_pct = 0
     
     return {
         "total_alerts": total_alerts,
         "total_cases": total_cases,
-        "analytics_confidence_score": 85,
+        "data_quality": {
+            "case_coverage_pct": case_coverage_pct,
+            "field_completeness_pct": field_completeness_pct,
+            "linkage_integrity_pct": linkage_pct,
+            "asset_coverage_pct": asset_coverage_pct,
+            "audit_trail_present": audit_trail_present,
+            "audit_event_count": audit_event_count
+        }
     }
 
 @app.get("/api/findings/execution-gaps")
@@ -1358,9 +1488,7 @@ def get_benchmark():
         "engine_breakdown": breakdown
     }
 
-@app.get("/api/entities/priority-queue")
-def get_priority_queue():
-    # Gather all findings
+def _gather_all_findings():
     all_findings = []
     
     all_findings.extend(get_execution_gaps().get("findings", []))
@@ -1378,7 +1506,33 @@ def get_priority_queue():
     all_findings.extend(get_peer_blindspot().get("findings", []))
     all_findings.extend(get_closure_regret().get("findings", []))
     
-    # Calculate SPS per entity
+    # ── Deduplicate overlapping findings ──
+    severity_rank = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+    
+    seen = {}
+    for finding in all_findings:
+        fid = finding.get("finding_id")
+        if not fid:
+            continue
+        existing = seen.get(fid)
+        if existing is None:
+            seen[fid] = finding
+        else:
+            if severity_rank.get(finding.get("severity"), 0) > severity_rank.get(existing.get("severity"), 0):
+                seen[fid] = finding
+                
+    return list(seen.values())
+
+@app.get("/api/findings")
+def get_all_findings():
+    findings = _gather_all_findings()
+    return {"findings": findings}
+
+@app.get("/api/entities/priority-queue")
+def get_priority_queue():
+    deduped_findings = _gather_all_findings()
+    
+    # Calculate SPS per entity using deduplicated findings
     entity_scores = {}
     
     severity_weights = {
@@ -1388,7 +1542,7 @@ def get_priority_queue():
         "Low": 5
     }
     
-    for finding in all_findings:
+    for finding in deduped_findings:
         entity_id = finding.get("entity_id")
         if not entity_id:
             continue
@@ -1415,13 +1569,16 @@ def get_priority_queue():
         entity_scores[entity_id]["findings_summary"].append({
             "id": finding.get("finding_id"),
             "type": finding.get("type"),
-            "severity": finding.get("severity")
+            "severity": finding.get("severity"),
+            "outcome": finding.get("outcome")
         })
         
     # Sort entities by score descending
     ranked_queue = sorted(list(entity_scores.values()), key=lambda x: x["score"], reverse=True)
     
-    return {"queue": ranked_queue}
+    return {
+        "queue": ranked_queue
+    }
 
 @app.get("/api/claims-matrix")
 def get_claims_matrix():
@@ -1469,7 +1626,16 @@ def get_claims_matrix():
                 "day_mttr_seconds": round(day_mttr, 2) if not pd.isna(day_mttr) else 0,
                 "night_volume": int(night_vol),
                 "day_volume": int(day_vol)
-            }
+            },
+            "reason": demo_text,
+            "benchmark": "Compare 00:00–08:00 alert volume and mean closure time with 08:00–16:00; contradict when night volume is zero, below 20% of day volume, or night closure time exceeds 150% of day; mark unverifiable above 120%.",
+            "missing_evidence": [
+                "Alert absence does not prove monitoring absence or lack of analyst coverage.",
+                "Alert creation and closure timestamps do not show continuous monitoring, staffing, or triage activity.",
+                "Only the loaded alert observation window and two shifts are compared; evening and external telemetry are not proof of 24/7 operation."
+            ],
+            "next_review_action": "Obtain shift rosters, telemetry health records, and timestamped triage or acknowledgement logs for all shifts.",
+            "scope": "Aggregate across all loaded entities; this is a predefined demo claim, not a submitted claim."
         })
     
     # Claim 2: 15-Minute Critical SLA
@@ -1493,7 +1659,15 @@ def get_claims_matrix():
             "status": status_2,
             "evidence": {
                 "p95_mttr_seconds": round(p95_mttr, 2)
-            }
+            },
+            "reason": f"The loaded Critical-alert closure-time P95 is {p95_mttr/60:.1f} minutes; the current rule contradicts above 15 minutes, marks 10–15 minutes unverifiable, and otherwise supports.",
+            "benchmark": "Critical-alert P95 closure time: supported at or below 10 minutes, unverifiable above 10 through 15 minutes, contradicted above 15 minutes.",
+            "missing_evidence": [
+                "Closure time is not triage or acknowledgement time; the SLA cannot be directly verified from closure timestamps.",
+                "No explicit triage timestamp, acknowledgement timestamp, pause interval, or SLA-clock evidence is loaded."
+            ],
+            "next_review_action": "Collect immutable Critical-alert acknowledgement and first-triage timestamps, including any documented SLA pauses, then recalculate the P95.",
+            "scope": "Aggregate across all loaded entities; this is a predefined demo claim, not a submitted claim."
         })
         
     # Claim 3: 100% Human Investigation
@@ -1523,7 +1697,16 @@ def get_claims_matrix():
             "soar_closed": int(soar_closures),
             "zombie_cases": int(zombie_cases),
             "human_investigated_rate": round(human_rate, 2)
-        }
+        },
+        "reason": f"The current proxy estimates {human_rate:.1f}% valid human action after excluding SOAR closures and non-SOAR zero-action cases.",
+        "benchmark": "Proxy human-investigation rate: supported at 95% or higher, unverifiable from 85% to below 95%, contradicted below 85%.",
+        "missing_evidence": [
+            "Investigation action counts do not establish that review was thorough or performed by a human.",
+            "Zero recorded actions may reflect missing audit data, and nonzero actions may be automated or superficial.",
+            "The declared word 'all' is assessed with the existing 85%/95% proxy thresholds rather than literal 100% proof."
+        ],
+        "next_review_action": "Sample linked cases and obtain actor-level audit events, investigation artifacts, and review sign-offs to verify human depth and attribution.",
+        "scope": "Aggregate across all loaded entities; this is a predefined demo claim, not a submitted claim."
     })
 
     return {"claims_matrix": matrix}
@@ -1618,55 +1801,78 @@ def get_efficacy_report():
         "cscrf_efficacy": cscrf
     }
 
+class EvidenceRecordsRequest(BaseModel):
+    entity_id: Optional[str] = Field(default=None, max_length=200)
+    evidence: Dict[str, Any]
+
+    @field_validator("entity_id")
+    @classmethod
+    def validate_entity_id(cls, value):
+        if value is None:
+            return value
+        value = value.strip()
+        if not value:
+            raise ValueError("entity_id must not be blank")
+        return value
+
+
+@app.post("/api/evidence/records")
+def get_evidence_records(request: EvidenceRecordsRequest):
+    alerts, cases, events = load_data()
+    assets = load_assets()
+    if alerts is None or cases is None or assets is None:
+        raise HTTPException(status_code=500, detail="Failed to load evidence data")
+    return resolve_evidence_records(request.evidence, request.entity_id, alerts, cases, assets, events)
+
+
 class ReviewRequest(BaseModel):
-    finding_id: str
-    status: str  # "confirm", "dismiss", "need-more-info"
-    comment: str = ""
+    finding_id: str = Field(min_length=1, max_length=200)
+    status: Literal["confirm", "dismiss", "need-more-info"]
+    comment: str = Field(min_length=1, max_length=4000)
+
+    @field_validator("finding_id", "comment")
+    @classmethod
+    def validate_nonblank(cls, value):
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be blank")
+        return value
 
 @app.post("/api/findings/review")
 def submit_review(review: ReviewRequest):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    reviews_file = os.path.join(base_dir, "data", "reviews.json")
-    
-    reviews = []
-    if os.path.exists(reviews_file):
-        with open(reviews_file, "r") as f:
-            try:
-                reviews = json.load(f)
-            except json.JSONDecodeError:
-                pass
-            
-    reviews.append({
-        "finding_id": review.finding_id,
-        "status": review.status,
-        "comment": review.comment,
-        "timestamp": datetime.utcnow().isoformat()
-    })
-    
-    with open(reviews_file, "w") as f:
-        json.dump(reviews, f, indent=2)
-        
-    return {"message": "Review submitted successfully", "review": review.dict()}
+    try:
+        stored_review = append_review(review.finding_id, review.status, review.comment)
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return {"message": "Review submitted successfully", "review": stored_review}
+
+
+@app.get("/api/findings/reviews")
+def get_finding_reviews(finding_id: str = Query(min_length=1, max_length=200)):
+    finding_id = finding_id.strip()
+    if not finding_id:
+        raise HTTPException(status_code=422, detail="finding_id must not be blank")
+    try:
+        reviews = read_reviews(finding_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    return {"reviews": reviews}
 
 @app.get("/api/dashboard/north-star")
 def get_north_star_metric():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    reviews_file = os.path.join(base_dir, "data", "reviews.json")
-    
-    if not os.path.exists(reviews_file):
+    try:
+        reviews = read_reviews()
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    if not reviews:
         return {
             "supervisory_assurance_coverage": 0.0,
             "total_reviews": 0,
             "confirmed_findings": 0,
             "message": "No reviews submitted yet."
         }
-        
-    with open(reviews_file, "r") as f:
-        try:
-            reviews = json.load(f)
-        except json.JSONDecodeError:
-            reviews = []
-        
+
     total_reviews = len(reviews)
     confirmed = sum(1 for r in reviews if r.get("status") == "confirm")
     

@@ -7,11 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0B0F19',
-        card: '#161B22',
-        primary: '#3B82F6',
-        accent: '#10B981',
-        danger: '#EF4444'
+        background: '#020617', // slate-950
+        card: '#0f172a',       // slate-900
+        primary: '#2563EB',
+        accent: '#059669',
+        danger: '#E11D48'
       }
     },
   },

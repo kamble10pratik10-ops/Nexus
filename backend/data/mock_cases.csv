@@ -1,131 +1,256 @@
 case_id,alert_id,entity_id,investigation_text,investigation_actions,escalated,created_at
-CAS-0000,ALT-0001,ENT-004,Duplicate.,0,False,2026-09-19T12:09:19.307453
-CAS-0001,ALT-0002,ENT-004,Check for Possible SQL Injection (T1190) on AST-ENT-004-05. IP 87.42.74.174 checked. BlmfjVwoBAsiLRL wWUyYtBkOPJJYhj. Benign.,7,False,2026-09-13T05:45:19.307453
-CAS-0002,ALT-0003,ENT-001,Reviewing Brute Force Authentication (T1110) on AST-ENT-001-03. Event telemetry looks normal. vEYQStQgRuLZfaM iigINzwDpTGjUfJ. Marked Benign.,6,False,2026-09-08T20:10:19.307453
-CAS-0003,ALT-0004,ENT-004,Reviewing Ransomware Indicator (T1486) on AST-ENT-004-03. Event telemetry looks normal. eqUKAvzplCfevcK USbBgBjoXlbunVN. Marked True Positive.,10,False,2026-09-30T02:28:19.307453
-CAS-0004,ALT-0006,ENT-002,Reviewing Ransomware Indicator (T1486) on AST-ENT-002-05. Event telemetry looks normal. fcmnmkzNKtWBSdL bMXURMVJQHWBrpU. Marked True Positive.,4,False,2026-09-12T01:01:19.307453
-CAS-0005,ALT-0007,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-05. Event telemetry looks normal. ZeMLdGzoPRlByuL QsroYaYmDqcBCDs. Marked True Positive.,9,False,2026-09-29T09:38:19.307453
-CAS-0006,ALT-0008,ENT-003,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-003-02. Event telemetry looks normal. IMXtKcpDOKufhjL icqoiiDfHKFcnfz. Marked True Positive.,10,False,2026-08-31T01:00:19.307453
-CAS-0007,ALT-0009,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-03. Source IP 62.129.187.118 was checked. Host contained. mXAttrSXxwJrtdy. Benign.,7,True,2026-09-23T03:40:19.307453
-CAS-0008,ALT-0010,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 86.185.175.141 verified against internal allowlist. Auto-closed.,5,True,2026-09-19T15:35:19.307453
-CAS-0009,ALT-0011,ENT-004,Triage of Possible SQL Injection (T1190) on AST-ENT-004-04. seuhMtoICzPDFJG lXbSzCqRoIYgHQz. Closed as True Positive.,9,False,2026-09-16T04:47:19.307453
-CAS-0010,ALT-0012,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-02. Source IP 83.52.64.193 was checked. Host contained. KHKbGJPzpslVEfj. False Positive.,6,False,2026-09-23T15:28:19.307453
-CAS-0011,ALT-0013,ENT-002,Reviewing Possible SQL Injection (T1190) on AST-ENT-002-05. Event telemetry looks normal. tVfYSwApvaQgZFa dVQozhWGtkCDZNv. Marked Benign.,7,True,2026-09-01T10:58:19.307453
-CAS-0012,ALT-0014,ENT-003,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-03. Source IP 41.151.118.97 was checked. Host contained. iAfpIVUGfeFCGzN. False Positive.,11,False,2026-09-22T20:13:19.307453
-CAS-0014,ALT-0015,ENT-003,Analyzed Ransomware Indicator (T1486) on AST-ENT-003-05. Source IP 68.167.193.143 was checked. Host contained. CGejfLIuFPsvHvQ. Benign.,7,False,2026-09-20T06:38:19.307453
-CAS-0015,ALT-0017,ENT-003,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-03. Source IP 8.8.8.8 was checked. Host contained. pGaEEgulWnoQRgT. True Positive.,7,True,2026-09-24T12:46:19.307453
-CAS-0016,ALT-0018,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-02. Source IP 40.159.125.245 was checked. Host contained. UAlNCGaDdHOUTHL. Benign.,7,True,2026-09-26T07:53:19.307453
-CAS-0017,ALT-0019,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 145.157.78.86 verified against internal allowlist. Auto-closed.,5,True,2026-09-12T19:28:19.307453
-CAS-0018,ALT-0020,ENT-002,Triage of Brute Force Authentication (T1110) on AST-ENT-002-02. kDHxRggcSQpJELT HKSeaaaKjjTOkQO. Closed as True Positive.,12,True,2026-09-01T00:23:19.307453
-CAS-0019,ALT-0021,ENT-003,Triage of Ransomware Indicator (T1486) on AST-ENT-003-05. ZsgeEteztWzpGvx LcnwwjKrYbbtLxT. Closed as False Positive.,12,False,2026-09-03T13:08:19.307453
-CAS-0020,ALT-0022,ENT-005,Triage of Ransomware Indicator (T1486) on AST-ENT-005-02. mkTGmqewGkzzBMJ BwwSeDanreCCdqc. Closed as False Positive.,10,False,2026-09-21T07:57:19.307453
-CAS-0021,ALT-0023,ENT-002,Check for Ransomware Indicator (T1486) on AST-ENT-002-04. IP 158.94.49.48 checked. CJLVdeucfuJUKxM tKRzaMfUNWWiAmq. False Positive.,7,True,2026-09-18T14:37:19.307453
-CAS-0022,ALT-0024,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-04. OxiibfcSLaOdqDq GGLwazNocUgHUzg. Closed as False Positive.,13,False,2026-09-19T21:11:19.307453
-CAS-0023,ALT-0025,ENT-002,See previous case.,0,False,2026-09-29T14:16:19.307453
-CAS-0024,ALT-0026,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-03. OPrCtLRaRssHMOu IkNDBIuqJmQUXSi. Closed as True Positive.,6,True,2026-09-03T20:08:19.307453
-CAS-0025,ALT-0027,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-02. Source IP 77.71.61.197 was checked. Host contained. WRxwAgSJkSrqMBz. True Positive.,4,False,2026-09-23T09:44:19.307453
-CAS-0026,ALT-0028,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 169.81.61.107 verified against internal allowlist. Auto-closed.,5,True,2026-09-06T16:45:19.307453
-CAS-0027,ALT-0030,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-05. Source IP 61.84.138.98 was checked. Host contained. zoHtDdRzuIPxTKh. True Positive.,11,False,2026-09-16T01:11:19.307453
-CAS-0028,ALT-0031,ENT-004,Reviewing Possible SQL Injection (T1190) on AST-ENT-004-05. Event telemetry looks normal. ZFOmeamezqKuGko ravgzvemqiKNKzE. Marked Benign.,14,False,2026-09-26T14:26:19.307453
-CAS-0029,ALT-0032,ENT-001,,0,False,2026-09-03T19:15:19.307453
-CAS-0030,ALT-0033,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-02. INKedeBlpZtldyQ eHWdcMgXUNymvVl. Closed as Benign.,10,True,2026-09-19T19:14:19.307453
-CAS-0031,ALT-0034,ENT-001,Triage of Data Exfiltration over DNS (T1048.003) on AST-ENT-001-05. qBpmSdQfIJXbTKY WJieiIlcPIhIXrT. Closed as True Positive.,12,True,2026-09-12T23:28:19.307453
-CAS-0032,ALT-0035,ENT-002,Triage of Ransomware Indicator (T1486) on AST-ENT-002-03. VmZXcQXOtYdASlP WyqFVltecUOlfMG. Closed as True Positive.,3,False,2026-09-03T03:28:19.307453
-CAS-0033,ALT-0036,ENT-004,Check for Ransomware Indicator (T1486) on AST-ENT-004-01. IP 180.170.101.50 checked. RcpLGkjCVydacDU DiTVJEtbbjXBIEr. True Positive.,7,True,2026-09-02T19:08:19.307453
-CAS-0034,ALT-0037,ENT-001,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 56.173.71.191 verified against internal allowlist. Auto-closed.,5,False,2026-09-07T15:14:19.307453
-CAS-0035,ALT-0038,ENT-005,Duplicate.,0,True,2026-09-27T02:10:19.307453
-CAS-0036,ALT-0040,ENT-001,Analyzed Possible SQL Injection (T1190) on AST-ENT-001-03. Source IP 8.8.8.8 was checked. Host contained. lEizeSMiAKUOTNq. True Positive.,10,False,2026-09-30T08:49:19.307453
-CAS-0037,ALT-0041,ENT-001,Analyzed Possible SQL Injection (T1190) on AST-ENT-001-05. Source IP 89.181.119.18 was checked. Host contained. jPiVluctWUpqFgF. Benign.,14,False,2026-09-24T05:30:19.307453
-CAS-0039,ALT-0042,ENT-004,Triage of Possible SQL Injection (T1190) on AST-ENT-004-02. IGiZCrwCnNnjcPa UpNeyFcxrceYyHO. Closed as True Positive.,12,False,2026-09-06T23:12:19.307453
-CAS-0040,ALT-0043,ENT-002,Check for Ransomware Indicator (T1486) on AST-ENT-002-02. IP 132.51.50.94 checked. uBxsgdVZJqmwWRi RLfbjfAynfsKUGA. True Positive.,7,True,2026-09-29T17:14:19.307453
-CAS-0042,ALT-0044,ENT-001,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-02. Event telemetry looks normal. ZICsSNHTcLPwbtJ GxZrZyyiXQpAHMO. Marked Benign.,5,True,2026-09-10T07:24:19.307453
-CAS-0043,ALT-0045,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-03. Event telemetry looks normal. naKejaYSuzpENwP ioHyjCcJvzDvgNy. Marked False Positive.,8,True,2026-09-16T07:11:19.307453
-CAS-0044,ALT-0046,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 115.21.34.104 verified against internal allowlist. Auto-closed.,5,False,2026-09-01T11:22:19.307453
-CAS-0045,ALT-0047,ENT-005,Closed.,0,True,2026-09-19T14:50:19.307453
-CAS-0046,ALT-0048,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-05. Source IP 132.107.150.216 was checked. Host contained. KrxfcpOlirSxFkC. False Positive.,14,False,2026-09-25T10:26:19.307453
-CAS-0047,ALT-0049,ENT-002,Reviewing Brute Force Authentication (T1110) on AST-ENT-002-01. Event telemetry looks normal. vWKQyNKYFpUMXGM CuUbCsegqpltCHE. Marked False Positive.,15,False,2026-09-21T03:41:19.307453
-CAS-0048,ALT-0050,ENT-004,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",1,True,2026-09-16T09:11:19.307453
-CAS-0049,ALT-0051,ENT-002,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",2,False,2026-09-15T19:49:19.307453
-CAS-0050,ALT-0052,ENT-001,See previous case.,0,False,2026-09-25T18:48:19.307453
-CAS-0051,ALT-0053,ENT-005,Triage of Ransomware Indicator (T1486) on AST-ENT-005-03. HBimBJrSeBYOXFR IxcfMelGXCttVVT. Closed as True Positive.,8,False,2026-08-31T23:09:19.307453
-CAS-0052,ALT-0055,ENT-004,N/A,0,False,2026-09-16T11:11:19.307453
-CAS-0053,ALT-0056,ENT-002,Analyzed Possible SQL Injection (T1190) on AST-ENT-002-01. Source IP 61.75.27.218 was checked. Host contained. crkmEviyKIulMzX. True Positive.,15,False,2026-08-31T23:02:19.307453
-CAS-0054,ALT-0057,ENT-004,Checked the logs and saw nothing bad. System looks fine. Closing this.,2,False,2026-09-23T02:54:19.307453
-CAS-0055,ALT-0058,ENT-001,Reviewing Possible SQL Injection (T1190) on AST-ENT-001-01. Event telemetry looks normal. dYweeGixVjPyCgI kzvnDgUhGPAFPFj. Marked False Positive.,7,False,2026-09-01T03:30:19.307453
-CAS-0056,ALT-0059,ENT-005,Triage of Brute Force Authentication (T1110) on AST-ENT-005-03. yRgiPOPdrpbJBlA MmidBRnSABYfZFd. Closed as Benign.,9,False,2026-09-25T16:44:19.307453
-CAS-0057,ALT-0060,ENT-003,Triage of Possible SQL Injection (T1190) on AST-ENT-003-04. BAzpZgPjUtHVIOs qDeRQTrvsMZHini. Closed as Benign.,11,True,2026-09-09T08:55:19.307453
-CAS-0059,ALT-0061,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-01. Source IP 22.111.193.77 was checked. Host contained. HljilewtJNpBaYC. True Positive.,13,True,2026-09-30T12:36:19.307453
-CAS-0060,ALT-0062,ENT-002,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-05. Event telemetry looks normal. sXMSQISMobVYnZU lWlryAsyzgoOxjD. Marked Benign.,7,False,2026-09-07T23:15:19.307453
-CAS-0061,ALT-0064,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 140.119.147.120 verified against internal allowlist. Auto-closed.,5,False,2026-09-12T22:47:19.307453
-CAS-0062,ALT-0065,ENT-001,Duplicate.,0,False,2026-09-20T22:06:19.307453
-CAS-0063,ALT-0066,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-02. Source IP 146.79.156.90 was checked. Host contained. fjrtrfqsSjPtFHv. False Positive.,14,False,2026-08-30T21:44:19.307453
-CAS-0064,ALT-0067,ENT-003,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-01. IP 116.180.58.18 checked. kfJmNCXkxqNSmtp iDLBHndkqOzyXja. Benign.,7,False,2026-08-30T20:02:19.307453
-CAS-0065,ALT-0068,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-02. Source IP 144.109.144.101 was checked. Host contained. ezOeKBNtfzveKRT. False Positive.,13,False,2026-08-30T21:31:19.307453
-CAS-0066,ALT-0069,ENT-002,Check for Ransomware Indicator (T1486) on AST-ENT-002-05. IP 41.139.147.11 checked. EEpCZGaTaIfncjc fAWwHFbJHMDpLRt. Benign.,7,True,2026-09-13T01:58:19.307453
-CAS-0067,ALT-0070,ENT-003,Reviewing Brute Force Authentication (T1110) on AST-ENT-003-04. Event telemetry looks normal. lcRiZvSycfxviNj mcyzeuBgFpDKAco. Marked True Positive.,13,False,2026-09-28T17:12:19.307453
-CAS-0069,ALT-0071,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-03. Source IP 123.46.142.169 was checked. Host contained. YKTVojQnAopZcvV. False Positive.,3,True,2026-09-20T08:43:19.307453
-CAS-0070,ALT-0072,ENT-001,Triage of Possible SQL Injection (T1190) on AST-ENT-001-04. vQGMabFmkjjrxyg AMxvfdidrzhgfJX. Closed as Benign.,8,True,2026-09-14T13:18:19.307453
-CAS-0071,ALT-0073,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 198.152.198.87 verified against internal allowlist. Auto-closed.,5,True,2026-09-15T04:04:19.307453
-CAS-0072,ALT-0074,ENT-004,I looked at the logs and saw nothing bad. The system is fine. Closing this.,1,False,2026-09-22T02:49:19.307453
-CAS-0073,ALT-0075,ENT-003,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-01. rBMDnmoTjVjCxht gDzZCebVpHZHmzq. Closed as True Positive.,15,False,2026-09-11T15:32:19.307453
-CAS-0074,ALT-0076,ENT-001,Closed.,0,False,2026-09-06T12:52:19.307453
-CAS-0075,ALT-0077,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-04. Event telemetry looks normal. MjTFJgdkvvMvOcu vOVEHDwcGkGpxqo. Marked True Positive.,7,False,2026-09-04T13:38:19.307453
-CAS-0076,ALT-0078,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-01. Source IP 36.140.150.33 was checked. Host contained. TFrcbUGvtShxygS. Benign.,13,False,2026-09-19T06:33:19.307453
-CAS-0077,ALT-0079,ENT-005,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-005-03. Event telemetry looks normal. IjAliLtQUFevNwW OhZvqcoTmUPajJh. Marked True Positive.,13,False,2026-09-03T19:57:19.307453
-CAS-0078,ALT-0080,ENT-002,Duplicate.,0,False,2026-09-10T13:42:19.307453
-CAS-0079,ALT-0081,ENT-003,Triage of Possible SQL Injection (T1190) on AST-ENT-003-03. cujcQxsnUdOrAhT pacAbFfGvpcSTMm. Closed as True Positive.,7,False,2026-09-13T11:37:19.307453
-CAS-0080,ALT-0082,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 43.191.24.165 verified against internal allowlist. Auto-closed.,5,True,2026-09-29T10:14:19.307453
-CAS-0081,ALT-0083,ENT-005,I looked at the logs and saw nothing bad. The system is fine. Closing this.,3,False,2026-09-17T14:51:19.307453
-CAS-0082,ALT-0084,ENT-001,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",2,False,2026-09-28T04:22:19.307453
-CAS-0083,ALT-0085,ENT-003,N/A,0,False,2026-09-26T10:58:19.307453
-CAS-0084,ALT-0086,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-04. Source IP 173.139.162.227 was checked. Host contained. OqnvHxoLGxlMtmX. True Positive.,9,False,2026-09-15T22:06:19.307453
-CAS-0085,ALT-0088,ENT-001,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-01. Source IP 171.12.102.218 was checked. Host contained. DtkVtsJaFuZfCAH. False Positive.,14,False,2026-09-28T09:49:19.307453
-CAS-0087,ALT-0089,ENT-003,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-05. IP 194.62.69.51 checked. osJsZqblQEhcvIi JRdLUnMyeEVRvIE. False Positive.,7,False,2026-09-08T01:28:19.307453
-CAS-0088,ALT-0090,ENT-004,Triage of Ransomware Indicator (T1486) on AST-ENT-004-01. SXwsbHOClGyXEBD ZcInHDLdXmIpbXr. Closed as True Positive.,14,True,2026-09-17T01:11:19.307453
-CAS-0089,ALT-0092,ENT-003,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-003-01. Event telemetry looks normal. GWyAuFUvdDTLgoi rVjKsUdXQFKscvB. Marked Benign.,11,True,2026-09-30T10:30:19.307453
-CAS-0090,ALT-0093,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-01. Source IP 173.97.111.190 was checked. Host contained. QLuYhFvNWnEMfhA. False Positive.,14,False,2026-09-12T02:07:19.307453
-CAS-0091,ALT-0094,ENT-004,Check for Possible SQL Injection (T1190) on AST-ENT-004-01. IP 62.144.84.18 checked. JOVucrhPhwQxKoX RZfNhBUvfETjfvZ. True Positive.,7,True,2026-09-26T07:07:19.307453
-CAS-0092,ALT-0095,ENT-001,Check for Possible SQL Injection (T1190) on AST-ENT-001-02. IP 8.8.8.8 checked. laEuaPiMOIUoFQy aasYCGmAINGCLzB. Benign.,7,True,2026-08-31T01:28:19.307453
-CAS-0093,ALT-0097,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-04. Event telemetry looks normal. ofbcrnIoUXNVwVr FOBubHCYbpUZUqn. Marked False Positive.,12,False,2026-09-18T05:38:19.307453
-CAS-0094,ALT-0098,ENT-003,Triage of Data Exfiltration over DNS (T1048.003) on AST-ENT-003-03. wrUQacEDivcYaMK UbrXhuiWOJtDFju. Closed as Benign.,9,False,2026-09-06T22:01:19.307453
-CAS-0095,ALT-0099,ENT-003,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-01. Source IP 93.197.140.196 was checked. Host contained. KEGrdlnqrobwhge. Benign.,4,False,2026-08-31T19:11:19.307453
-CAS-0096,ALT-0100,ENT-005,,0,False,2026-09-14T22:19:19.307453
-CAS-0098,ALT-0101,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-03. Event telemetry looks normal. elzENizlpgYFils ngawOdjvYmhKhsv. Marked True Positive.,10,False,2026-09-12T06:20:19.307453
-CAS-0099,ALT-0103,ENT-004,See previous case.,0,False,2026-09-11T17:29:19.307453
-CAS-0100,ALT-0104,ENT-004,Reviewing Possible SQL Injection (T1190) on AST-ENT-004-02. Event telemetry looks normal. ahaBUnXrejYbKIp YVDwQXMrGHCPPVw. Marked True Positive.,14,False,2026-09-18T20:09:19.307453
-CAS-0101,ALT-0105,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-02. Source IP 10.52.131.123 was checked. Host contained. CMYwkTRNQUvBewY. True Positive.,7,False,2026-09-03T00:36:19.307453
-CAS-0102,ALT-0107,ENT-003,Triage of Ransomware Indicator (T1486) on AST-ENT-003-02. eswvGgzLhHAJSpj OzqHvQjeXozywFt. Closed as False Positive.,14,False,2026-09-14T03:32:19.307453
-CAS-0103,ALT-0108,ENT-004,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",3,True,2026-09-24T21:55:19.307453
-CAS-0104,ALT-0109,ENT-003,I looked at the logs and saw nothing bad. The system is fine. Closing this.,1,False,2026-08-30T21:41:19.307453
-CAS-0105,ALT-0110,ENT-001,Duplicate.,0,False,2026-09-25T03:16:19.307453
-CAS-0106,ALT-0111,ENT-001,Closed.,0,True,2026-09-17T14:06:19.307453
-CAS-0107,ALT-0112,ENT-005,See previous case.,0,True,2026-09-15T12:30:19.307453
-CAS-0108,ALT-0113,ENT-001,Check for Brute Force Authentication (T1110) on AST-ENT-001-05. IP 113.162.77.75 checked. QQCMHMpVNprpvdN DZCnIeCMEziaWCN. False Positive.,7,False,2026-09-19T00:46:19.307453
-CAS-0109,ALT-0114,ENT-005,N/A,0,True,2026-09-15T02:01:19.307453
-CAS-0110,ALT-0115,ENT-002,Duplicate.,0,True,2026-09-14T07:32:19.307453
-CAS-0111,ALT-0117,ENT-002,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-03. IP 69.182.74.248 checked. DXmWHvWQykjpAPZ EDJjFulxgFpJmWd. False Positive.,7,False,2026-09-05T00:31:19.307453
-CAS-0112,ALT-0118,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 54.120.60.172 verified against internal allowlist. Auto-closed.,5,True,2026-09-08T16:02:19.307453
-CAS-0113,ALT-0119,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-02. Source IP 159.77.11.239 was checked. Host contained. vBaGznElXjYSvti. False Positive.,12,False,2026-09-25T19:22:19.307453
-CAS-0114,ALT-0120,ENT-004,Reviewing Possible SQL Injection (T1190) on AST-ENT-004-03. Event telemetry looks normal. fNHiwiATReGMkKI CxyjnzLPcDqvNra. Marked Benign.,9,True,2026-09-22T21:26:19.307453
-CAS-0115,ALT-0121,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-04. Source IP 20.82.177.240 was checked. Host contained. DygmgCpyzvUtBOC. True Positive.,6,True,2026-09-27T07:10:19.307453
-CAS-0116,ALT-0122,ENT-004,Check for Brute Force Authentication (T1110) on AST-ENT-004-01. IP 123.57.40.29 checked. QfAkvbeTfvtNzLM VPgiviGKzMRGMnW. False Positive.,7,False,2026-09-29T13:00:19.307453
-CAS-0117,ALT-0123,ENT-004,Duplicate.,0,True,2026-09-13T14:49:19.307453
-CAS-0118,ALT-0125,ENT-005,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-04. Event telemetry looks normal. bSSQzPQQrXEHeEQ EbTDDVOtUwxlMqk. Marked True Positive.,6,False,2026-09-01T04:35:19.307453
-CAS-0119,ALT-0126,ENT-004,"Looked at logs, saw nothing bad. The system is fine, closing.",3,False,2026-09-03T13:38:19.307453
-CAS-0120,ALT-0127,ENT-001,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 123.142.176.152 verified against internal allowlist. Auto-closed.,5,False,2026-09-17T13:57:19.307453
-CAS-0121,ALT-0128,ENT-004,Check for Possible SQL Injection (T1190) on AST-ENT-004-02. IP 88.84.56.41 checked. wsIWDohlZDIANdF jYJwOwZazXPuWmS. False Positive.,7,False,2026-09-11T12:11:19.307453
-CAS-0123,ALT-0129,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-01. Source IP 141.13.191.56 was checked. Host contained. MHxlzhBWknNWxDa. False Positive.,4,True,2026-09-14T15:34:19.307453
-CAS-0124,ALT-0130,ENT-003,Triage of Ransomware Indicator (T1486) on AST-ENT-003-01. FgRTELucQkZimHB ubWIsOvMWvyncJk. Closed as False Positive.,10,False,2026-09-29T12:29:19.307453
-CAS-0125,ALT-0131,ENT-005,Triage of Possible SQL Injection (T1190) on AST-ENT-005-03. BYZCIBETlHlDonN aRTWXqzRBlidUnx. Closed as True Positive.,8,False,2026-09-15T00:33:19.307453
-CAS-0126,ALT-0132,ENT-005,Standard routine check completed for Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-03. No anomalies detected in the current telemetry window. Closed as False Positive.,7,False,2026-09-11T14:25:19.307453
-CAS-0127,ALT-0133,ENT-003,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-02. Event telemetry looks normal. VDlzYucSzvGlByX ifwodXxVgFAeikq. Marked False Positive.,8,False,2026-09-25T19:02:19.307453
-CAS-0128,ALT-0134,ENT-004,Triage of Brute Force Authentication (T1110) on AST-ENT-004-03. pNpRJxlZaheAiLK LbKfpAOHTTElJmL. Closed as True Positive.,11,False,2026-09-17T21:09:19.307453
-CAS-0129,ALT-0135,ENT-003,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-003-03. Source IP 63.160.34.24 was checked. Host contained. DBpCrCYgOtrXGnK. True Positive.,3,False,2026-09-25T07:16:19.307453
-CAS-0130,ALT-0136,ENT-001,"Looked at logs, saw nothing bad. The system is fine, closing.",1,True,2026-09-24T19:09:19.307453
-CAS-0131,ALT-0140,ENT-004,,0,True,2026-09-17T21:11:19.307453
-CAS-0132,ALT-0141,ENT-003,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",2,False,2026-09-29T03:23:19.307453
-CAS-0133,ALT-0142,ENT-002,Reviewing Possible SQL Injection (T1190) on AST-ENT-002-02. Event telemetry looks normal. cIFQySBWrzGWeLM rSwIAKQMzoMtepj. Marked Benign.,13,False,2026-09-22T17:37:19.307453
-CAS-0134,ALT-0143,ENT-001,See previous case.,0,True,2026-09-21T07:57:19.307453
-CAS-0135,ALT-0144,ENT-003,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-04. PNSHgwyKQjWkIQQ gAyOhSXgUOsExzf. Closed as False Positive.,11,False,2026-09-09T17:53:19.307453
-CAS-0136,ALT-0145,ENT-003,,0,False,2026-09-29T10:38:19.307453
-CAS-0137,ALT-0148,ENT-005,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-04. Source IP 128.163.57.243 was checked. Host contained. aYWePHNSevBGYgc. False Positive.,12,False,2026-09-24T15:45:19.307453
+CAS-0000,ALT-0001,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 128.166.54.141 verified against internal allowlist. Auto-closed.,5,False,2026-09-29T19:09:33.589707
+CAS-0001,ALT-0004,ENT-003,"Looked at logs, saw nothing bad. The system is fine, closing.",1,True,2026-09-17T03:13:33.589707
+CAS-0002,ALT-0005,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-02. Source IP 37.97.75.73 was checked. Host contained. SxxoIpQxFWVgtEa. True Positive.,4,False,2026-09-03T00:35:33.589707
+CAS-0004,ALT-0006,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-01. Source IP 26.148.158.167 was checked. Host contained. JzENXpbKdkSHadV. True Positive.,10,True,2026-09-29T19:14:33.589707
+CAS-0005,ALT-0007,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-01. Source IP 8.8.8.8 was checked. Host contained. vaFSetlElcZKOLJ. True Positive.,8,False,2026-09-11T21:14:33.589707
+CAS-0006,ALT-0008,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-01. Source IP 97.115.99.125 was checked. Host contained. WvPLXmTPPpFRuEo. False Positive.,12,False,2026-09-03T08:50:33.589707
+CAS-0007,ALT-0009,ENT-004,I looked at the logs and saw nothing bad. The system is fine. Closing this.,2,False,2026-09-11T17:03:33.589707
+CAS-0008,ALT-0010,ENT-002,Checked the logs and saw nothing bad. System looks fine. Closing this.,3,False,2026-09-22T17:51:33.589707
+CAS-0009,ALT-0011,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-01. Event telemetry looks normal. TcSXzybnjLYHFga buCShzgkbntyent. Marked Benign.,10,False,2026-09-17T17:52:33.589707
+CAS-0010,ALT-0012,ENT-003,,0,True,2026-09-18T11:51:33.589707
+CAS-0011,ALT-0013,ENT-002,,0,False,2026-09-30T13:16:33.589707
+CAS-0012,ALT-0015,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-01. Event telemetry looks normal. mpaGiGAICXMBXUu ptOqyYnNElPIMvK. Marked Benign.,12,False,2026-09-15T23:35:33.589707
+CAS-0013,ALT-0016,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-02. Event telemetry looks normal. GlUCmkdnYdCkFro QKlfBYfDbkdVsHm. Marked True Positive.,13,False,2026-09-08T16:54:33.589707
+CAS-0014,ALT-0017,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-01. Source IP 118.100.35.85 was checked. Host contained. XFupaKhSNKdMMOl. False Positive.,7,True,2026-09-26T00:35:33.589707
+CAS-0015,ALT-0018,ENT-005,See previous case.,0,True,2026-08-30T18:23:33.589707
+CAS-0016,ALT-0021,ENT-003,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-04. IP 12.61.111.230 checked. MBZQKxXLyDycdZO jcCVTPuacasoFWR. False Positive.,7,False,2026-09-21T18:57:33.589707
+CAS-0017,ALT-0022,ENT-001,Triage of Possible SQL Injection (T1190) on AST-ENT-001-02. jfQzILKzLKMPYYv MfJwzXCOrESAsgr. Closed as True Positive.,8,True,2026-09-14T21:11:33.589707
+CAS-0018,ALT-0023,ENT-003,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-003-03. Source IP 156.187.70.26 was checked. Host contained. LwFiNMeCvGQuvJO. True Positive.,14,False,2026-09-04T12:07:33.589707
+CAS-0019,ALT-0024,ENT-003,Checked the logs and saw nothing bad. System looks fine. Closing this.,1,False,2026-09-07T07:45:33.589707
+CAS-0020,ALT-0025,ENT-003,Analyzed Possible SQL Injection (T1190) on AST-ENT-003-04. Source IP 23.135.139.171 was checked. Host contained. EurgHXMpYHhfCdP. True Positive.,8,True,2026-09-14T09:44:33.589707
+CAS-0021,ALT-0026,ENT-002,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-002-05. IP 51.126.98.3 checked. hZoLFOcIOXxaeZr sgxssrIERhldfqn. False Positive.,7,True,2026-09-02T17:32:33.589707
+CAS-0022,ALT-0027,ENT-004,Triage of Possible SQL Injection (T1190) on AST-ENT-004-05. yNeMkUHNLRIafDj MTWkuUjrzxPOSls. Closed as False Positive.,13,True,2026-09-11T00:19:33.589707
+CAS-0023,ALT-0028,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 29.131.133.137 verified against internal allowlist. Auto-closed.,5,True,2026-09-19T13:40:33.589707
+CAS-0024,ALT-0029,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-04. Source IP 94.87.124.88 was checked. Host contained. hDtpYJwgPxkEgoI. False Positive.,12,False,2026-09-05T07:18:33.589707
+CAS-0025,ALT-0030,ENT-004,See previous case.,0,False,2026-09-16T05:35:33.589707
+CAS-0027,ALT-0031,ENT-003,Analyzed Ransomware Indicator (T1486) on AST-ENT-003-01. Source IP 70.113.71.72 was checked. Host contained. OKXCeTSwihEgFbj. False Positive.,4,False,2026-09-27T00:29:33.589707
+CAS-0028,ALT-0032,ENT-003,Check for Brute Force Authentication (T1110) on AST-ENT-003-05. IP 32.99.124.164 checked. kduVzRgbNecTWvA SRAbPsTRYeetzzH. Benign.,7,False,2026-09-17T03:07:33.589707
+CAS-0029,ALT-0034,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-04. TqTyLOlBbTCQAkQ zrQbnbqIZzEupyd. Closed as False Positive.,13,False,2026-09-12T00:35:33.589707
+CAS-0031,ALT-0035,ENT-005,Analyzed Possible SQL Injection (T1190) on AST-ENT-005-03. Source IP 96.173.134.47 was checked. Host contained. FBiIdpqVlSQgMBg. Benign.,11,False,2026-09-25T17:33:33.589707
+CAS-0032,ALT-0036,ENT-002,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-002-05. Event telemetry looks normal. SZAWKzToOMZByEn kNdDWBfkTaUwhLY. Marked Benign.,9,False,2026-09-25T09:53:33.589707
+CAS-0033,ALT-0037,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 192.80.168.72 verified against internal allowlist. Auto-closed.,5,True,2026-09-24T08:02:33.589707
+CAS-0034,ALT-0038,ENT-001,Check for Brute Force Authentication (T1110) on AST-ENT-001-02. IP 59.178.200.47 checked. ipKzIFUWfpUpjPo LTPqUZKjQlCBcoA. Benign.,7,False,2026-09-08T10:35:33.589707
+CAS-0035,ALT-0039,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-05. Source IP 8.8.8.8 was checked. Host contained. cVUBCOVdMkYOTgx. True Positive.,4,False,2026-09-16T11:13:33.589707
+CAS-0036,ALT-0040,ENT-005,Reviewing Brute Force Authentication (T1110) on AST-ENT-005-01. Event telemetry looks normal. tSmBPbtEnsFdlha LEXEeQgnracuLJC. Marked True Positive.,13,True,2026-09-23T09:35:33.589707
+CAS-0037,ALT-0041,ENT-002,Triage of Brute Force Authentication (T1110) on AST-ENT-002-02. icdIOrjcPjLnDKh zOvAZjBGTaItxyt. Closed as True Positive.,5,True,2026-09-05T06:11:33.589707
+CAS-0038,ALT-0042,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-05. Source IP 22.24.143.56 was checked. Host contained. VPPHLzqMTklovRc. False Positive.,5,False,2026-09-13T17:11:33.589707
+CAS-0039,ALT-0043,ENT-001,Check for Brute Force Authentication (T1110) on AST-ENT-001-04. IP 105.47.31.129 checked. GjqHKUIKVEtJduX LwTdicUpoYtKWkA. False Positive.,7,False,2026-09-10T07:14:33.589707
+CAS-0040,ALT-0044,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-04. Source IP 109.181.157.166 was checked. Host contained. cwybgfeODtftvuo. False Positive.,6,True,2026-09-17T12:15:33.589707
+CAS-0041,ALT-0045,ENT-004,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",1,False,2026-09-25T06:00:33.589707
+CAS-0042,ALT-0046,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 91.91.191.146 verified against internal allowlist. Auto-closed.,5,False,2026-09-27T21:35:33.589707
+CAS-0043,ALT-0047,ENT-003,Check for Possible SQL Injection (T1190) on AST-ENT-003-02. IP 184.167.49.15 checked. iWnMvYKGMUlZyGC tTsavllqlkCsVIU. True Positive.,7,False,2026-09-27T10:38:33.589707
+CAS-0044,ALT-0048,ENT-002,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-002-04. Event telemetry looks normal. OYZyEPCuCQGqlZF sboFvUFMoVCHAXi. Marked False Positive.,12,False,2026-09-22T00:49:33.589707
+CAS-0045,ALT-0049,ENT-003,Analyzed Brute Force Authentication (T1110) on AST-ENT-003-01. Source IP 21.37.136.65 was checked. Host contained. hZKpEEsFnCTAWyb. Benign.,13,True,2026-09-28T22:20:33.589707
+CAS-0046,ALT-0050,ENT-001,Standard routine check completed for Possible SQL Injection (T1190) on AST-ENT-001-01. No anomalies detected in the current telemetry window. Closed as True Positive.,7,False,2026-09-02T10:54:33.589707
+CAS-0047,ALT-0051,ENT-005,"Looked at logs, saw nothing bad. The system is fine, closing.",1,False,2026-09-26T21:43:33.589707
+CAS-0048,ALT-0052,ENT-003,Check for Brute Force Authentication (T1110) on AST-ENT-003-01. IP 120.90.15.183 checked. mBYrqcRQbZFnuwx XgwoioVjRViVCKD. Benign.,7,False,2026-09-01T06:53:33.589707
+CAS-0049,ALT-0053,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-05. Source IP 143.102.54.116 was checked. Host contained. ogiYzjdTpZOqarQ. Benign.,11,False,2026-09-24T03:35:33.589707
+CAS-0050,ALT-0054,ENT-003,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-003-05. IP 74.71.118.11 checked. gzaAYbScyTdjqIy aSIFpwhjpdnuSCa. Benign.,7,False,2026-09-18T22:57:33.589707
+CAS-0051,ALT-0055,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 197.60.35.122 verified against internal allowlist. Auto-closed.,5,True,2026-09-16T15:35:33.589707
+CAS-0052,ALT-0059,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-01. Source IP 8.8.8.8 was checked. Host contained. ajlfLzMlUXMnEaV. True Positive.,7,False,2026-09-14T22:15:33.589707
+CAS-0053,ALT-0062,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-04. Source IP 141.12.193.167 was checked. Host contained. ueBshYhZtGlwTOq. False Positive.,9,True,2026-09-03T10:37:33.589707
+CAS-0054,ALT-0063,ENT-005,Analyzed Brute Force Authentication (T1110) on AST-ENT-005-05. Source IP 131.184.200.197 was checked. Host contained. rMGMfnppHpZSUix. Benign.,3,False,2026-09-02T04:53:33.589707
+CAS-0055,ALT-0064,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 10.137.138.219 verified against internal allowlist. Auto-closed.,5,False,2026-09-10T22:29:33.589707
+CAS-0056,ALT-0066,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-05. Source IP 173.49.195.183 was checked. Host contained. lJHLMcwlFAWWNqO. Benign.,12,False,2026-09-08T21:50:33.589707
+CAS-0057,ALT-0067,ENT-002,Triage of Brute Force Authentication (T1110) on AST-ENT-002-03. QCZcEIhzAdxufUu kUYUwZAmvVKIdve. Closed as Benign.,10,True,2026-09-05T13:26:33.589707
+CAS-0058,ALT-0068,ENT-004,Check for Ransomware Indicator (T1486) on AST-ENT-004-05. IP 20.195.139.19 checked. psGhLqSADTcgwHA MGwqZkXQWykcEBT. Benign.,7,True,2026-09-28T02:49:33.589707
+CAS-0059,ALT-0069,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-04. Source IP 39.196.166.175 was checked. Host contained. CRfNunFqFgKXLZI. Benign.,15,True,2026-09-18T23:04:33.589707
+CAS-0060,ALT-0070,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-05. Source IP 197.200.145.132 was checked. Host contained. ZfUozJBmCfgWqsp. Benign.,7,False,2026-09-20T07:55:33.589707
+CAS-0062,ALT-0072,ENT-005,Reviewing Ransomware Indicator (T1486) on AST-ENT-005-04. Event telemetry looks normal. fFFpHdOTfKpwJAR JcROdsGQkbqgNoG. Marked True Positive.,5,False,2026-09-28T14:15:33.589707
+CAS-0063,ALT-0073,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 101.128.24.132 verified against internal allowlist. Auto-closed.,5,False,2026-09-23T17:13:33.589707
+CAS-0064,ALT-0074,ENT-005,Reviewing Ransomware Indicator (T1486) on AST-ENT-005-03. Event telemetry looks normal. ZryMjruIIrQAltU PxXOErygFYtwKws. Marked True Positive.,11,False,2026-09-27T06:15:33.589707
+CAS-0065,ALT-0075,ENT-001,Analyzed Ransomware Indicator (T1486) on AST-ENT-001-03. Source IP 116.143.198.235 was checked. Host contained. qDtmvgHKWSjmiht. True Positive.,5,False,2026-09-14T17:33:33.589707
+CAS-0066,ALT-0077,ENT-004,Duplicate.,0,False,2026-09-17T11:57:33.589707
+CAS-0067,ALT-0078,ENT-005,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-03. Source IP 173.66.167.51 was checked. Host contained. jpwctobSUPQGMMr. True Positive.,11,False,2026-08-31T00:41:33.589707
+CAS-0068,ALT-0080,ENT-004,Triage of Ransomware Indicator (T1486) on AST-ENT-004-01. UsBUPOILUmqsiQY XpERcnnBjbgjmga. Closed as Benign.,10,False,2026-09-17T01:35:33.589707
+CAS-0069,ALT-0081,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-01. Source IP 8.8.8.8 was checked. Host contained. xNivxRmrdBCKrsH. True Positive.,11,False,2026-09-06T08:04:33.589707
+CAS-0070,ALT-0082,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 79.98.59.3 verified against internal allowlist. Auto-closed.,5,True,2026-09-21T22:53:33.589707
+CAS-0071,ALT-0083,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-05. YJOlmIaZaKniUIs CZkJfAtsQEXnOPl. Closed as True Positive.,4,False,2026-09-19T16:37:33.589707
+CAS-0072,ALT-0084,ENT-005,Analyzed Ransomware Indicator (T1486) on AST-ENT-005-05. Source IP 27.116.132.217 was checked. Host contained. XrIzuoZtStviNNc. True Positive.,3,False,2026-09-04T17:16:33.589707
+CAS-0073,ALT-0085,ENT-001,Reviewing Ransomware Indicator (T1486) on AST-ENT-001-03. Event telemetry looks normal. SOAiijvnlOmuGcl dLtftpPWlXiFrPo. Marked True Positive.,14,False,2026-09-15T08:07:33.589707
+CAS-0074,ALT-0086,ENT-004,Reviewing Ransomware Indicator (T1486) on AST-ENT-004-01. Event telemetry looks normal. TzvfWzjiinEnXHu alcTIsjAUQXaTpg. Marked Benign.,10,False,2026-09-03T22:15:33.589707
+CAS-0075,ALT-0087,ENT-005,Standard routine check completed for Brute Force Authentication (T1110) on AST-ENT-005-02. No anomalies detected in the current telemetry window. Closed as Benign.,7,True,2026-09-23T09:36:33.589707
+CAS-0076,ALT-0089,ENT-001,Triage of Brute Force Authentication (T1110) on AST-ENT-001-03. kbFthpZhtEUwhgs DOYWwgzaInBJBoN. Closed as True Positive.,13,False,2026-09-14T02:25:33.589707
+CAS-0077,ALT-0090,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-03. Source IP 33.53.18.56 was checked. Host contained. HOnxxUysxWkltkv. True Positive.,15,False,2026-09-24T06:34:33.589707
+CAS-0078,ALT-0091,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 10.188.192.18 verified against internal allowlist. Auto-closed.,5,False,2026-09-15T15:35:33.589707
+CAS-0079,ALT-0092,ENT-002,Check for Brute Force Authentication (T1110) on AST-ENT-002-04. IP 97.72.174.87 checked. BjzNkMCiGdYOiWz LEsGGiKQuWVstFS. False Positive.,7,True,2026-09-15T16:29:33.589707
+CAS-0081,ALT-0094,ENT-001,Reviewing Brute Force Authentication (T1110) on AST-ENT-001-04. Event telemetry looks normal. KEovCMcxjqhlQze gGRULMaZrzCrKpW. Marked True Positive.,6,True,2026-09-08T14:00:33.589707
+CAS-0082,ALT-0095,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-03. Source IP 34.21.77.87 was checked. Host contained. wQHLlVITYbArTbp. False Positive.,10,True,2026-09-10T08:41:33.589707
+CAS-0083,ALT-0097,ENT-003,Closed.,0,True,2026-09-01T16:20:33.589707
+CAS-0084,ALT-0098,ENT-003,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",1,True,2026-09-02T12:00:33.589707
+CAS-0085,ALT-0099,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-03. Source IP 91.165.172.23 was checked. Host contained. RsXUskVYBVGHMGM. Benign.,6,False,2026-09-11T11:39:33.589707
+CAS-0086,ALT-0100,ENT-001,,0,False,2026-09-18T17:07:33.589707
+CAS-0087,ALT-0101,ENT-003,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-02. Event telemetry looks normal. yrRrqdnCJbrOdDQ goEBjizQNEndVXf. Marked False Positive.,12,False,2026-09-28T23:01:33.589707
+CAS-0088,ALT-0102,ENT-005,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-05. Event telemetry looks normal. AzQhzbxHXFEdEbi ntGEpogmXlTPGNr. Marked True Positive.,9,False,2026-09-24T15:39:33.589707
+CAS-0089,ALT-0103,ENT-004,Triage of Brute Force Authentication (T1110) on AST-ENT-004-04. tzfSsbqrNGTQVAu kdUbbfAYmxaTCSu. Closed as True Positive.,4,True,2026-09-27T20:09:33.589707
+CAS-0090,ALT-0105,ENT-004,Check for Possible SQL Injection (T1190) on AST-ENT-004-03. IP 8.8.8.8 checked. wrVqdNrFnyWZPaR vkfrODBHYxzQmnV. False Positive.,7,False,2026-09-17T11:35:33.589707
+CAS-0091,ALT-0106,ENT-001,Reviewing Brute Force Authentication (T1110) on AST-ENT-001-01. Event telemetry looks normal. lekemGtLEEqDMtr vBJGqghcnErqZDB. Marked False Positive.,13,False,2026-09-30T01:02:33.589707
+CAS-0092,ALT-0107,ENT-003,Analyzed Possible SQL Injection (T1190) on AST-ENT-003-03. Source IP 159.21.60.162 was checked. Host contained. kQBsBGFkJZOlSse. False Positive.,7,False,2026-09-28T13:53:33.589707
+CAS-0093,ALT-0108,ENT-003,Check for Possible SQL Injection (T1190) on AST-ENT-003-01. IP 11.60.66.221 checked. RgUXWwVDYIYpIMj OonGghiBNxXsofN. False Positive.,7,False,2026-09-05T03:08:33.589707
+CAS-0094,ALT-0110,ENT-002,See previous case.,0,False,2026-09-28T15:31:33.589707
+CAS-0095,ALT-0112,ENT-005,Standard routine check completed for Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-03. No anomalies detected in the current telemetry window. Closed as True Positive.,7,True,2026-09-28T04:47:33.589707
+CAS-0097,ALT-0113,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-03. Source IP 186.12.43.94 was checked. Host contained. KNnpvktpLTbjLwT. True Positive.,14,False,2026-09-08T05:15:33.589707
+CAS-0098,ALT-0114,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-03. Source IP 10.45.94.116 was checked. Host contained. QnuySCrHuyhuNhz. False Positive.,9,False,2026-09-14T09:39:33.589707
+CAS-0099,ALT-0115,ENT-001,Triage of Brute Force Authentication (T1110) on AST-ENT-001-05. UaySlrBLtDKwhGG MbqPCJAApesEhJN. Closed as True Positive.,3,False,2026-09-03T19:27:33.589707
+CAS-0100,ALT-0117,ENT-001,Triage of Ransomware Indicator (T1486) on AST-ENT-001-03. DWVHsMReHTqgZqB csgNSrUKQLUMRac. Closed as True Positive.,4,False,2026-09-24T03:22:33.589707
+CAS-0101,ALT-0118,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 71.197.128.22 verified against internal allowlist. Auto-closed.,5,False,2026-09-17T11:50:33.589707
+CAS-0102,ALT-0119,ENT-004,Standard routine check completed for Brute Force Authentication (T1110) on AST-ENT-004-05. No anomalies detected in the current telemetry window. Closed as False Positive.,7,False,2026-09-27T12:27:33.589707
+CAS-0103,ALT-0120,ENT-003,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-02. Source IP 156.116.147.106 was checked. Host contained. EieODxwgXaPZNqo. False Positive.,7,True,2026-09-05T05:55:33.589707
+CAS-0104,ALT-0121,ENT-001,Analyzed Ransomware Indicator (T1486) on AST-ENT-001-04. Source IP 155.90.51.52 was checked. Host contained. KKUIeVVOfXgmSrH. False Positive.,13,False,2026-09-10T07:19:33.589707
+CAS-0105,ALT-0123,ENT-003,"Looked at logs, saw nothing bad. The system is fine, closing.",1,True,2026-09-16T16:52:33.589707
+CAS-0106,ALT-0124,ENT-001,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-001-04. IP 70.128.120.210 checked. SQIHoMPkiuQSgmN BypKtXXvFnYZIKG. False Positive.,7,False,2026-09-01T18:25:33.589707
+CAS-0107,ALT-0125,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-04. Source IP 29.37.86.129 was checked. Host contained. ECfwpXTagrkdsoy. Benign.,3,False,2026-09-03T14:36:33.589707
+CAS-0108,ALT-0126,ENT-001,Check for Possible SQL Injection (T1190) on AST-ENT-001-01. IP 31.48.105.23 checked. yBBPvLRwFtSArZJ XVDnFMrcKmHPMEP. True Positive.,7,False,2026-09-05T06:56:33.589707
+CAS-0109,ALT-0127,ENT-001,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 189.176.34.86 verified against internal allowlist. Auto-closed.,5,True,2026-09-11T13:20:33.589707
+CAS-0110,ALT-0128,ENT-003,Analyzed Ransomware Indicator (T1486) on AST-ENT-003-03. Source IP 74.29.129.178 was checked. Host contained. udnzZbZQwALMQIf. Benign.,3,False,2026-09-06T20:56:33.589707
+CAS-0111,ALT-0129,ENT-001,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-01. zevNskZZdaYgLWD aqinfioRMEKkKyp. Closed as True Positive.,3,False,2026-09-29T01:06:33.589707
+CAS-0112,ALT-0130,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-05. Source IP 66.94.79.10 was checked. Host contained. DUvLuKgTovCXOfO. True Positive.,9,False,2026-09-14T20:30:33.589707
+CAS-0113,ALT-0131,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-01. Source IP 51.68.167.221 was checked. Host contained. KWoRAIzjnBIYsvP. Benign.,13,True,2026-09-17T01:25:33.589707
+CAS-0114,ALT-0132,ENT-001,Triage of Brute Force Authentication (T1110) on AST-ENT-001-02. vlCqgNTNwKdWeGI gFfpyeynykiRQtB. Closed as True Positive.,9,False,2026-09-28T05:12:33.589707
+CAS-0115,ALT-0133,ENT-001,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-04. IpScCfXnRLADoLA jzibRkLFZuJDhhj. Closed as False Positive.,13,False,2026-09-08T13:31:33.589707
+CAS-0116,ALT-0134,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-01. Source IP 76.97.156.92 was checked. Host contained. zIYvnjeMlUQYOiN. Benign.,3,False,2026-09-13T20:13:33.589707
+CAS-0117,ALT-0136,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 178.151.129.222 verified against internal allowlist. Auto-closed.,5,True,2026-09-12T07:36:33.589707
+CAS-0118,ALT-0137,ENT-001,Analyzed Ransomware Indicator (T1486) on AST-ENT-001-03. Source IP 175.159.76.147 was checked. Host contained. JSKTpnAwucCmqCP. Benign.,8,False,2026-09-09T17:01:33.589707
+CAS-0119,ALT-0138,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-01. Source IP 99.135.173.125 was checked. Host contained. WELvEkHyuocZNTl. False Positive.,4,False,2026-09-01T21:44:33.589707
+CAS-0120,ALT-0139,ENT-002,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-04. Event telemetry looks normal. oEuyACBDQlIiBFH UTBNqRSaYibyRWq. Marked False Positive.,12,False,2026-09-12T22:50:33.589707
+CAS-0121,ALT-0140,ENT-005,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-04. IP 49.40.161.192 checked. UmsQenSoiAAsEsD VHGnZjfKLWcibLQ. Benign.,7,False,2026-09-20T11:26:33.589707
+CAS-0122,ALT-0142,ENT-003,Standard routine check completed for Data Exfiltration over DNS (T1048.003) on AST-ENT-003-01. No anomalies detected in the current telemetry window. Closed as False Positive.,7,False,2026-09-12T19:16:33.589707
+CAS-0123,ALT-0143,ENT-002,Analyzed Possible SQL Injection (T1190) on AST-ENT-002-02. Source IP 8.8.8.8 was checked. Host contained. tqqCiTOAHymUXtg. True Positive.,14,False,2026-09-27T02:20:33.589707
+CAS-0124,ALT-0144,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-03. Source IP 151.124.95.147 was checked. Host contained. lXSrkwNQIfFUHbN. Benign.,5,False,2026-09-27T19:31:33.589707
+CAS-0125,ALT-0145,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 146.186.44.53 verified against internal allowlist. Auto-closed.,5,False,2026-09-21T12:27:33.589707
+CAS-0126,ALT-0146,ENT-004,I looked at the logs and saw nothing bad. The system is fine. Closing this.,1,False,2026-08-31T20:38:33.589707
+CAS-0127,ALT-0147,ENT-005,Analyzed Ransomware Indicator (T1486) on AST-ENT-005-04. Source IP 190.115.116.57 was checked. Host contained. ZGaofNChwWMiQdZ. True Positive.,10,True,2026-09-02T17:28:33.589707
+CAS-0128,ALT-0148,ENT-004,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",3,True,2026-09-08T21:04:33.589707
+CAS-0129,ALT-0149,ENT-003,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-003-05. IP 8.8.8.8 checked. SueRvKCLWgrCwVc SWQWMHaAoQFtZGJ. False Positive.,7,True,2026-09-07T11:40:33.589707
+
+CAS-SIM-87559,ALT-SIM-87559,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:19:07.037606
+CAS-SIM-65939,ALT-SIM-65939,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:19:14.129148
+CAS-SIM-91200,ALT-SIM-91200,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:19:21.192073
+CAS-SIM-17464,ALT-SIM-17464,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:19:28.232767
+CAS-SIM-63030,ALT-SIM-63030,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",5,True,2026-09-30T13:19:35.276602
+CAS-SIM-24002,ALT-SIM-24002,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:19:42.315333
+CAS-SIM-31930,ALT-SIM-31930,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:19:49.377025
+CAS-SIM-89617,ALT-SIM-89617,ENT-001,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:19:56.422838
+CAS-SIM-26396,ALT-SIM-26396,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:20:03.464166
+CAS-SIM-21246,ALT-SIM-21246,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:20:10.511149
+CAS-SIM-63977,ALT-SIM-63977,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:20:17.543346
+CAS-SIM-11186,ALT-SIM-11186,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:20:24.598658
+CAS-SIM-29293,ALT-SIM-29293,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:20:31.624525
+CAS-SIM-42946,ALT-SIM-42946,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:20:38.662858
+CAS-SIM-71711,ALT-SIM-71711,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:20:45.706601
+CAS-SIM-83572,ALT-SIM-83572,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:20:52.990836
+CAS-SIM-17198,ALT-SIM-17198,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:21:00.043498
+CAS-SIM-58494,ALT-SIM-58494,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:21:07.102229
+CAS-SIM-46872,ALT-SIM-46872,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:21:14.196563
+CAS-SIM-39673,ALT-SIM-39673,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:21:21.436020
+CAS-SIM-41542,ALT-SIM-41542,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:21:28.794239
+CAS-SIM-78436,ALT-SIM-78436,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:21:35.871862
+CAS-SIM-49548,ALT-SIM-49548,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:21:42.931835
+CAS-SIM-38007,ALT-SIM-38007,ENT-004,"Closed as benign. No issues found.",1,False,2026-09-30T13:21:50.580826
+CAS-SIM-99215,ALT-SIM-99215,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:21:57.660434
+CAS-SIM-52208,ALT-SIM-52208,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:22:04.782434
+CAS-SIM-50246,ALT-SIM-50246,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:22:11.823759
+CAS-SIM-63064,ALT-SIM-63064,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:22:18.864554
+CAS-SIM-13163,ALT-SIM-13163,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:22:25.927208
+CAS-SIM-32317,ALT-SIM-32317,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:22:32.976032
+CAS-SIM-36107,ALT-SIM-36107,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:22:40.021973
+CAS-SIM-78145,ALT-SIM-78145,ENT-001,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:22:47.056039
+CAS-SIM-16480,ALT-SIM-16480,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",3,True,2026-09-30T13:22:54.110223
+CAS-SIM-40299,ALT-SIM-40299,ENT-001,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:23:01.158568
+CAS-SIM-69770,ALT-SIM-69770,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",6,True,2026-09-30T13:23:08.202055
+CAS-SIM-55117,ALT-SIM-55117,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:23:15.239959
+CAS-SIM-93107,ALT-SIM-93107,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:23:22.295357
+CAS-SIM-91906,ALT-SIM-91906,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",6,True,2026-09-30T13:23:29.348677
+CAS-SIM-53699,ALT-SIM-53699,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:23:36.397566
+CAS-SIM-98999,ALT-SIM-98999,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:23:43.443924
+CAS-SIM-67675,ALT-SIM-67675,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:23:50.493543
+CAS-SIM-18441,ALT-SIM-18441,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:23:57.529432
+CAS-SIM-29977,ALT-SIM-29977,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:24:04.564034
+CAS-SIM-64489,ALT-SIM-64489,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:24:11.598071
+CAS-SIM-20295,ALT-SIM-20295,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:24:18.660176
+CAS-SIM-89770,ALT-SIM-89770,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:24:25.712201
+CAS-SIM-11949,ALT-SIM-11949,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:24:32.749134
+CAS-SIM-44715,ALT-SIM-44715,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:24:39.780008
+CAS-SIM-16416,ALT-SIM-16416,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:24:46.825161
+CAS-SIM-64677,ALT-SIM-64677,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:24:53.856497
+CAS-SIM-10702,ALT-SIM-10702,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:25:00.903718
+CAS-SIM-60307,ALT-SIM-60307,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",7,True,2026-09-30T13:25:07.953365
+CAS-SIM-51204,ALT-SIM-51204,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:25:15.001031
+CAS-SIM-43609,ALT-SIM-43609,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:25:22.047631
+CAS-SIM-32090,ALT-SIM-32090,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:25:29.098723
+CAS-SIM-58129,ALT-SIM-58129,ENT-004,"Closed as benign. No issues found.",1,False,2026-09-30T13:25:36.142739
+CAS-SIM-27092,ALT-SIM-27092,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:25:43.193556
+CAS-SIM-30348,ALT-SIM-30348,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:25:50.245965
+CAS-SIM-82311,ALT-SIM-82311,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:25:57.306731
+CAS-SIM-70072,ALT-SIM-70072,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:26:04.360951
+CAS-SIM-11103,ALT-SIM-11103,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:26:11.421446
+CAS-SIM-52670,ALT-SIM-52670,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",3,True,2026-09-30T13:26:18.473881
+CAS-SIM-27780,ALT-SIM-27780,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:26:25.505223
+CAS-SIM-71101,ALT-SIM-71101,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:26:32.562233
+CAS-SIM-31039,ALT-SIM-31039,ENT-004,"Closed as benign. No issues found.",1,False,2026-09-30T13:26:39.589471
+CAS-SIM-28508,ALT-SIM-28508,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:26:46.627121
+CAS-SIM-18912,ALT-SIM-18912,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:26:53.658009
+CAS-SIM-44468,ALT-SIM-44468,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:27:00.699522
+CAS-SIM-61986,ALT-SIM-61986,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:27:07.738768
+CAS-SIM-46936,ALT-SIM-46936,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:27:14.756229
+CAS-SIM-99976,ALT-SIM-99976,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:27:21.806613
+CAS-SIM-47811,ALT-SIM-47811,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:27:29.101835
+CAS-SIM-61779,ALT-SIM-61779,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:27:36.146154
+CAS-SIM-68021,ALT-SIM-68021,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:27:43.209427
+CAS-SIM-24442,ALT-SIM-24442,ENT-004,"Closed as benign. No issues found.",1,False,2026-09-30T13:27:50.271799
+CAS-SIM-75062,ALT-SIM-75062,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:27:57.318197
+CAS-SIM-97145,ALT-SIM-97145,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:28:04.378678
+CAS-SIM-49382,ALT-SIM-49382,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:28:11.437586
+CAS-SIM-98223,ALT-SIM-98223,ENT-002,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:28:19.203652
+CAS-SIM-49166,ALT-SIM-49166,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:28:26.268093
+CAS-SIM-77445,ALT-SIM-77445,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:28:33.356192
+CAS-SIM-54734,ALT-SIM-54734,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:28:40.578438
+CAS-SIM-70105,ALT-SIM-70105,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:28:47.645974
+CAS-SIM-34840,ALT-SIM-34840,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:28:54.693072
+CAS-SIM-67876,ALT-SIM-67876,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:29:01.724050
+CAS-SIM-42466,ALT-SIM-42466,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:29:08.757070
+CAS-SIM-32527,ALT-SIM-32527,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:29:15.798387
+CAS-SIM-18006,ALT-SIM-18006,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:29:22.824250
+CAS-SIM-90381,ALT-SIM-90381,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:29:29.876272
+CAS-SIM-86592,ALT-SIM-86592,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:29:36.932555
+CAS-SIM-91664,ALT-SIM-91664,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:29:43.970542
+CAS-SIM-22938,ALT-SIM-22938,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:29:51.007928
+CAS-SIM-21932,ALT-SIM-21932,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:29:58.052848
+CAS-SIM-24666,ALT-SIM-24666,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:30:05.104674
+CAS-SIM-12079,ALT-SIM-12079,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:30:12.135359
+CAS-SIM-30629,ALT-SIM-30629,ENT-001,"Closed as benign. No issues found.",1,False,2026-09-30T13:30:19.170471
+CAS-SIM-68487,ALT-SIM-68487,ENT-003,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:30:26.221295
+CAS-SIM-56140,ALT-SIM-56140,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",3,True,2026-09-30T13:30:33.274820
+CAS-SIM-65036,ALT-SIM-65036,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:30:40.315479
+CAS-SIM-49279,ALT-SIM-49279,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:30:47.359797
+CAS-SIM-97352,ALT-SIM-97352,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:30:54.419665
+CAS-SIM-58075,ALT-SIM-58075,ENT-001,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:31:01.470395
+CAS-SIM-52473,ALT-SIM-52473,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:31:08.518989
+CAS-SIM-60947,ALT-SIM-60947,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:31:15.581104
+CAS-SIM-77189,ALT-SIM-77189,ENT-002,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:31:22.639450
+CAS-SIM-91528,ALT-SIM-91528,ENT-002,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:31:29.699717
+CAS-SIM-99950,ALT-SIM-99950,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",5,False,2026-09-30T13:31:36.752953
+CAS-SIM-95617,ALT-SIM-95617,ENT-004,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:31:43.796719
+CAS-SIM-35668,ALT-SIM-35668,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:31:50.833097
+CAS-SIM-70462,ALT-SIM-70462,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:31:57.890149
+CAS-SIM-98276,ALT-SIM-98276,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:32:04.947099
+CAS-SIM-89262,ALT-SIM-89262,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",8,True,2026-09-30T13:32:12.008768
+CAS-SIM-91623,ALT-SIM-91623,ENT-002,"Closed as benign. No issues found.",1,False,2026-09-30T13:32:19.066981
+CAS-SIM-29270,ALT-SIM-29270,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:32:26.115025
+CAS-SIM-25954,ALT-SIM-25954,ENT-002,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:32:33.173642
+CAS-SIM-96501,ALT-SIM-96501,ENT-003,"Closed as benign. No issues found.",1,False,2026-09-30T13:32:40.226546
+CAS-SIM-16384,ALT-SIM-16384,ENT-004,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:32:47.286427
+CAS-SIM-50445,ALT-SIM-50445,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,True,2026-09-30T13:32:54.347216
+CAS-SIM-18693,ALT-SIM-18693,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",7,False,2026-09-30T13:33:01.404127
+CAS-SIM-12467,ALT-SIM-12467,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",8,False,2026-09-30T13:33:08.436751
+CAS-SIM-43959,ALT-SIM-43959,ENT-002,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:33:15.474100
+CAS-SIM-60808,ALT-SIM-60808,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",5,True,2026-09-30T13:33:22.526279
+CAS-SIM-37873,ALT-SIM-37873,ENT-002,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",5,True,2026-09-30T13:33:29.579603
+CAS-SIM-88885,ALT-SIM-88885,ENT-004,"Closed as benign. No issues found.",1,False,2026-09-30T13:33:36.622923
+CAS-SIM-52031,ALT-SIM-52031,ENT-001,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",3,False,2026-09-30T13:33:43.674672
+CAS-SIM-34282,ALT-SIM-34282,ENT-004,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:33:50.748518
+CAS-SIM-56803,ALT-SIM-56803,ENT-002,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",6,True,2026-09-30T13:34:08.534678
+CAS-SIM-13505,ALT-SIM-13505,ENT-001,"Investigated Malware (T1059). Checked logs. Verified with user. Resolution applied.",4,False,2026-09-30T13:34:15.556057
+CAS-SIM-28519,ALT-SIM-28519,ENT-003,"Investigated Brute Force Authentication (T1110). Checked logs. Verified with user. Resolution applied.",6,False,2026-09-30T13:34:22.592621
+CAS-SIM-83808,ALT-SIM-83808,ENT-003,"Investigated Data Exfiltration. Checked logs. Verified with user. Resolution applied.",7,True,2026-09-30T13:34:29.625761

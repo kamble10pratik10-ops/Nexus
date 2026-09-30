@@ -1,0 +1,3 @@
+LOG: [vite] connecting...
+LOG: [vite] connected.
+ERROR: The requested module '/node_modules/.vite/deps/@tanstack_react-table.js?v=b8ba7dea' does not provide an export named 'getCoreRowModel'

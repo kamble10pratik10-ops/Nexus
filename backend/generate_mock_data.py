@@ -4,6 +4,11 @@ import random
 from datetime import datetime, timedelta
 import os
 import json
+import sys
+
+seed = int(sys.argv[1]) if len(sys.argv) > 1 else 42
+random.seed(seed)
+np.random.seed(seed)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(base_dir, "data")
