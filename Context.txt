@@ -9,18 +9,17 @@ SAT-SA Nexus is an offline supervisory assurance platform that converts periodic
 **Market Positioning:** We are not replacing the SOC stack (SIEM, SOAR, UEBA, etc.). We independently assess the evidence produced by the SOC stack. The system sits above SOCs to determine whether the SOC's operational evidence demonstrates that the SOC is actually functioning effectively. This addresses regulatory demands (e.g., SEBI's CSCRF, NIST frameworks) that require measurable, evidence-backed efficacy reports rather than self-scored checklists.
 
 ## Unique Selling Propositions (USPs)
-1. **Evidence-Driven Efficacy:** Moves beyond checklist compliance by strictly measuring *demonstrated* capabilities against *declared* capabilities using statistical and NLP-driven anomaly detection.
+1. **Evidence-Driven Efficacy:** Moves beyond checklist compliance by strictly measuring *demonstrated* capabilities against *declared* capabilities.
 2. **Air-Gapped / Privacy-First AI:** 100% offline and local NLP. Uses lightweight HuggingFace transformers (`all-MiniLM-L6-v2`) and local ML algorithms (DBSCAN, Isolation Forest) without relying on any external, cloud-based LLM APIs (No OpenAI/Anthropic/Gemini). Ensures absolute data privacy for sensitive SOC telemetry.
 3. **Multi-Seed Scientific Validation:** The platform includes an integrated benchmarking harness (`benchmark_harness.py`) that uses deterministic synthetic fault injection to scientifically prove and measure the exact precision, recall, and False Positive Rate of its own detection engines.
-4. **Metric & Automation Integrity:** Detects silent operational decay, such as SOAR auto-closure defects, severity downgrades to meet SLAs, and "zombie cases" (cases closed instantly without required investigation actions).
-5. **Cryptographic Provenance:** Generates a signed submission manifest using offline HMAC-SHA256 signing keys to guarantee chain-of-custody for audit trails.
-6. **Comprehensive 16+ Assurance Engines:** Deep-dive analytical engines mapping to specific SOC failure domains, including:
-   - **Execution Gaps:** Fast closures, un-escalated criticals, shallow investigations.
-   - **NLP Investigation Analysis:** Copy-paste and templated notes detection via Sentence-Transformers/DBSCAN.
-   - **Negative Space & Peer Benchmarking:** Critical assets with zero alerts, entity vs peer closure-speed comparisons, and peer blind spots.
-   - **Metric & Evidence Integrity:** Severity downgrades, SLA clock resets, MTTR variance, Benford-style duration analysis, and round-number closure forensics.
-   - **Capability Drift & Regret:** Decaying telemetry/alert activity on critical assets, recurring alerts, and closure regret (missed early warnings).
-   - **Claims Verification & Governance:** 24/7 monitoring proofs, efficacy reports, automation vs human accuracy assurance, and coverage indices.
+4. **Cryptographic Provenance:** Generates a signed submission manifest using offline HMAC-SHA256 signing keys to guarantee chain-of-custody for audit trails.
+5. **Comprehensive 16+ Assurance Engines:** Deep-dive analytical engines mapping to specific SOC failure domains, including:
+   - **Execution Gaps & Zombie Cases:** Detects fast closures, un-escalated criticals, and cases closed without required actions.
+   - **NLP Investigation Analysis:** Identifies copy-paste and templated notes via semantic clustering (Sentence-Transformers/DBSCAN).
+   - **Metric & Evidence Integrity:** Flags severity downgrades, SLA clock resets, MTTR variance, and round-number closure forensics.
+   - **Negative Space & Peer Benchmarking:** Surfaces critical assets with zero alerts, and techniques detected by peers but never by the entity.
+   - **Capability Drift & Regret:** Highlights decaying telemetry on critical assets, recurring alerts, and closure regret (missed early warnings).
+   - **Claims Verification & Governance:** Evaluates 24/7 monitoring proofs, efficacy reports, automation vs. human accuracy, and coverage indices.
 ## Tech Stack
 **Backend:** 
 - Python 3.12, FastAPI (REST API framework)
