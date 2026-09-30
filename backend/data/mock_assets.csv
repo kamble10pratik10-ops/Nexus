@@ -1,4 +1,5 @@
 asset_id,entity_id,asset_type,criticality,monitoring_expected
+<<<<<<< HEAD
 AST-ENT-001-01,ENT-001,Windows Server 2019,Medium,True
 AST-ENT-001-02,ENT-001,Palo Alto Firewall,Medium,True
 AST-ENT-001-03,ENT-001,Employee Laptop,High,True
@@ -24,3 +25,30 @@ AST-ENT-005-02,ENT-005,AWS EC2 Instance,High,True
 AST-ENT-005-03,ENT-005,Windows Server 2019,High,True
 AST-ENT-005-04,ENT-005,Employee Laptop,High,True
 AST-ENT-005-05,ENT-005,Palo Alto Firewall,Low,True
+=======
+AST-ENT-001-01,ENT-001,Database,Medium,True
+AST-ENT-001-02,ENT-001,Database,Low,True
+AST-ENT-001-03,ENT-001,Server,High,True
+AST-ENT-001-04,ENT-001,Endpoint,High,True
+AST-ENT-001-05,ENT-001,Firewall,Medium,True
+AST-ENT-002-01,ENT-002,Firewall,Medium,True
+AST-ENT-002-02,ENT-002,Firewall,Medium,True
+AST-ENT-002-03,ENT-002,Server,Medium,True
+AST-ENT-002-04,ENT-002,Database,Low,True
+AST-ENT-002-05,ENT-002,Server,High,True
+AST-ENT-003-01,ENT-003,Endpoint,Medium,True
+AST-ENT-003-02,ENT-003,Firewall,Medium,True
+AST-ENT-003-03,ENT-003,Database,Medium,True
+AST-ENT-003-04,ENT-003,Server,High,True
+AST-ENT-003-05,ENT-003,Firewall,Medium,True
+AST-ENT-004-01,ENT-004,Firewall,Medium,True
+AST-ENT-004-02,ENT-004,Database,High,True
+AST-ENT-004-03,ENT-004,Server,Medium,True
+AST-ENT-004-04,ENT-004,Endpoint,Low,True
+AST-ENT-004-05,ENT-004,Server,High,True
+AST-ENT-005-01,ENT-005,Server,High,True
+AST-ENT-005-02,ENT-005,Database,Medium,True
+AST-ENT-005-03,ENT-005,Firewall,Medium,True
+AST-ENT-005-04,ENT-005,Endpoint,Medium,True
+AST-ENT-005-05,ENT-005,Endpoint,Low,True
+>>>>>>> 9681317deb1662e66a1a0b724f238e91d2a2cc62

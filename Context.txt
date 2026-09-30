@@ -1,10 +1,10 @@
-# SAT-SA Nexus: Evidence-Driven Supervisory Assurance Platform
+# SAT-SA Nexus: Evidence-Driven Supervisory Analytics for Critical-Sector SOCs
 
 ## Tagline
-From reported capability to demonstrated capability.
+From "SOC reports" to "SOC evidence."
 
 ## Core Proposition
-SAT-SA Nexus is an offline supervisory assurance platform that converts periodic SOC submissions into evidence-backed assessments of what a SOC has demonstrated, what remains unverified, what contradicts its declared capabilities, and where limited human supervisory review should be spent.
+SAT-SA Nexus converts periodic SOC operational evidence into explainable supervisory signals. It detects execution gaps, negative space, metric-evidence divergence, and peer anomalies, then prioritizes the small subset of entities and cases that a human supervisor should review. 
 
 **Market Positioning:** We are not replacing the SOC stack (SIEM, SOAR, UEBA, etc.). We independently assess the evidence produced by the SOC stack. The system sits above SOCs to determine whether the SOC's operational evidence demonstrates that the SOC is actually functioning effectively. This addresses regulatory demands (e.g., SEBI's CSCRF, NIST frameworks) that require measurable, evidence-backed efficacy reports rather than self-scored checklists.
 
