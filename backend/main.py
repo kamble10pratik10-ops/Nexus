@@ -61,6 +61,31 @@ def load_assets():
 def read_root():
     return {"status": "SAT-SA Nexus Backend Running"}
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# THREE-STATE OUTCOME CLASSIFIER
+# All findings use: SUPPORTED, CONTRADICTED, or UNVERIFIABLE.
+# Anomalies are review candidates — not proof of fabrication or failure.
+# Missing evidence must never result in a pass — it is UNVERIFIABLE.
+# ═══════════════════════════════════════════════════════════════════════════════
+def classify_outcome(has_positive_evidence: bool, has_contradicting_evidence: bool, has_missing_evidence: bool = False) -> str:
+    """
+    Classify a capability claim or finding into one of three defensible states.
+
+    SUPPORTED:     Positive evidence exists AND no contradicting signals found.
+    CONTRADICTED:  Concrete evidence exists that directly contradicts the claim.
+    UNVERIFIABLE:  Evidence is missing, insufficient, or ambiguous — cannot confirm or deny.
+
+    Missing evidence NEVER becomes a pass. It is always UNVERIFIABLE.
+    """
+    if has_missing_evidence and not has_contradicting_evidence:
+        return "UNVERIFIABLE"
+    if has_contradicting_evidence:
+        return "CONTRADICTED"
+    if has_positive_evidence:
+        return "SUPPORTED"
+    return "UNVERIFIABLE"
+
+
 @app.get("/api/dashboard/summary")
 def get_dashboard_summary():
     alerts, cases, events = load_data()
@@ -116,6 +141,7 @@ def get_execution_gaps():
         findings.append({
             "finding_id": f"FND-GAP-{row['alert_id']}",
             "type": "Fast Closure (High Risk)",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id_x'] if 'entity_id_x' in row else row['entity_id'],
             "severity": "High",
             "description": f"Alert {row['alert_id']} ({row['category']}, {row['severity']}) was closed in {row['time_to_close_seconds']:.0f}s with no escalation and minimal evidence. Median is {median:.0f}s.",
@@ -137,9 +163,10 @@ def get_execution_gaps():
         findings.append({
             "finding_id": f"FND-CHAIN-{row['case_id']}",
             "type": "Broken Evidence Chain (No Escalation)",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id_x'] if 'entity_id_x' in row else row['entity_id'],
             "severity": "Critical",
-            "description": f"Critical alert {row['alert_id']} was marked True Positive but never escalated.",
+            "description": f"Critical alert {row['alert_id']} was confirmed True Positive but has no escalation record. This warrants supervisory review to determine whether escalation was handled out-of-band.",
             "evidence": {
                 "case_id": row['case_id'],
                 "severity": row['severity'],
@@ -240,9 +267,10 @@ def get_nlp_findings():
         findings.append({
             "finding_id": f"FND-NLP-{row['analyst']}",
             "type": "Templated Investigation (Semantic)",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id'],
             "severity": "High",
-            "description": f"Analyst {row['analyst']} has an unusually high rate of semantic near-duplicates ({row['reuse_rate']*100:.1f}%, z={row['robust_z']:.2f}).",
+            "description": f"Analyst {row['analyst']} shows an anomalously high rate of semantically near-duplicate investigation notes ({row['reuse_rate']*100:.1f}%, z={row['robust_z']:.2f}). Review recommended to determine if this reflects copy-paste behaviour or legitimately similar case handling.",
             "evidence": {
                 "analyst": row['analyst'],
                 "reuse_rate": row['reuse_rate'],
@@ -271,9 +299,10 @@ def get_negative_space():
         findings.append({
             "finding_id": f"FND-NEG-AST-{row['asset_id']}",
             "type": "Silent Critical Asset",
+            "outcome": "UNVERIFIABLE",
             "entity_id": row['entity_id'],
             "severity": "Critical",
-            "description": f"Critical asset {row['asset_id']} ({row['asset_type']}) generated zero alerts. Verify monitoring is active.",
+            "description": f"Critical asset {row['asset_id']} ({row['asset_type']}) generated zero alerts during the observation window. Monitoring status cannot be confirmed — this may indicate a telemetry gap or a genuinely quiet asset. Supervisory verification required.",
             "evidence": {
                 "asset_id": row['asset_id'],
                 "asset_type": row['asset_type'],
@@ -290,9 +319,10 @@ def get_negative_space():
         findings.append({
             "finding_id": f"FND-NEG-ALT-{row['alert_id']}",
             "type": "Orphaned Critical Alert",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id'],
             "severity": "High",
-            "description": f"{row['severity']} alert {row['alert_id']} ({row['category']}) was never investigated (no case created).",
+            "description": f"{row['severity']} alert {row['alert_id']} ({row['category']}) has no associated investigation case. The claim of comprehensive investigation is contradicted for this alert.",
             "evidence": {
                 "alert_id": row['alert_id'],
                 "category": row['category']
@@ -334,9 +364,10 @@ def get_peer_benchmarking():
         findings.append({
             "finding_id": f"FND-PEER-{row['entity_id']}",
             "type": "Peer Anomaly (Fast Closure)",
+            "outcome": "UNVERIFIABLE",
             "entity_id": row['entity_id'],
             "severity": "High",
-            "description": f"Entity {row['entity_id']} closes alerts significantly faster (Median: {row['median_time_to_close']:.0f}s) than the peer group median ({global_median:.0f}s). Robust Z-Score: {row['robust_z_score']:.2f}.",
+            "description": f"Entity {row['entity_id']} closes alerts significantly faster (Median: {row['median_time_to_close']:.0f}s) than the peer group median ({global_median:.0f}s), Z-Score: {row['robust_z_score']:.2f}. This statistical outlier warrants review but may reflect efficient tooling rather than deficient investigation.",
             "evidence": {
                 "entity_median_s": round(row['median_time_to_close'], 1),
                 "peer_median_s": round(global_median, 1),
@@ -369,9 +400,10 @@ def get_evidence_chains():
         findings.append({
             "finding_id": f"FND-CHAIN-{row['alert_id']}",
             "type": "Broken Evidence Chain (No Escalation)",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id'],
             "severity": "Critical",
-            "description": f"Critical alert {row['alert_id']} was investigated and confirmed as True Positive, but the evidence chain breaks: it was never escalated.",
+            "description": f"Critical alert {row['alert_id']} was confirmed True Positive but lacks an escalation record. The expected evidence chain (detect → investigate → confirm → escalate) is incomplete.",
             "evidence": {
                 "alert_id": row['alert_id'],
                 "case_id": row['case_id'],
@@ -442,9 +474,10 @@ def get_remediation_effectiveness():
         findings.append({
             "finding_id": f"FND-REMED-{row['entity_id']}-{hash(row['asset_id']) % 1000}",
             "type": "Ineffective Remediation",
+            "outcome": "CONTRADICTED",
             "entity_id": row['entity_id'],
             "severity": "Medium",
-            "description": f"Entity {row['entity_id']} has recurring True Positive alerts ({row['count']} times) for {row['category']} on asset {row['asset_id']}. Indicates failure to resolve the root cause.",
+            "description": f"Entity {row['entity_id']} has {row['count']} recurring True Positive alerts for {row['category']} on asset {row['asset_id']}. The claim of effective remediation is contradicted by recurrence of the same threat on the same asset.",
             "evidence": {
                 "asset_id": row['asset_id'],
                 "category": row['category'],
@@ -514,10 +547,14 @@ def get_metric_integrity():
             if pd.notna(old_sev) and pd.notna(new_sev):
                 if severity_map.get(old_sev, 0) > severity_map.get(new_sev, 0):
                     alert_id = row['alert_id']
+                    matched = alerts[alerts['alert_id'] == alert_id]
+                    if matched.empty:
+                        continue
                     findings.append({
                         "finding_id": f"FND-MI-SEV-{alert_id}",
                         "type": "Severity Downgrade",
-                        "entity_id": alerts[alerts['alert_id'] == alert_id]['entity_id'].iloc[0],
+                        "outcome": "CONTRADICTED",
+                        "entity_id": matched['entity_id'].iloc[0],
                         "severity": "Medium",
                         "description": f"Alert {alert_id} severity was downgraded from {old_sev} to {new_sev} by {row['actor']}.",
                         "evidence": {
@@ -537,10 +574,14 @@ def get_metric_integrity():
             if "Resolved" in states:
                 res_idx = states.index("Resolved")
                 if "Open" in states[res_idx:]:
+                    matched = alerts[alerts['alert_id'] == alert_id]
+                    if matched.empty:
+                        continue
                     findings.append({
                         "finding_id": f"FND-MI-SLA-{alert_id}",
                         "type": "SLA Clock Reset",
-                        "entity_id": alerts[alerts['alert_id'] == alert_id]['entity_id'].iloc[0],
+                        "outcome": "CONTRADICTED",
+                        "entity_id": matched['entity_id'].iloc[0],
                         "severity": "Medium",
                         "description": f"Alert {alert_id} status was toggled to Resolved and back to Open, potentially resetting SLA clocks.",
                         "evidence": {
@@ -565,9 +606,10 @@ def get_metric_integrity():
             findings.append({
                 "finding_id": f"FND-MI-MTTR-{row['entity_id']}",
                 "type": "MTTR Definition Spread",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": row['entity_id'],
                 "severity": "Medium",
-                "description": f"Extremely high variance in MTTR for {row['entity_id']} (Mean: {row['mean_mttr']:.1f}h, StdDev: {row['std_mttr']:.1f}h). Indicates inconsistent measurement or gaming.",
+                "description": f"Extremely high variance in MTTR for {row['entity_id']} (Mean: {row['mean_mttr']:.1f}h, StdDev: {row['std_mttr']:.1f}h). The reported MTTR metric cannot be relied upon for supervisory assessment without clarifying the measurement methodology.",
                 "evidence": {
                     "entity_id": row['entity_id'],
                     "mean": row['mean_mttr'],
@@ -604,10 +646,11 @@ def get_evidence_forensics():
         if cv < 0.15 and len(inter_arrivals) >= 5:  # CV < 15% is very uniform
             findings.append({
                 "finding_id": f"FND-FORENSIC-UNIFORM-{entity_id}",
-                "type": "Uniform Inter-Arrival (Fabrication Risk)",
+                "type": "Uniform Inter-Arrival (Anomalous Pattern)",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": entity_id,
                 "severity": "Critical",
-                "description": f"Entity {entity_id}: Alert inter-arrival times are suspiciously uniform (CV={cv:.3f}). Real alerts are bursty; uniform spacing suggests fabricated or synthetic data.",
+                "description": f"Entity {entity_id}: Alert inter-arrival times show unusually uniform spacing (CV={cv:.3f}). Natural alert patterns are typically bursty. This anomaly warrants review to determine whether the data is synthetic, filtered, or the result of a scheduled scan.",
                 "evidence": {
                     "coefficient_of_variation": round(cv, 4),
                     "mean_interval_min": round(mean_ia / 60, 1),
@@ -636,10 +679,11 @@ def get_evidence_forensics():
                 gap_pct = len(missing) / len(expected_range) * 100
                 findings.append({
                     "finding_id": "FND-FORENSIC-CASEGAP",
-                    "type": "Case-ID Sequence Gap (Deleted Records)",
+                    "type": "Case-ID Sequence Gap",
+                    "outcome": "UNVERIFIABLE",
                     "entity_id": "ALL",
                     "severity": "High",
-                    "description": f"{len(missing)} case ID(s) missing from the sequence ({gap_pct:.1f}% gap rate). Missing IDs: {sorted(list(missing))[:10]}. Suggests records were deleted or scrubbed before submission.",
+                    "description": f"{len(missing)} case ID(s) missing from the sequence ({gap_pct:.1f}% gap rate). Missing IDs: {sorted(list(missing))[:10]}. The completeness of the submission cannot be verified. Gaps may indicate deleted records, filtered exports, or non-sequential ID assignment.",
                     "evidence": {
                         "missing_count": len(missing),
                         "gap_percentage": round(gap_pct, 1),
@@ -656,9 +700,10 @@ def get_evidence_forensics():
         findings.append({
             "finding_id": "FND-FORENSIC-ROUND",
             "type": "Round-Number Duration Clustering",
+            "outcome": "UNVERIFIABLE",
             "entity_id": "ALL",
             "severity": "Medium",
-            "description": f"{len(round_alerts)} alerts ({round_pct:.1f}%) have exact round-number closure durations (5/10/15/30/60 min). Natural investigations rarely land on exact minute boundaries.",
+            "description": f"{len(round_alerts)} alerts ({round_pct:.1f}%) have exact round-number closure durations (5/10/15/30/60 min). This pattern is atypical for organic investigations and warrants review to determine if durations are manually entered or system-generated.",
             "evidence": {
                 "round_count": len(round_alerts),
                 "total_alerts": len(alerts),
@@ -692,9 +737,10 @@ def get_evidence_forensics():
             findings.append({
                 "finding_id": "FND-FORENSIC-BENFORD",
                 "type": "Timestamp Digit Anomaly (Benford's Law)",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": "ALL",
                 "severity": "Medium",
-                "description": f"Leading-digit distribution of closure durations deviates from Benford's Law (divergence score: {divergence:.4f}). Natural data follows Benford's; fabricated data often doesn't.",
+                "description": f"Leading-digit distribution of closure durations deviates from Benford's Law (divergence: {divergence:.4f}). This statistical anomaly is a review candidate — it may reflect data processing artifacts rather than fabrication.",
                 "evidence": {
                     "divergence_score": round(divergence, 4),
                     "digit_analysis": digit_analysis
@@ -787,6 +833,7 @@ def get_investigation_quality():
             findings.append({
                 "finding_id": f"FND-QUALITY-LOW-{row['case_id']}",
                 "type": "Low Quality Investigation",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": row['entity_id'],
                 "severity": "High",
                 "description": f"Case {row['case_id']} investigated a {row.get('severity')} alert ({row.get('category', 'N/A')}) but scored only {quality_pct:.0f}% on the quality rubric. Missing: evidence references, tool citations, action verbs.",
@@ -809,10 +856,11 @@ def get_investigation_quality():
             if cited_ips and native_ioc not in cited_ips:
                 findings.append({
                     "finding_id": f"FND-GROUNDING-{row['case_id']}",
-                    "type": "Rubric Grounding Failure (Gaming)",
+                    "type": "Rubric Grounding Failure",
+                    "outcome": "CONTRADICTED",
                     "entity_id": row['entity_id'],
                     "severity": "Critical",
-                    "description": f"Case {row['case_id']} cited an IP ({list(cited_ips)[0]}) in the investigation notes that does not exist in the alert's native telemetry ({native_ioc}). This indicates fabricated investigation text to pass quality rubrics.",
+                    "description": f"Case {row['case_id']} cited an IP ({list(cited_ips)[0]}) that does not appear in the alert's native telemetry ({native_ioc}). The investigation evidence does not ground to the original alert data. Review recommended.",
                     "evidence": {
                         "case_id": row['case_id'],
                         "cited_ips": list(cited_ips),
@@ -829,10 +877,11 @@ def get_investigation_quality():
     for _, row in zombie_cases.iterrows():
         findings.append({
             "finding_id": f"FND-ZOMBIE-{row['case_id']}",
-            "type": "Zombie Case (No Evidence)",
+            "type": "Zombie Case (Insufficient Evidence)",
+            "outcome": "UNVERIFIABLE",
             "entity_id": row['entity_id'],
             "severity": "Critical",
-            "description": f"Case {row['case_id']} is a zombie: investigation text is '{str(row.get('investigation_text', ''))[:30]}' with {row.get('investigation_actions', 0)} action(s). This case was closed without defensible evidence.",
+            "description": f"Case {row['case_id']} was closed with minimal or no investigation record (text: '{str(row.get('investigation_text', ''))[:30]}', actions: {row.get('investigation_actions', 0)}). The adequacy of investigation cannot be verified from the submitted evidence.",
             "evidence": {
                 "case_id": row['case_id'],
                 "alert_severity": row.get('severity', 'Unknown'),
@@ -852,9 +901,10 @@ def get_investigation_quality():
                 findings.append({
                     "finding_id": f"FND-QUALITY-ENT-{row['entity_id']}",
                     "type": "Systemic Low Investigation Quality",
+                    "outcome": "UNVERIFIABLE",
                     "entity_id": row['entity_id'],
                     "severity": "High",
-                    "description": f"Entity {row['entity_id']} has a systemic investigation quality problem: average rubric score is {row['avg_quality']:.0f}%. Investigations lack evidence citations, tool references, and documented actions.",
+                    "description": f"Entity {row['entity_id']} averages {row['avg_quality']:.0f}% on the investigation quality rubric. Submitted investigation records lack sufficient evidence citations, tool references, and documented actions to support the claimed investigation depth.",
                     "evidence": {
                         "avg_quality_pct": round(row['avg_quality'], 1)
                     }
@@ -899,9 +949,10 @@ def get_detection_decay():
             findings.append({
                 "finding_id": f"FND-SILENCE-{entity_id}-{hash(cat) % 10000}",
                 "type": "Rule Gone Silent",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": entity_id,
                 "severity": "High",
-                "description": f"Entity {entity_id}: Detection rule for '{cat}' fired {old_count} time(s) in the first half of the observation window but has gone completely silent. The rule may still show 'active' status while detecting nothing.",
+                "description": f"Entity {entity_id}: Detection rule for '{cat}' fired {old_count} time(s) in the first half but produced zero alerts in the second half. Detection capability for this category cannot be verified. May indicate a disabled rule, changed telemetry, or resolved threat.",
                 "evidence": {
                     "category": cat,
                     "old_period_count": old_count,
@@ -925,9 +976,10 @@ def get_detection_decay():
                 findings.append({
                     "finding_id": f"FND-COVERAGE-DECAY-{entity_id}",
                     "type": "Detection Coverage Decay",
+                    "outcome": "CONTRADICTED",
                     "entity_id": entity_id,
                     "severity": "Critical",
-                    "description": f"Entity {entity_id}: Detection coverage dropped from {len(old_techniques)} technique categories to {len(new_techniques)} ({coverage_ratio*100:.0f}% retention). Broad capability degradation detected.",
+                    "description": f"Entity {entity_id}: Detection coverage dropped from {len(old_techniques)} technique categories to {len(new_techniques)} ({coverage_ratio*100:.0f}% retention). The claim of maintained detection breadth is contradicted by observable coverage loss.",
                     "evidence": {
                         "old_technique_count": len(old_techniques),
                         "new_technique_count": len(new_techniques),
@@ -972,9 +1024,10 @@ def get_capacity_stress():
             findings.append({
                 "finding_id": "FND-SHIFT-ACCEL",
                 "type": "Shift-End Quality Degradation",
+                "outcome": "CONTRADICTED",
                 "entity_id": "ALL",
                 "severity": "High",
-                "description": f"Late-shift closures are {((1 - late_speed/early_speed) * 100):.0f}% faster with {((1 - late_depth/early_depth) * 100):.0f}% fewer investigation actions vs. early-shift. Indicates fatigue-driven rubber-stamping.",
+                "description": f"Late-shift closures are {((1 - late_speed/early_speed) * 100):.0f}% faster with {((1 - late_depth/early_depth) * 100):.0f}% fewer investigation actions vs. early-shift. This pattern warrants review for potential fatigue-driven quality degradation.",
                 "evidence": {
                     "early_shift_median_actions": float(early_depth),
                     "late_shift_median_actions": float(late_depth),
@@ -1009,6 +1062,7 @@ def get_capacity_stress():
             findings.append({
                 "finding_id": "FND-CAPACITY-UTIL",
                 "type": "Capacity Overload Risk",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": "ALL",
                 "severity": "High" if peak_utilization > 100 else "Medium",
                 "description": f"Average daily human alert volume is {avg_daily:.0f} (peak: {peak_daily:.0f}). Estimated utilization: {utilization:.0f}% avg, {peak_utilization:.0f}% peak. Decision quality degrades sharply above 70% utilization.",
@@ -1119,9 +1173,10 @@ def get_peer_blindspot():
             findings.append({
                 "finding_id": f"FND-BLINDSPOT-{entity_id}",
                 "type": "Peer Blind-Spot (Missing Detection)",
+                "outcome": "UNVERIFIABLE",
                 "entity_id": entity_id,
                 "severity": "Critical",
-                "description": f"Entity {entity_id} has NEVER detected {len(blind_spots)} technique(s) that the majority of peers actively detect: {', '.join(list(blind_spots)[:3])}. This is a detection gap only visible from a national supervisory vantage point.",
+                "description": f"Entity {entity_id} has no detection records for {len(blind_spots)} technique(s) that the majority of peers detect: {', '.join(list(blind_spots)[:3])}. Detection capability for these techniques cannot be verified from the submitted evidence. This cross-entity view is only available from a supervisory vantage point.",
                 "evidence": {
                     "missing_techniques": list(blind_spots),
                     "peer_detection_rate": {cat: peer_category_counts[cat] for cat in blind_spots},
@@ -1161,6 +1216,7 @@ def get_closure_regret():
             findings.append({
                 "finding_id": f"FND-REGRET-{incident['case_id']}",
                 "type": "Closure Regret (Missed Early Warning)",
+                "outcome": "CONTRADICTED",
                 "entity_id": incident['entity_id'],
                 "severity": "Critical",
                 "description": f"Incident {incident['case_id']} on asset {incident['asset_id']} was preceded by {len(missed_opps)} alert(s) on the same asset that were incorrectly closed as Benign/False Positive in the prior 30 days. This represents a critical missed opportunity to stop the attack early.",
@@ -1391,17 +1447,17 @@ def get_claims_matrix():
         day_mttr = day_shift['time_to_close_seconds'].mean() if day_vol > 0 else 0
         
         if night_vol == 0 and day_vol > 0:
-            status = "FAIL"
-            demo_text = "Zero alerts processed during night shift (12AM - 8AM), indicating complete coverage gap."
+            status = "CONTRADICTED"
+            demo_text = "Zero alerts processed during night shift (00:00–08:00). The evidence contradicts the claim of 24/7 monitoring coverage."
         elif night_mttr > (day_mttr * 1.5) or night_vol < (day_vol * 0.2):
-            status = "FAIL"
-            demo_text = f"Night shift MTTR is {night_mttr/3600:.1f}h vs Day shift MTTR {day_mttr/3600:.1f}h. Night volume is {night_vol} vs Day volume {day_vol}."
+            status = "CONTRADICTED"
+            demo_text = f"Night shift performance significantly degrades (MTTR: {night_mttr/3600:.1f}h vs Day: {day_mttr/3600:.1f}h, Volume: {night_vol} vs {day_vol}). Evidence contradicts uniform 24/7 coverage."
         elif night_mttr > (day_mttr * 1.2):
-            status = "WARNING"
-            demo_text = f"Slight performance degradation at night: Night MTTR {night_mttr/3600:.1f}h vs Day {day_mttr/3600:.1f}h."
+            status = "UNVERIFIABLE"
+            demo_text = f"Slight night-shift degradation observed (Night MTTR: {night_mttr/3600:.1f}h vs Day: {day_mttr/3600:.1f}h). Insufficient evidence to confirm or deny uniform coverage."
         else:
-            status = "PASS"
-            demo_text = "Consistent MTTR and volume handled across all shifts."
+            status = "SUPPORTED"
+            demo_text = "Consistent MTTR and volume across all shifts. Evidence supports the claim of 24/7 monitoring."
             
         matrix.append({
             "claim": "24/7 Monitoring Coverage",
@@ -1424,11 +1480,11 @@ def get_claims_matrix():
             p95_mttr = 0
             
         if p95_mttr > 900: # 15 minutes = 900 seconds
-            status_2 = "FAIL"
+            status_2 = "CONTRADICTED"
         elif p95_mttr > 600:
-            status_2 = "WARNING"
+            status_2 = "UNVERIFIABLE"
         else:
-            status_2 = "PASS"
+            status_2 = "SUPPORTED"
             
         matrix.append({
             "claim": "15-Minute Critical Alert SLA",
@@ -1451,11 +1507,11 @@ def get_claims_matrix():
     human_rate = ((total_alerts - soar_closures - zombie_cases) / total_alerts) * 100 if total_alerts > 0 else 0
     
     if human_rate < 85:
-        status_3 = "FAIL"
+        status_3 = "CONTRADICTED"
     elif human_rate < 95:
-        status_3 = "WARNING"
+        status_3 = "UNVERIFIABLE"
     else:
-        status_3 = "PASS"
+        status_3 = "SUPPORTED"
         
     matrix.append({
         "claim": "Comprehensive Human Investigation",
