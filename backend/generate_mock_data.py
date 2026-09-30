@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 import os
 import json
 
-# Create data directory if it doesn't exist
-os.makedirs("data", exist_ok=True)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+data_dir = os.path.join(base_dir, "data")
+os.makedirs(data_dir, exist_ok=True)
 
 # 0. Initialize Ground Truth labels
 ground_truth = []
@@ -18,7 +19,7 @@ entities = pd.DataFrame({
     "size_band": ["Large", "Medium", "Large", "Small", "Medium"],
     "criticality": ["High", "High", "Critical", "Low", "Medium"]
 })
-entities.to_csv("data/mock_entities.csv", index=False)
+entities.to_csv(os.path.join(data_dir, "mock_entities.csv"), index=False)
 
 # 2. Generate Mock Assets
 assets_data = []
@@ -32,7 +33,7 @@ for ent_id in entities["entity_id"]:
             "monitoring_expected": True
         })
 assets = pd.DataFrame(assets_data)
-assets.to_csv("data/mock_assets.csv", index=False)
+assets.to_csv(os.path.join(data_dir, "mock_assets.csv"), index=False)
 
 # 3. Generate Mock Alerts
 # --- New fields for Feature 1 (Metric Integrity): closed_by, original_severity, sla_reset ---
@@ -165,7 +166,7 @@ for i in range(1, 150): # Generated 150 alerts for a better demo
         "sla_reset": sla_reset
     })
 alerts = pd.DataFrame(alerts_data)
-alerts.to_csv("data/mock_alerts.csv", index=False)
+alerts.to_csv(os.path.join(data_dir, "mock_alerts.csv"), index=False)
 
 # 4. Generate Mock Cases (Investigations)
 cases_data = []
@@ -225,8 +226,15 @@ for idx, alert in enumerate(alerts_data):
                 "entity_id": alert["entity_id"], "target_id": case_id
             })
         # Inject the lazy "templated" text for NLP to catch
-        elif idx % 7 == 0:
-            investigation_text = random.choice(lazy_templates)
+        # Inject the lazy "templated" text for NLP to catch
+        elif alert.get("closed_by") == "Analyst-C" and random.random() < 0.6:
+            paraphrases = [
+                "I looked at the logs and saw nothing bad. The system is fine. Closing this.",
+                "Checked the logs and saw nothing bad. System looks fine. Closing this.",
+                "Looked at logs, saw nothing bad. The system is fine, closing.",
+                "I reviewed the logs, nothing bad seen. System fine. Closing this out."
+            ]
+            investigation_text = random.choice(paraphrases)
             investigation_actions = random.randint(1, 3)
             ground_truth.append({
                 "engine": "NLP", "type": "Templated Investigation (Semantic)",
@@ -234,10 +242,9 @@ for idx, alert in enumerate(alerts_data):
             })
         # Add Hard Negatives: Legitimate SOAR templates that shouldn't be flagged as lazy
         elif idx % 9 == 0:
-            investigation_text = "SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP verified against internal allowlist. Auto-closed."
+            investigation_text = f"SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP {alert.get('native_ioc', '127.0.0.1')} verified against internal allowlist. Auto-closed."
             investigation_actions = 5
             # We DO NOT append to ground truth here because it's a hard negative (legit)
-            
         else:
             # === Feature 8: Rubric Grounding Defect Injection ===
             # Analyst cites a generic/fake IP instead of the actual native_ioc
@@ -250,14 +257,30 @@ for idx, alert in enumerate(alerts_data):
             else:
                 cited_ip = alert["native_ioc"]
                 
-            if "SQL" in alert["category"]:
-                investigation_text = random.choice(good_templates_sql).replace("{ip}", cited_ip)
-            elif "Authentication" in alert["category"]:
-                investigation_text = random.choice(good_templates_auth).replace("{ip}", cited_ip)
-            else:
-                investigation_text = f"Analyzed {alert['category']} on {alert['asset_id']}. Source IP {cited_ip} was checked. CrowdStrike sensor logged process execution tree. Closed as {alert['disposition']}."
-            investigation_actions = random.randint(1, 15)
+            analyst = alert.get("closed_by", "Unknown")
+            cat = alert.get("category", "alert")
+            host = alert.get("asset_id", "host")
+            ip = cited_ip
+            disp = alert.get("disposition", "Unknown")
             
+            import random, string
+            def get_rand(): return ''.join(random.choices(string.ascii_letters, k=15))
+            
+            if analyst == "Analyst-A":
+                investigation_text = f"Triage of {cat} on {host}. {get_rand()} {get_rand()}. Closed as {disp}."
+                investigation_actions = random.randint(3, 15)
+            elif analyst == "Analyst-B":
+                if random.random() < 0.25:
+                    investigation_text = f"Standard routine check completed for {cat} on {host}. No anomalies detected in the current telemetry window. Closed as {disp}."
+                else:
+                    investigation_text = f"Check for {cat} on {host}. IP {ip} checked. {get_rand()} {get_rand()}. {disp}."
+                investigation_actions = 7
+            elif analyst == "Analyst-D":
+                investigation_text = f"Reviewing {cat} on {host}. Event telemetry looks normal. {get_rand()} {get_rand()}. Marked {disp}."
+                investigation_actions = random.randint(3, 15)
+            else:
+                investigation_text = f"Analyzed {cat} on {host}. Source IP {ip} was checked. Host contained. {get_rand()}. {disp}."
+                investigation_actions = random.randint(3, 15)
         escalated = random.choice([True, False, False])
         if alert["severity"] == "Critical" and not escalated and alert.get("disposition") == "True Positive":
             ground_truth.append({
@@ -276,7 +299,7 @@ for idx, alert in enumerate(alerts_data):
         })
         case_index += 1
 cases = pd.DataFrame(cases_data)
-cases.to_csv("data/mock_cases.csv", index=False)
+cases.to_csv(os.path.join(data_dir, "mock_cases.csv"), index=False)
 
 print(f"Enhanced mock data generated. {len(alerts_data)} alerts, {len(cases_data)} cases.")
 print(f"  Injected: {sum(1 for a in alerts_data if a['severity'] != a['original_severity'])} severity downgrades")
@@ -286,7 +309,7 @@ print(f"  Injected: {len(deleted_case_ids)} case-ID gaps (deleted records)")
 print(f"  Injected: {sum(1 for c in cases_data if c['investigation_actions'] == 0)} zombie cases")
 
 # Save ground truth labels
-with open("data/ground_truth.json", "w") as f:
+with open(os.path.join(data_dir, "ground_truth.json"), "w") as f:
     json.dump(ground_truth, f, indent=2)
 print(f"Ground truth labels saved: {len(ground_truth)} anomalies injected.")
 

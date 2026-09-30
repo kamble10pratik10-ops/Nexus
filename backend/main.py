@@ -29,13 +29,19 @@ def load_data():
         base_dir = os.path.dirname(os.path.abspath(__file__))
         alerts = pd.read_csv(os.path.join(base_dir, "data", "mock_alerts.csv"))
         cases = pd.read_csv(os.path.join(base_dir, "data", "mock_cases.csv"))
+        events_path = os.path.join(base_dir, "data", "mock_alert_events.csv")
+        if os.path.exists(events_path):
+            events = pd.read_csv(events_path)
+            events['timestamp'] = pd.to_datetime(events['timestamp'])
+        else:
+            events = pd.DataFrame()
         # Convert timestamps
         alerts['created_at'] = pd.to_datetime(alerts['created_at'])
         alerts['closed_at'] = pd.to_datetime(alerts['closed_at'])
-        return alerts, cases
+        return alerts, cases, events
     except Exception as e:
         print(f"Error loading data: {e}")
-        return None, None
+        return None, None, None
 
 def load_assets():
     try:
@@ -52,7 +58,7 @@ def read_root():
 
 @app.get("/api/dashboard/summary")
 def get_dashboard_summary():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None:
         return {"error": "Data not found"}
         
@@ -67,24 +73,36 @@ def get_dashboard_summary():
 
 @app.get("/api/findings/execution-gaps")
 def get_execution_gaps():
-    alerts, cases = load_data()
-    if alerts is None:
+    alerts, cases, events = load_data()
+    if alerts is None or cases is None:
         return {"error": "Data not found"}
         
     findings = []
     
     alerts['time_to_close_seconds'] = (alerts['closed_at'] - alerts['created_at']).dt.total_seconds()
     
-    # Calculate category-level medians
-    category_medians = alerts.groupby('category')['time_to_close_seconds'].median().to_dict()
+    # We merge alerts and cases because we need case context (escalated, investigation_actions)
+    merged = alerts.merge(cases, on='alert_id', how='left')
     
+    # Calculate category-level medians (minimum group size 5)
+    category_medians = {}
+    for cat, group in merged.groupby('category'):
+        if len(group) >= 5:
+            category_medians[cat] = group['time_to_close_seconds'].median()
+        else:
+            category_medians[cat] = 90  # fallback
+            
     suspicious_alerts = []
-    for _, row in alerts.iterrows():
+    for _, row in merged.iterrows():
         cat = row['category']
         median = category_medians.get(cat, 90)
         
-        # Fast closure: Faster than 10% of the category median AND not closed by SOAR
-        if row['time_to_close_seconds'] < (median * 0.10) and row.get('closed_by', '') != 'SOAR':
+        # Fast closure defect: High/Critical severity, closed < 10% of median, no evidence (actions <= 1), no escalation, not SOAR
+        if (row['time_to_close_seconds'] < (median * 0.10) and 
+            row.get('closed_by', '') != 'SOAR' and
+            row.get('severity') in ['High', 'Critical'] and
+            row.get('investigation_actions', 0) <= 1 and
+            not row.get('escalated', False)):
             suspicious_alerts.append(row)
             
     suspicious_df = pd.DataFrame(suspicious_alerts) if suspicious_alerts else pd.DataFrame()
@@ -92,10 +110,10 @@ def get_execution_gaps():
     for _, row in suspicious_df.iterrows():
         findings.append({
             "finding_id": f"FND-GAP-{row['alert_id']}",
-            "type": "Fast Closure",
-            "entity_id": row['entity_id'],
+            "type": "Fast Closure (High Risk)",
+            "entity_id": row['entity_id_x'] if 'entity_id_x' in row else row['entity_id'],
             "severity": "High",
-            "description": f"Alert {row['alert_id']} ({row['category']}) was closed in {row['time_to_close_seconds']}s. This is significantly faster than the category median ({median}s).",
+            "description": f"Alert {row['alert_id']} ({row['category']}, {row['severity']}) was closed in {row['time_to_close_seconds']:.0f}s with no escalation and minimal evidence. Median is {median:.0f}s.",
             "evidence": {
                 "alert_id": row['alert_id'],
                 "time_to_close": row['time_to_close_seconds'],
@@ -103,25 +121,24 @@ def get_execution_gaps():
             }
         })
 
-    # Rule 2: "Lazy Analyst" - Shallow Investigation Depth
-    # Merge cases with alerts to get severity and category
-    merged_data = cases.merge(alerts[['alert_id', 'severity', 'category']], on='alert_id', how='inner')
-    
-    lazy_cases = merged_data[
-        ((merged_data['severity'] == 'Critical') & (merged_data['investigation_actions'] <= 3)) |
-        ((merged_data['severity'] == 'High') & (merged_data['investigation_actions'] <= 2))
+    # Rule 2: Broken Evidence Chain (No Escalation on True Positive Criticals)
+    broken_chains = merged[
+        (merged['severity'] == 'Critical') & 
+        (merged['disposition'] == 'True Positive') & 
+        (merged['escalated'] == False)
     ]
     
-    for _, row in lazy_cases.iterrows():
+    for _, row in broken_chains.iterrows():
         findings.append({
-            "finding_id": f"FND-LAZY-{row['case_id']}",
-            "type": "Shallow Investigation",
-            "entity_id": row['entity_id'],
-            "severity": "Medium",
-            "description": f"Analyst closed a {row['severity']} alert ({row['category']}) with only {row['investigation_actions']} investigation action(s). Indicates potential rubber-stamping.",
+            "finding_id": f"FND-CHAIN-{row['case_id']}",
+            "type": "Broken Evidence Chain (No Escalation)",
+            "entity_id": row['entity_id_x'] if 'entity_id_x' in row else row['entity_id'],
+            "severity": "Critical",
+            "description": f"Critical alert {row['alert_id']} was marked True Positive but never escalated.",
             "evidence": {
-                "alert_id": row['alert_id'],
-                "actions_logged": row['investigation_actions']
+                "case_id": row['case_id'],
+                "severity": row['severity'],
+                "disposition": row['disposition']
             }
         })
         
@@ -129,102 +146,110 @@ def get_execution_gaps():
 
 @app.get("/api/findings/nlp-templated")
 def get_nlp_findings():
-    _, cases = load_data()
+    alerts, cases, events = load_data()
     if cases is None or cases.empty:
         return {"error": "Data not found"}
         
-    # Lazy load the model to save startup time
+    findings = []
+    
     try:
         from sentence_transformers import SentenceTransformer
         from sklearn.cluster import DBSCAN
         from sklearn.metrics.pairwise import cosine_distances
-        # Using a small, fast model suitable for sentence similarity
-        model = SentenceTransformer('all-MiniLM-L6-v2')
+        import pandas as pd
+        import numpy as np
     except ImportError:
-        return {"error": "Required libraries (sentence-transformers, scikit-learn) not installed"}
-        
-    findings = []
-    # Exclude SOAR templates and exact boilerplate
-    cases['investigation_text'] = cases['investigation_text'].fillna("").astype(str)
-    cases = cases[~cases['investigation_text'].str.contains("SOAR PLAYBOOK EXECUTION", case=False, na=False)].copy()
+        return {"error": "Missing NLP dependencies"}
     
-    if cases.empty:
+    # Join cases with alerts to get the actor (closed_by)
+    cases_ext = pd.merge(cases, alerts[['alert_id', 'closed_by']], on='alert_id', how='left')
+    
+    # Filter cases with meaningful text
+    valid_cases = cases_ext.dropna(subset=['investigation_text']).copy()
+    valid_cases = valid_cases[valid_cases['investigation_text'].str.len() > 15].copy()
+    
+    if valid_cases.empty:
         return {"findings": []}
         
-    # Mask entities (IPs, hashes) to see if the underlying text is just boilerplate
-    def mask_entities(text):
-        # Mask IPs
-        text = re.sub(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b', '<IP>', text)
-        # Mask Hashes
-        text = re.sub(r'\b[A-Fa-f0-9]{32,64}\b', '<HASH>', text)
-        return text.strip()
+    # Mask IPs and specific IDs out of the text for embeddings
+    def mask_text(t):
+        t = re.sub(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b', '[IP]', t)
+        t = re.sub(r'\bAST-\S+', '[ASSET]', t)
+        return t
         
-    cases['masked_text'] = cases['investigation_text'].apply(mask_entities)
-    
-    # 1. Exact duplicates on masked text (Highly confident copy-paste boilerplate)
-    exact_duplicates = cases.groupby('masked_text').filter(lambda x: len(x) > 1)
-    for text, group in exact_duplicates.groupby('masked_text'):
-        # Only flag if it's substantive text (not just "Closed.")
-        if len(text) > 20:
-            sample = group.iloc[0]['investigation_text']
-            findings.append({
-                "finding_id": f"FND-NLP-EXACT-{hash(text) % 10000}",
-                "type": "Templated Investigation (Semantic)",
-                "entity_id": group.iloc[0]['entity_id'],
-                "severity": "High",
-                "description": f"Found {len(group)} cases with exactly identical investigation text (after masking IPs).",
-                "evidence": {
-                    "text_snippet": sample[:100] + "...",
-                    "case_ids": group['case_id'].tolist()
-                }
-            })
-            
-    # Remove exact matches from DBSCAN to avoid double-counting
-    dbscan_cases = cases[~cases['case_id'].isin(exact_duplicates['case_id'])].copy()
-    if dbscan_cases.empty:
-        return {"findings": findings}
+    valid_cases['masked_text'] = valid_cases['investigation_text'].apply(mask_text)
         
-    # Ensure all texts are strictly strings to prevent SentenceTransformer float errors
-    texts = [str(t) for t in dbscan_cases['masked_text'].tolist()]
-    embeddings = model.encode(texts)
+    model = SentenceTransformer('all-MiniLM-L6-v2')
     
-    # Compute cosine distances and cluster using DBSCAN
-    distances = cosine_distances(embeddings)
-    db = DBSCAN(eps=0.10, min_samples=2, metric='precomputed') # Tighter eps due to masking
-    labels = db.fit_predict(distances)
+    analyst_stats = []
     
-    dbscan_cases['cluster'] = labels
-    unique_labels = set(labels)
-    
-    for label in unique_labels:
-        if label == -1:
-            continue # -1 represents noise (unique texts)
-            
-        cluster_cases = dbscan_cases[dbscan_cases['cluster'] == label]
-        sample_text = cluster_cases.iloc[0]['investigation_text']
-        
-        # Calculate residual content
-        residual_length = len(cluster_cases.iloc[0]['masked_text'])
-        if residual_length < 15:
+    for analyst, group in valid_cases.groupby('closed_by'):
+        if analyst == 'SOAR':
             continue
             
+        total_cases = len(group)
+        if total_cases < 2:
+            continue
+            
+        # Cluster per-analyst using embeddings
+        texts = group['masked_text'].tolist()
+        embeddings = model.encode(texts)
+        distance_matrix = cosine_distances(embeddings)
+        
+        # DBSCAN clustering. eps=0.05
+        clustering = DBSCAN(eps=0.05, min_samples=2, metric='precomputed').fit(distance_matrix)
+        
+        reused_mask = clustering.labels_ != -1
+        reused_cases = np.sum(reused_mask)
+        reuse_rate = reused_cases / total_cases
+        
+        case_ids = group['case_id'].values
+        reused_case_ids = case_ids[reused_mask].tolist()
+        
+        analyst_stats.append({
+            'analyst': analyst,
+            'total_cases': total_cases,
+            'reused_cases': reused_cases,
+            'reuse_rate': reuse_rate,
+            'reused_case_ids': reused_case_ids,
+            'entity_id': group['entity_id'].iloc[0]
+        })
+        
+    if not analyst_stats:
+        return {"findings": []}
+        
+    stats_df = pd.DataFrame(analyst_stats)
+    
+    # Robust z-score of reuse rates
+    global_median = stats_df['reuse_rate'].median()
+    mad = (stats_df['reuse_rate'] - global_median).abs().median()
+    if mad == 0:
+        mad = 0.01  # prevent division by zero
+        
+    stats_df['robust_z'] = 0.6745 * (stats_df['reuse_rate'] - global_median) / mad
+    
+    # Flag analysts with anomalously high reuse rates
+    anomalous = stats_df[stats_df['robust_z'] > 2.0]
+    
+    for _, row in anomalous.iterrows():
         findings.append({
-            "finding_id": f"FND-NLP-SEM-{hash(sample_text) % 10000}",
+            "finding_id": f"FND-NLP-{row['analyst']}",
             "type": "Templated Investigation (Semantic)",
-            "entity_id": cluster_cases.iloc[0]['entity_id'],
-            "severity": "Medium",
-            "description": f"Found {len(cluster_cases)} cases with semantically similar boilerplate.",
+            "entity_id": row['entity_id'],
+            "severity": "High",
+            "description": f"Analyst {row['analyst']} has an unusually high rate of semantic near-duplicates ({row['reuse_rate']*100:.1f}%, z={row['robust_z']:.2f}).",
             "evidence": {
-                "text_snippet": sample_text[:100] + "...",
-                "case_ids": cluster_cases['case_id'].tolist()
+                "analyst": row['analyst'],
+                "reuse_rate": row['reuse_rate'],
+                "case_ids": row['reused_case_ids']
             }
         })
-
+        
     return {"findings": findings}
 
 @app.get("/api/findings/negative-space")
 def get_negative_space():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     assets = load_assets()
     
     if alerts is None or cases is None or assets is None:
@@ -273,7 +298,7 @@ def get_negative_space():
 
 @app.get("/api/findings/peer-benchmarking")
 def get_peer_benchmarking():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None:
         return {"error": "Data not found"}
         
@@ -318,7 +343,7 @@ def get_peer_benchmarking():
 
 @app.get("/api/findings/evidence-chains")
 def get_evidence_chains():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Data not found"}
         
@@ -354,7 +379,7 @@ def get_evidence_chains():
 
 @app.get("/api/findings/capability-drift")
 def get_capability_drift():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     assets = load_assets()
     if alerts is None or assets is None:
         return {"error": "Data not found"}
@@ -397,7 +422,7 @@ def get_capability_drift():
 
 @app.get("/api/findings/remediation-effectiveness")
 def get_remediation_effectiveness():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None:
         return {"error": "Data not found"}
         
@@ -426,7 +451,7 @@ def get_remediation_effectiveness():
 
 @app.get("/api/findings/adaptive-sampling")
 def get_adaptive_sampling():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Data not found"}
         
@@ -466,119 +491,90 @@ def get_adaptive_sampling():
 # ═══════════════════════════════════════════════════════════════════════════════
 @app.get("/api/findings/metric-integrity")
 def get_metric_integrity():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None:
         return {"error": "Data not found"}
         
     findings = []
-    alerts['time_to_close_seconds'] = (alerts['closed_at'] - alerts['created_at']).dt.total_seconds()
     
-    # --- Sub-Engine 1: MTTR Multi-Definition Spread ---
-    # Definition A: alert created_at -> closed_at
-    # Definition B: alert created_at -> case created_at (first triage)
-    # Definition C: case created_at -> alert closed_at (investigation time)
-    if cases is not None and not cases.empty:
-        cases['created_at_dt'] = pd.to_datetime(cases['created_at'])
-        merged = alerts.merge(cases[['alert_id', 'entity_id', 'created_at_dt']], on=['alert_id', 'entity_id'], how='inner')
+    # Analyze the events audit trail for defects
+    if not events.empty:
+        # Detect Severity Downgrades
+        severity_events = events[events['field'] == 'severity'].copy()
+        severity_map = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1, "Info": 0}
         
-        for entity_id in merged['entity_id'].unique():
-            ent = merged[merged['entity_id'] == entity_id]
-            mttr_a = ent['time_to_close_seconds'].median() / 60  # minutes
-            mttr_b = (ent['created_at_dt'] - ent['created_at']).dt.total_seconds().median() / 60
-            mttr_c = (ent['closed_at'] - ent['created_at_dt']).dt.total_seconds().median() / 60
-            
-            spread = max(abs(mttr_a), abs(mttr_b), abs(mttr_c)) - min(abs(mttr_a), abs(mttr_b), abs(mttr_c))
-            
-            if spread > 30:  # > 30 minute spread between definitions
-                findings.append({
-                    "finding_id": f"FND-MTTR-SPREAD-{entity_id}",
-                    "type": "MTTR Definition Spread",
-                    "entity_id": entity_id,
-                    "severity": "Medium",
-                    "description": f"Entity {entity_id}: MTTR varies by {spread:.0f} min depending on definition. A={mttr_a:.0f}m, B(to-triage)={abs(mttr_b):.0f}m, C(investigation)={abs(mttr_c):.0f}m. Metric is unreliable without definition pinning.",
-                    "evidence": {
-                        "mttr_alert_to_close_min": round(mttr_a, 1),
-                        "mttr_to_triage_min": round(abs(mttr_b), 1),
-                        "mttr_investigation_min": round(abs(mttr_c), 1),
-                        "spread_min": round(spread, 1)
-                    }
-                })
-    
-    # --- Sub-Engine 2: Automation Blending Detector ---
-    if 'closed_by' in alerts.columns:
-        for entity_id in alerts['entity_id'].unique():
-            ent = alerts[alerts['entity_id'] == entity_id]
-            soar_mask = ent['closed_by'] == 'SOAR'
-            human_mask = ~soar_mask
-            
-            if soar_mask.sum() > 0 and human_mask.sum() > 0:
-                soar_mttr = ent.loc[soar_mask, 'time_to_close_seconds'].median()
-                human_mttr = ent.loc[human_mask, 'time_to_close_seconds'].median()
-                blended_mttr = ent['time_to_close_seconds'].median()
-                soar_pct = soar_mask.sum() / len(ent) * 100
-                
-                # Flag if SOAR closures are > 25% and pulling the blended MTTR down by > 40%
-                if soar_pct > 25 and blended_mttr < human_mttr * 0.6:
+        for _, row in severity_events.iterrows():
+            old_sev = row['old_value']
+            new_sev = row['new_value']
+            if pd.notna(old_sev) and pd.notna(new_sev):
+                if severity_map.get(old_sev, 0) > severity_map.get(new_sev, 0):
+                    alert_id = row['alert_id']
                     findings.append({
-                        "finding_id": f"FND-AUTO-BLEND-{entity_id}",
-                        "type": "Automation Blending",
-                        "entity_id": entity_id,
-                        "severity": "High",
-                        "description": f"Entity {entity_id}: {soar_pct:.0f}% of closures are SOAR-automated. Blended MTTR={blended_mttr/60:.0f}m masks human MTTR={human_mttr/60:.0f}m. Reported metrics misrepresent analyst performance.",
+                        "finding_id": f"FND-MI-SEV-{alert_id}",
+                        "type": "Severity Downgrade",
+                        "entity_id": alerts[alerts['alert_id'] == alert_id]['entity_id'].iloc[0],
+                        "severity": "Medium",
+                        "description": f"Alert {alert_id} severity was downgraded from {old_sev} to {new_sev} by {row['actor']}.",
                         "evidence": {
-                            "soar_mttr_s": round(soar_mttr, 1),
-                            "human_mttr_s": round(human_mttr, 1),
-                            "blended_mttr_s": round(blended_mttr, 1),
-                            "soar_pct": round(soar_pct, 1)
+                            "alert_id": alert_id,
+                            "old_severity": old_sev,
+                            "new_severity": new_sev
                         }
                     })
+                    
+        # Detect SLA Clock Resets
+        status_events = events[events['field'] == 'status'].copy()
+        status_events = status_events.sort_values(['alert_id', 'timestamp'])
+        
+        for alert_id, group in status_events.groupby('alert_id'):
+            # Looking for sequence: Open -> Resolved -> Open
+            states = group['new_value'].tolist()
+            if "Resolved" in states:
+                res_idx = states.index("Resolved")
+                if "Open" in states[res_idx:]:
+                    findings.append({
+                        "finding_id": f"FND-MI-SLA-{alert_id}",
+                        "type": "SLA Clock Reset",
+                        "entity_id": alerts[alerts['alert_id'] == alert_id]['entity_id'].iloc[0],
+                        "severity": "Medium",
+                        "description": f"Alert {alert_id} status was toggled to Resolved and back to Open, potentially resetting SLA clocks.",
+                        "evidence": {
+                            "alert_id": alert_id
+                        }
+                    })
+                    
+    # Original metric integrity logic (e.g. MTTR spread)
+    alerts['time_to_close_seconds'] = (alerts['closed_at'] - alerts['created_at']).dt.total_seconds()
+    alerts['time_to_close_hours'] = alerts['time_to_close_seconds'] / 3600.0
+
+    entity_mttr = alerts.groupby('entity_id')['time_to_close_hours'].mean().reset_index()
+    entity_mttr.columns = ['entity_id', 'mean_mttr']
     
-    # --- Sub-Engine 3: Severity Downgrade Detector ---
-    if 'original_severity' in alerts.columns:
-        downgrades = alerts[alerts['severity'] != alerts['original_severity']]
-        if not downgrades.empty:
-            for entity_id in downgrades['entity_id'].unique():
-                ent_dg = downgrades[downgrades['entity_id'] == entity_id]
-                findings.append({
-                    "finding_id": f"FND-SEV-DG-{entity_id}",
-                    "type": "Severity Downgrade",
-                    "entity_id": entity_id,
-                    "severity": "High",
-                    "description": f"Entity {entity_id}: {len(ent_dg)} alert(s) had severity downgraded after creation (e.g., {ent_dg.iloc[0]['original_severity']} -> {ent_dg.iloc[0]['severity']}). May indicate SLA-breach avoidance.",
-                    "evidence": {
-                        "downgrade_count": len(ent_dg),
-                        "sample_alert": ent_dg.iloc[0]['alert_id'],
-                        "original": ent_dg.iloc[0]['original_severity'],
-                        "changed_to": ent_dg.iloc[0]['severity']
-                    }
-                })
+    entity_std = alerts.groupby('entity_id')['time_to_close_hours'].std().reset_index()
+    entity_std.columns = ['entity_id', 'std_mttr']
     
-    # --- Sub-Engine 4: SLA Reset Detector ---
-    if 'sla_reset' in alerts.columns:
-        resets = alerts[alerts['sla_reset'] == True]
-        if not resets.empty:
-            for entity_id in resets['entity_id'].unique():
-                ent_resets = resets[resets['entity_id'] == entity_id]
-                findings.append({
-                    "finding_id": f"FND-SLA-RESET-{entity_id}",
-                    "type": "SLA Clock Reset",
-                    "entity_id": entity_id,
-                    "severity": "Medium",
-                    "description": f"Entity {entity_id}: {len(ent_resets)} alert(s) show SLA clock resets. Cases may have been reassigned near SLA deadlines to restart the timer.",
-                    "evidence": {
-                        "reset_count": len(ent_resets),
-                        "sample_alerts": ent_resets['alert_id'].head(3).tolist()
-                    }
-                })
+    mttr_stats = pd.merge(entity_mttr, entity_std, on='entity_id')
     
+    for _, row in mttr_stats.iterrows():
+        if pd.notna(row['std_mttr']) and row['std_mttr'] > (row['mean_mttr'] * 2.5):
+            findings.append({
+                "finding_id": f"FND-MI-MTTR-{row['entity_id']}",
+                "type": "MTTR Definition Spread",
+                "entity_id": row['entity_id'],
+                "severity": "Medium",
+                "description": f"Extremely high variance in MTTR for {row['entity_id']} (Mean: {row['mean_mttr']:.1f}h, StdDev: {row['std_mttr']:.1f}h). Indicates inconsistent measurement or gaming.",
+                "evidence": {
+                    "entity_id": row['entity_id'],
+                    "mean": row['mean_mttr'],
+                    "std_dev": row['std_mttr']
+                }
+            })
+            
     return {"findings": findings}
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# FEATURE 2: EVIDENCE FORENSICS (FALSIFIED SUBMISSIONS)
-# ═══════════════════════════════════════════════════════════════════════════════
 @app.get("/api/findings/evidence-forensics")
 def get_evidence_forensics():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None:
         return {"error": "Data not found"}
         
@@ -707,7 +703,7 @@ def get_evidence_forensics():
 # ═══════════════════════════════════════════════════════════════════════════════
 @app.get("/api/findings/investigation-quality")
 def get_investigation_quality():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Data not found"}
         
@@ -866,7 +862,7 @@ def get_investigation_quality():
 # ===============================================================================
 @app.get("/api/findings/detection-decay")
 def get_detection_decay():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     assets = load_assets()
     if alerts is None or assets is None:
         return {"error": "Data not found"}
@@ -942,7 +938,7 @@ def get_detection_decay():
 # ===============================================================================
 @app.get("/api/findings/capacity-stress")
 def get_capacity_stress():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Data not found"}
         
@@ -1081,7 +1077,7 @@ def test_taxonomy_normalization():
 
 @app.get("/api/findings/peer-blindspot")
 def get_peer_blindspot():
-    alerts, _ = load_data()
+    alerts, _, _ = load_data()
     if alerts is None:
         return {"error": "Data not found"}
     
@@ -1132,7 +1128,7 @@ def get_peer_blindspot():
 
 @app.get("/api/findings/closure-regret")
 def get_closure_regret():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Data not found"}
         
@@ -1368,7 +1364,7 @@ def get_priority_queue():
 
 @app.get("/api/claims-matrix")
 def get_claims_matrix():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Failed to load data"}
 
@@ -1473,7 +1469,7 @@ def get_claims_matrix():
 
 @app.get("/api/reports/efficacy")
 def get_efficacy_report():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Failed to load data"}
 
@@ -1627,7 +1623,7 @@ def get_north_star_metric():
 
 @app.get("/api/reports/automation-assurance")
 def get_automation_assurance():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Failed to load data"}
 
@@ -1747,7 +1743,7 @@ def generate_signed_manifest():
 
 @app.get("/api/reports/coverage-index")
 def get_coverage_index():
-    alerts, cases = load_data()
+    alerts, cases, events = load_data()
     if alerts is None or cases is None:
         return {"error": "Failed to load data"}
         

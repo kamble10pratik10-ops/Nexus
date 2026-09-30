@@ -1,26 +1,20 @@
 [
   {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0001"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-004",
-    "target_id": "ALT-0002"
-  },
-  {
     "engine": "Peer Blind-Spot",
     "type": "Peer Blind-Spot (Missing Detection)",
     "entity_id": "ENT-004"
   },
   {
     "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-005",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-001",
     "target_id": "ALT-0003"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-003",
+    "target_id": "ALT-0005"
   },
   {
     "engine": "Evidence Forensics",
@@ -29,141 +23,9 @@
   },
   {
     "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0016"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0020"
-  },
-  {
-    "engine": "Metric Integrity",
     "type": "Severity Downgrade",
     "entity_id": "ENT-004",
-    "target_id": "ALT-0024"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0026"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0047"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0048"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0054"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0056"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0057"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0057"
-  },
-  {
-    "engine": "Execution Gaps",
-    "type": "Fast Closure",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0060"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0061"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0062"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0063"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0072"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0075"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-003",
-    "target_id": "ALT-0080"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0081"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0087"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0090"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-004",
-    "target_id": "ALT-0101"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "Severity Downgrade",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0102"
-  },
-  {
-    "engine": "Execution Gaps",
-    "type": "Fast Closure",
-    "entity_id": "ENT-005",
-    "target_id": "ALT-0105"
+    "target_id": "ALT-0030"
   },
   {
     "engine": "Evidence Forensics",
@@ -173,98 +35,152 @@
   {
     "engine": "Metric Integrity",
     "type": "Severity Downgrade",
-    "entity_id": "ENT-003",
-    "target_id": "ALT-0127"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-003",
-    "target_id": "ALT-0127"
-  },
-  {
-    "engine": "Metric Integrity",
-    "type": "SLA Clock Reset",
-    "entity_id": "ENT-001",
-    "target_id": "ALT-0129"
+    "entity_id": "ENT-002",
+    "target_id": "ALT-0033"
   },
   {
     "engine": "Metric Integrity",
     "type": "Severity Downgrade",
-    "entity_id": "ENT-003",
-    "target_id": "ALT-0132"
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0042"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-005",
+    "target_id": "ALT-0047"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0050"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-002",
+    "target_id": "ALT-0054"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0058"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-005",
+    "target_id": "ALT-0083"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0086"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0088"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0095"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0103"
   },
   {
     "engine": "Metric Integrity",
     "type": "SLA Clock Reset",
     "entity_id": "ENT-004",
-    "target_id": "ALT-0142"
+    "target_id": "ALT-0103"
   },
   {
     "engine": "Metric Integrity",
     "type": "Severity Downgrade",
-    "entity_id": "ENT-002",
-    "target_id": "ALT-0143"
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0108"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-002",
+    "engine": "Metric Integrity",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0113"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-004",
+    "target_id": "ALT-0120"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0127"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-005",
+    "target_id": "ALT-0131"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "SLA Clock Reset",
+    "entity_id": "ENT-001",
+    "target_id": "ALT-0137"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-003",
+    "target_id": "ALT-0146"
+  },
+  {
+    "engine": "Metric Integrity",
+    "type": "Severity Downgrade",
+    "entity_id": "ENT-003",
+    "target_id": "ALT-0147"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-004",
     "target_id": "CAS-0000"
   },
   {
     "engine": "Investigation Quality",
     "type": "Rubric Grounding Failure (Gaming)",
-    "entity_id": "ENT-005",
-    "target_id": "CAS-0002"
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0003"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-005",
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-002",
+    "target_id": "CAS-0004"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Rubric Grounding Failure (Gaming)",
+    "entity_id": "ENT-003",
     "target_id": "CAS-0006"
   },
   {
     "engine": "Execution Gaps",
     "type": "Broken Evidence Chain (No Escalation)",
-    "entity_id": "ENT-005",
-    "target_id": "CAS-0008"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0012"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0014"
-  },
-  {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
     "entity_id": "ENT-004",
-    "target_id": "CAS-0018"
-  },
-  {
-    "engine": "Execution Gaps",
-    "type": "Broken Evidence Chain (No Escalation)",
-    "entity_id": "ENT-005",
-    "target_id": "CAS-0020"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-001",
-    "target_id": "CAS-0021"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-003",
-    "target_id": "CAS-0022"
+    "target_id": "CAS-0009"
   },
   {
     "engine": "Evidence Forensics",
@@ -275,25 +191,37 @@
     "engine": "Investigation Quality",
     "type": "Rubric Grounding Failure (Gaming)",
     "entity_id": "ENT-003",
-    "target_id": "CAS-0029"
-  },
-  {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0030"
+    "target_id": "CAS-0015"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-002",
-    "target_id": "CAS-0031"
+    "target_id": "CAS-0023"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-002",
+    "target_id": "CAS-0025"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-001",
+    "target_id": "CAS-0029"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-005",
     "target_id": "CAS-0035"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Rubric Grounding Failure (Gaming)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0036"
   },
   {
     "engine": "Investigation Quality",
@@ -302,183 +230,255 @@
     "target_id": "CAS-0039"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-001",
-    "target_id": "CAS-0040"
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-005",
+    "target_id": "CAS-0045"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
+    "engine": "Investigation Quality",
+    "type": "Rubric Grounding Failure (Gaming)",
     "entity_id": "ENT-002",
     "target_id": "CAS-0047"
   },
   {
-    "engine": "Execution Gaps",
-    "type": "Broken Evidence Chain (No Escalation)",
-    "entity_id": "ENT-001",
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-004",
     "target_id": "CAS-0048"
   },
   {
     "engine": "NLP",
     "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-002",
+    "target_id": "CAS-0049"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-001",
     "target_id": "CAS-0050"
   },
   {
-    "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
     "entity_id": "ENT-001",
+    "target_id": "CAS-0050"
+  },
+  {
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-005",
     "target_id": "CAS-0051"
   },
   {
     "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
+    "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-004",
     "target_id": "CAS-0052"
   },
   {
-    "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0053"
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0054"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-001",
-    "target_id": "CAS-0055"
+    "target_id": "CAS-0062"
+  },
+  {
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-003",
+    "target_id": "CAS-0067"
   },
   {
     "engine": "NLP",
     "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-003",
-    "target_id": "CAS-0060"
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0072"
   },
   {
     "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0074"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-002",
-    "target_id": "CAS-0061"
+    "target_id": "CAS-0078"
+  },
+  {
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-005",
+    "target_id": "CAS-0081"
+  },
+  {
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0082"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-003",
-    "target_id": "CAS-0062"
+    "target_id": "CAS-0083"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0067"
+    "engine": "Investigation Quality",
+    "type": "Rubric Grounding Failure (Gaming)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0092"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-005",
+    "target_id": "CAS-0096"
   },
   {
     "engine": "Investigation Quality",
     "type": "Rubric Grounding Failure (Gaming)",
     "entity_id": "ENT-004",
-    "target_id": "CAS-0068"
+    "target_id": "CAS-0098"
   },
   {
     "engine": "Execution Gaps",
     "type": "Broken Evidence Chain (No Escalation)",
     "entity_id": "ENT-004",
-    "target_id": "CAS-0070"
+    "target_id": "CAS-0098"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-003",
-    "target_id": "CAS-0073"
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0099"
   },
   {
-    "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-003",
-    "target_id": "CAS-0075"
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0100"
   },
   {
     "engine": "NLP",
     "type": "Templated Investigation (Semantic)",
     "entity_id": "ENT-004",
-    "target_id": "CAS-0081"
+    "target_id": "CAS-0103"
+  },
+  {
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-003",
+    "target_id": "CAS-0104"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0084"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
     "entity_id": "ENT-001",
-    "target_id": "CAS-0087"
+    "target_id": "CAS-0105"
   },
   {
     "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0106"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
     "entity_id": "ENT-005",
-    "target_id": "CAS-0088"
+    "target_id": "CAS-0107"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-001",
-    "target_id": "CAS-0091"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0093"
-  },
-  {
-    "engine": "Investigation Quality",
-    "type": "Rubric Grounding Failure (Gaming)",
-    "entity_id": "ENT-003",
-    "target_id": "CAS-0097"
-  },
-  {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-004",
-    "target_id": "CAS-0101"
-  },
-  {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-003",
+    "entity_id": "ENT-005",
     "target_id": "CAS-0109"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-001",
+    "entity_id": "ENT-002",
     "target_id": "CAS-0110"
   },
   {
-    "engine": "NLP",
-    "type": "Templated Investigation (Semantic)",
-    "entity_id": "ENT-001",
+    "engine": "Investigation Quality",
+    "type": "Rubric Grounding Failure (Gaming)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0114"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0117"
+  },
+  {
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-005",
     "target_id": "CAS-0118"
   },
   {
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0119"
+  },
+  {
     "engine": "Investigation Quality",
-    "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0120"
+    "type": "Rubric Grounding Failure (Gaming)",
+    "entity_id": "ENT-003",
+    "target_id": "CAS-0124"
+  },
+  {
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-005",
+    "target_id": "CAS-0125"
+  },
+  {
+    "engine": "Execution Gaps",
+    "type": "Broken Evidence Chain (No Escalation)",
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0128"
   },
   {
     "engine": "NLP",
     "type": "Templated Investigation (Semantic)",
     "entity_id": "ENT-001",
-    "target_id": "CAS-0123"
+    "target_id": "CAS-0130"
   },
   {
     "engine": "Investigation Quality",
     "type": "Zombie Case (No Evidence)",
-    "entity_id": "ENT-002",
-    "target_id": "CAS-0125"
+    "entity_id": "ENT-004",
+    "target_id": "CAS-0131"
+  },
+  {
+    "engine": "NLP",
+    "type": "Templated Investigation (Semantic)",
+    "entity_id": "ENT-003",
+    "target_id": "CAS-0132"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-001",
+    "target_id": "CAS-0134"
+  },
+  {
+    "engine": "Investigation Quality",
+    "type": "Zombie Case (No Evidence)",
+    "entity_id": "ENT-003",
+    "target_id": "CAS-0136"
   }
 ]

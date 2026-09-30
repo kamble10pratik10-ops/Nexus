@@ -1,0 +1,121 @@
+case_id,alert_id,entity_id,investigation_text,investigation_actions,escalated,created_at
+CAS-0001,ALT-0001,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 119.47.21.47 verified against internal allowlist. Auto-closed.,5,False,2026-09-04T15:41:00.911172
+CAS-0002,ALT-0003,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-03. malclScsXwzAIkO OWaWiqBSWLnxJwj. Closed as Benign.,13,True,2026-09-01T16:20:00.911172
+CAS-0003,ALT-0004,ENT-001,Analyzed Possible SQL Injection (T1190) on AST-ENT-001-04. Source IP 112.85.182.213 was checked. Host contained. XOCWKcudzNTRJdV. Benign.,9,False,2026-09-06T19:32:00.911172
+CAS-0004,ALT-0006,ENT-005,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",2,True,2026-09-19T04:54:00.911172
+CAS-0005,ALT-0007,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-01. Source IP 8.8.8.8 was checked. Host contained. CkUhodndWYMcLzO. False Positive.,7,False,2026-09-01T22:51:00.911172
+CAS-0006,ALT-0010,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 100.75.91.151 verified against internal allowlist. Auto-closed.,5,False,2026-09-15T17:06:00.911172
+CAS-0007,ALT-0011,ENT-003,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-01. Source IP 21.70.40.152 was checked. Host contained. FpEXpSqydWJZkvT. Benign.,8,False,2026-09-19T08:47:00.911172
+CAS-0008,ALT-0013,ENT-005,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-04. ENOSunIwNYMnOtl isNjervEZzkeove. Closed as False Positive.,4,False,2026-09-06T08:54:00.911172
+CAS-0009,ALT-0014,ENT-002,Analyzed Brute Force Authentication (T1110) on AST-ENT-002-02. Source IP 8.8.8.8 was checked. Host contained. BJpqlXwCXahEAMQ. Benign.,9,False,2026-08-30T18:38:00.911172
+CAS-0010,ALT-0015,ENT-003,See previous case.,0,False,2026-08-30T23:09:00.911172
+CAS-0011,ALT-0016,ENT-005,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-03. IP 104.43.38.157 checked. XjwEGVbJrIPKHiX rZGGRjIvdkJAhou. False Positive.,7,False,2026-09-12T12:48:00.911172
+CAS-0012,ALT-0017,ENT-005,I looked at the logs and saw nothing bad. The system is fine. Closing this.,1,True,2026-09-14T12:49:00.911172
+CAS-0013,ALT-0018,ENT-003,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-003-05. Source IP 126.181.181.158 was checked. Host contained. azXXVSruoFprMEb. False Positive.,4,False,2026-09-07T05:55:00.911172
+CAS-0014,ALT-0019,ENT-001,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 61.118.156.59 verified against internal allowlist. Auto-closed.,5,False,2026-09-27T13:52:00.911172
+CAS-0015,ALT-0020,ENT-005,Standard routine check completed for Ransomware Indicator (T1486) on AST-ENT-005-03. No anomalies detected in the current telemetry window. Closed as Benign.,7,False,2026-09-09T09:35:00.911172
+CAS-0016,ALT-0021,ENT-004,Triage of Possible SQL Injection (T1190) on AST-ENT-004-03. NblQppPcnMRwJuw quTQtRRlZGXdzWl. Closed as Benign.,15,False,2026-09-01T07:15:00.911172
+CAS-0017,ALT-0022,ENT-005,Check for Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-01. IP 132.200.139.19 checked. vVlFhIHFGYGvFXl eBNMdAzpHqVduDD. Benign.,7,True,2026-09-22T19:23:00.911172
+CAS-0018,ALT-0023,ENT-001,Analyzed Ransomware Indicator (T1486) on AST-ENT-001-04. Source IP 17.115.55.79 was checked. Host contained. TWbzvYBWeYwmHEX. Benign.,7,False,2026-09-02T15:42:00.911172
+CAS-0019,ALT-0025,ENT-005,Reviewing Possible SQL Injection (T1190) on AST-ENT-005-04. Event telemetry looks normal. HmqkvqeKKyIeutC zVsJjrYljjMaPHK. Marked True Positive.,10,False,2026-09-03T16:19:00.911172
+CAS-0020,ALT-0026,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-04. Source IP 196.98.44.126 was checked. Host contained. faMuqXcgMbnxwRP. Benign.,8,True,2026-09-03T07:04:00.911172
+CAS-0021,ALT-0027,ENT-004,Reviewing Possible SQL Injection (T1190) on AST-ENT-004-01. Event telemetry looks normal. zedyUzQOiCSLchv eYOyKnylWDEgjNe. Marked Benign.,15,True,2026-09-04T11:27:00.911172
+CAS-0022,ALT-0028,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 190.88.79.53 verified against internal allowlist. Auto-closed.,5,True,2026-09-04T08:23:00.911172
+CAS-0023,ALT-0029,ENT-003,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-02. iFFfqaAHMZPvYUh TIvoEEHldBcweHW. Closed as Benign.,11,False,2026-09-21T14:35:00.911172
+CAS-0024,ALT-0030,ENT-003,Analyzed Brute Force Authentication (T1110) on AST-ENT-003-05. Source IP 140.39.144.99 was checked. Host contained. RWGWqxKKYrAkXqC. False Positive.,13,False,2026-09-06T10:19:00.911172
+CAS-0025,ALT-0031,ENT-004,Analyzed Possible SQL Injection (T1190) on AST-ENT-004-05. Source IP 15.37.199.242 was checked. Host contained. IJdRvWWZweGBrzb. Benign.,11,True,2026-09-08T10:27:00.911172
+CAS-0026,ALT-0032,ENT-002,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",2,False,2026-09-03T21:48:00.911172
+CAS-0027,ALT-0034,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-01. Source IP 176.103.63.47 was checked. Host contained. VkPyVGNkcHIqxyp. False Positive.,4,True,2026-09-15T16:46:00.911172
+CAS-0028,ALT-0035,ENT-005,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-005-04. Event telemetry looks normal. ZEBvEwkNfzDbIpO NTsJBMKKjUApIvZ. Marked False Positive.,10,False,2026-09-05T01:13:00.911172
+CAS-0029,ALT-0038,ENT-002,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-01. clcBjxMulQUrxjD xbThcmcyjBNwXgF. Closed as False Positive.,3,True,2026-09-07T00:53:00.911172
+CAS-0030,ALT-0039,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-02. Source IP 21.37.90.85 was checked. Host contained. NPhelKGfNdQbvzw. True Positive.,13,False,2026-09-29T12:40:00.911172
+CAS-0031,ALT-0040,ENT-005,Reviewing Possible SQL Injection (T1190) on AST-ENT-005-04. Event telemetry looks normal. CsUlNDWXeffEKXx LGReeXSjSgaznAP. Marked False Positive.,10,True,2026-08-30T12:48:00.911172
+CAS-0032,ALT-0041,ENT-003,Reviewing Ransomware Indicator (T1486) on AST-ENT-003-02. Event telemetry looks normal. WLFhBmkqJVayotX qZUiTVKrpPtXqID. Marked Benign.,15,False,2026-09-25T19:07:00.911172
+CAS-0033,ALT-0043,ENT-005,Triage of Data Exfiltration over DNS (T1048.003) on AST-ENT-005-03. QRQRFpJNyKsvWLP czoaNDdlKxmpSwQ. Closed as True Positive.,15,False,2026-09-22T00:44:00.911172
+CAS-0034,ALT-0044,ENT-003,Standard routine check completed for Possible SQL Injection (T1190) on AST-ENT-003-05. No anomalies detected in the current telemetry window. Closed as Benign.,7,False,2026-09-27T22:45:00.911172
+CAS-0035,ALT-0045,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-05. Source IP 27.130.199.139 was checked. Host contained. WlVbDttLKvIDXCQ. True Positive.,11,False,2026-09-23T20:45:00.911172
+CAS-0036,ALT-0046,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 20.173.128.36 verified against internal allowlist. Auto-closed.,5,False,2026-09-24T06:27:00.911172
+CAS-0037,ALT-0047,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-03. Source IP 15.194.20.48 was checked. Host contained. DuxiDzFquCLPaTI. True Positive.,4,False,2026-09-12T04:15:00.911172
+CAS-0038,ALT-0048,ENT-001,Standard routine check completed for Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-03. No anomalies detected in the current telemetry window. Closed as False Positive.,7,False,2026-09-21T08:57:00.911172
+CAS-0039,ALT-0049,ENT-005,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-04. oQGrPiSDJcgqoGF pDUCBBnSGahGsZW. Closed as Benign.,4,False,2026-09-21T06:51:00.911172
+CAS-0040,ALT-0050,ENT-002,Triage of Data Exfiltration over DNS (T1048.003) on AST-ENT-002-02. RFZiEKdtSYrUpof NbColsCrwCjSvuU. Closed as Benign.,6,True,2026-09-30T07:21:00.911172
+CAS-0041,ALT-0052,ENT-004,Check for Ransomware Indicator (T1486) on AST-ENT-004-01. IP 99.150.192.222 checked. vRTYwhNspFAWuZX bKtBkOsgkltSYZx. Benign.,7,False,2026-09-24T14:55:00.911172
+CAS-0042,ALT-0053,ENT-002,Reviewing Brute Force Authentication (T1110) on AST-ENT-002-02. Event telemetry looks normal. NNEZPcnLFoGDCiJ CXgqdfRfvRcKAgy. Marked True Positive.,7,False,2026-09-17T22:23:00.911172
+CAS-0043,ALT-0054,ENT-003,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-05. PInhKAIOFtKumeT QSuiUhMLkgDLwLB. Closed as False Positive.,8,False,2026-09-17T15:25:00.911172
+CAS-0044,ALT-0055,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 166.95.42.196 verified against internal allowlist. Auto-closed.,5,True,2026-09-16T11:06:00.911172
+CAS-0045,ALT-0056,ENT-001,Triage of Ransomware Indicator (T1486) on AST-ENT-001-02. YUTIOzuZcBGFOYi zkJMkUAlszAquhF. Closed as Benign.,9,True,2026-09-16T01:59:00.911172
+CAS-0047,ALT-0057,ENT-003,Triage of Ransomware Indicator (T1486) on AST-ENT-003-04. xdyriFDkgqwAWUW CWMJKGEdhFMeFlL. Closed as False Positive.,9,True,2026-09-23T14:01:00.911172
+CAS-0048,ALT-0058,ENT-004,Triage of Ransomware Indicator (T1486) on AST-ENT-004-02. LQsiYjvaJQjAFZF cTdWqygXNvUGBow. Closed as False Positive.,8,True,2026-09-14T21:50:00.911172
+CAS-0049,ALT-0059,ENT-003,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",3,True,2026-09-11T06:45:00.911172
+CAS-0050,ALT-0060,ENT-001,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-001-05. IP 74.127.164.197 checked. qkBHtcCKxXSQhyM EMZyqXuQDDMfpZv. False Positive.,7,False,2026-09-02T01:32:00.911172
+CAS-0051,ALT-0061,ENT-003,Triage of Data Exfiltration over DNS (T1048.003) on AST-ENT-003-02. JjPpFEmPpxOnalF zsJtXoWiiGVUFLN. Closed as Benign.,7,False,2026-09-12T15:07:00.911172
+CAS-0052,ALT-0062,ENT-001,Reviewing Ransomware Indicator (T1486) on AST-ENT-001-01. Event telemetry looks normal. yHqXOxjVKwBxEic fThbrFLUUIzDDBK. Marked Benign.,3,False,2026-09-25T12:59:00.911172
+CAS-0053,ALT-0063,ENT-005,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-01. Source IP 196.83.160.168 was checked. Host contained. oUsPvgpBJNbEMXv. True Positive.,5,True,2026-09-11T16:04:00.911172
+CAS-0054,ALT-0064,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 161.85.48.172 verified against internal allowlist. Auto-closed.,5,True,2026-09-12T17:08:00.911172
+CAS-0055,ALT-0065,ENT-005,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-005-05. Event telemetry looks normal. PAiqdDGEUWzHwWR XmaWDWJLLdYsZEY. Marked False Positive.,10,True,2026-09-25T13:02:00.911172
+CAS-0056,ALT-0066,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-01. Source IP 69.49.116.183 was checked. Host contained. cfeBaXMHpXzAZmG. Benign.,8,False,2026-09-08T03:45:00.911172
+CAS-0057,ALT-0067,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-02. Source IP 156.109.120.40 was checked. Host contained. kPTwQwvaFRdoxXh. False Positive.,15,False,2026-09-07T22:20:00.911172
+CAS-0058,ALT-0069,ENT-001,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-03. Source IP 197.173.48.208 was checked. Host contained. abGpWlvKNYrFDzJ. True Positive.,3,False,2026-09-01T06:46:00.911172
+CAS-0059,ALT-0070,ENT-004,Standard routine check completed for Brute Force Authentication (T1110) on AST-ENT-004-03. No anomalies detected in the current telemetry window. Closed as Benign.,7,False,2026-09-16T17:06:00.911172
+CAS-0060,ALT-0072,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-02. Source IP 154.169.40.241 was checked. Host contained. QMychYmHGzngliH. True Positive.,13,False,2026-08-31T20:14:00.911172
+CAS-0061,ALT-0073,ENT-003,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 56.177.147.64 verified against internal allowlist. Auto-closed.,5,False,2026-09-18T13:49:00.911172
+CAS-0062,ALT-0074,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-04. Source IP 67.184.196.163 was checked. Host contained. hTsoCBGORszMnyw. False Positive.,11,False,2026-09-05T07:48:00.911172
+CAS-0063,ALT-0075,ENT-003,Analyzed Brute Force Authentication (T1110) on AST-ENT-003-02. Source IP 152.125.67.116 was checked. Host contained. DrEofYdnrWpbYAT. False Positive.,12,False,2026-09-17T23:36:00.911172
+CAS-0064,ALT-0077,ENT-001,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-001-04. Event telemetry looks normal. MHGJbRVgLlGewVE jdglUaELIAjdRUw. Marked True Positive.,3,False,2026-09-20T16:19:00.911172
+CAS-0065,ALT-0078,ENT-004,Checked the logs and saw nothing bad. System looks fine. Closing this.,2,False,2026-09-19T00:37:00.911172
+CAS-0066,ALT-0079,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-05. Source IP 135.119.77.225 was checked. Host contained. VIaIyaYNJmxjwId. False Positive.,11,False,2026-08-31T09:51:00.911172
+CAS-0068,ALT-0080,ENT-002,Triage of Possible SQL Injection (T1190) on AST-ENT-002-03. jULQevFXWCyKajm ChOVjYNjHxZxdAn. Closed as Benign.,7,False,2026-09-23T15:29:00.911172
+CAS-0069,ALT-0081,ENT-002,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",1,False,2026-09-02T21:10:00.911172
+CAS-0070,ALT-0082,ENT-001,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 108.26.47.204 verified against internal allowlist. Auto-closed.,5,True,2026-09-13T14:13:00.911172
+CAS-0071,ALT-0084,ENT-003,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-003-04. Event telemetry looks normal. qvlQncTyVtXDSWP RIVmIoZZEGkerVI. Marked True Positive.,5,True,2026-09-16T21:10:00.911172
+CAS-0072,ALT-0085,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-03. Source IP 8.8.8.8 was checked. Host contained. xYmDGbbLMWDisQa. False Positive.,3,True,2026-09-27T00:02:00.911172
+CAS-0073,ALT-0086,ENT-001,Triage of Ransomware Indicator (T1486) on AST-ENT-001-02. nDkYCZUlkLwhnPt NNRdquCuXEkOvlr. Closed as Benign.,13,False,2026-09-03T09:07:00.911172
+CAS-0074,ALT-0087,ENT-003,Check for Brute Force Authentication (T1110) on AST-ENT-003-04. IP 134.58.51.8 checked. AAWyWaoHOdXrgij bOplleGBdOiAwFG. True Positive.,7,True,2026-09-08T10:56:00.911172
+CAS-0075,ALT-0088,ENT-001,"I reviewed the logs, nothing bad seen. System fine. Closing this out.",3,True,2026-09-03T12:01:00.911172
+CAS-0076,ALT-0089,ENT-005,See previous case.,0,True,2026-09-16T13:47:00.911172
+CAS-0077,ALT-0090,ENT-005,Checked the logs and saw nothing bad. System looks fine. Closing this.,2,False,2026-09-21T08:55:00.911172
+CAS-0078,ALT-0091,ENT-002,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 129.26.40.19 verified against internal allowlist. Auto-closed.,5,True,2026-09-05T19:57:00.911172
+CAS-0079,ALT-0092,ENT-002,Triage of Brute Force Authentication (T1110) on AST-ENT-002-02. favYTYuVtggDBEb MQJeFwZnAcPMxWE. Closed as Benign.,9,False,2026-09-22T14:16:00.911172
+CAS-0080,ALT-0093,ENT-001,Triage of Ransomware Indicator (T1486) on AST-ENT-001-05. GQXydNuSnjezElM iSwqnkLROnWlVNc. Closed as Benign.,3,False,2026-09-02T17:01:00.911172
+CAS-0081,ALT-0094,ENT-001,Reviewing Suspicious PowerShell Execution (T1059.001) on AST-ENT-001-03. Event telemetry looks normal. vQXXiTlWwNtUrGb EvgLgnEThXqyZCL. Marked True Positive.,9,False,2026-09-26T12:06:00.911172
+CAS-0082,ALT-0095,ENT-001,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-001-01. Source IP 8.8.8.8 was checked. Host contained. WchWWfZPyDdNVvh. Benign.,6,False,2026-09-19T12:42:00.911172
+CAS-0083,ALT-0097,ENT-005,I looked at the logs and saw nothing bad. The system is fine. Closing this.,2,True,2026-09-13T07:26:00.911172
+CAS-0084,ALT-0098,ENT-002,Reviewing Brute Force Authentication (T1110) on AST-ENT-002-05. Event telemetry looks normal. zJhBvgoyvIrVRMv cxYBZVqgBlInBrN. Marked Benign.,7,True,2026-09-01T00:22:00.911172
+CAS-0085,ALT-0100,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 163.167.72.162 verified against internal allowlist. Auto-closed.,5,False,2026-09-17T05:06:00.911172
+CAS-0086,ALT-0102,ENT-004,Analyzed Brute Force Authentication (T1110) on AST-ENT-004-02. Source IP 106.155.49.241 was checked. Host contained. leGisrOAqdjQDjs. True Positive.,6,True,2026-09-13T12:59:00.911172
+CAS-0087,ALT-0104,ENT-004,Duplicate.,0,False,2026-08-31T09:00:00.911172
+CAS-0088,ALT-0105,ENT-003,Reviewing Ransomware Indicator (T1486) on AST-ENT-003-05. Event telemetry looks normal. QeQFLdxgBXgUQZO jnMEqcWAGkJBmQW. Marked False Positive.,15,False,2026-09-04T00:37:00.911172
+CAS-0089,ALT-0106,ENT-005,Check for Brute Force Authentication (T1110) on AST-ENT-005-02. IP 70.33.97.73 checked. KgoFZnakVvPXwVz QWcxtDoVZaDkgdL. Benign.,7,True,2026-09-05T23:00:00.911172
+CAS-0090,ALT-0107,ENT-002,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-002-04. Event telemetry looks normal. GiZqKiEstxLvsgd cMJXHOXdDDDiBdv. Marked False Positive.,7,False,2026-09-13T00:08:00.911172
+CAS-0091,ALT-0108,ENT-003,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-003-05. Source IP 155.80.168.93 was checked. Host contained. wPuQRCUwEGMuJWe. False Positive.,7,True,2026-08-30T14:08:00.911172
+CAS-0092,ALT-0109,ENT-004,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 77.50.134.134 verified against internal allowlist. Auto-closed.,5,True,2026-09-24T13:52:00.911172
+CAS-0093,ALT-0111,ENT-004,Reviewing Ransomware Indicator (T1486) on AST-ENT-004-04. Event telemetry looks normal. PPzSoZhwrEFstJd uPFiLoudXehlOVT. Marked False Positive.,8,True,2026-08-30T22:48:00.911172
+CAS-0094,ALT-0112,ENT-002,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-002-01. Source IP 92.93.90.64 was checked. Host contained. CzFlPexsHLshbZx. Benign.,13,True,2026-09-05T13:59:00.911172
+CAS-0095,ALT-0113,ENT-003,Analyzed Brute Force Authentication (T1110) on AST-ENT-003-05. Source IP 189.23.56.196 was checked. Host contained. JCoooxXSAxrWMkJ. False Positive.,10,False,2026-09-28T21:42:00.911172
+CAS-0096,ALT-0114,ENT-004,Reviewing Possible SQL Injection (T1190) on AST-ENT-004-03. Event telemetry looks normal. kavPQgqlHztaEPH stOPEUFWhAxbWdd. Marked False Positive.,14,False,2026-09-29T04:47:00.911172
+CAS-0097,ALT-0116,ENT-005,Duplicate.,0,True,2026-09-29T07:27:00.911172
+CAS-0098,ALT-0117,ENT-001,Analyzed Ransomware Indicator (T1486) on AST-ENT-001-03. Source IP 100.144.172.223 was checked. Host contained. xqDzHqgGZsgPSFp. True Positive.,4,False,2026-09-22T08:43:00.911172
+CAS-0099,ALT-0118,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 193.40.71.45 verified against internal allowlist. Auto-closed.,5,False,2026-09-22T16:59:00.911172
+CAS-0100,ALT-0119,ENT-002,Analyzed Ransomware Indicator (T1486) on AST-ENT-002-03. Source IP 39.172.126.156 was checked. Host contained. HjHyCEVcJkyYsFq. Benign.,12,True,2026-09-11T02:34:00.911172
+CAS-0101,ALT-0120,ENT-004,Reviewing Brute Force Authentication (T1110) on AST-ENT-004-04. Event telemetry looks normal. LBZuJiJwuvQBljG ZiXaqIeHtTWgcVY. Marked True Positive.,13,False,2026-09-04T18:48:00.911172
+CAS-0102,ALT-0121,ENT-001,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-001-01. Event telemetry looks normal. NPJGPFOvGIMNuVo hWscyDguZDgoDgC. Marked True Positive.,9,True,2026-09-03T14:06:00.911172
+CAS-0103,ALT-0122,ENT-002,Analyzed Possible SQL Injection (T1190) on AST-ENT-002-01. Source IP 8.8.8.8 was checked. Host contained. ovEVFNoiNtBUnca. True Positive.,5,False,2026-09-12T08:18:00.911172
+CAS-0104,ALT-0123,ENT-005,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-005-01. Event telemetry looks normal. RVJRuixvPqySNfL xrZMCHecbsqOahK. Marked True Positive.,8,False,2026-09-21T08:06:00.911172
+CAS-0105,ALT-0124,ENT-005,Triage of Ransomware Indicator (T1486) on AST-ENT-005-04. IPiJIslytbfjJiW vqJltFEcafMOzLD. Closed as Benign.,8,False,2026-09-10T08:27:00.911172
+CAS-0106,ALT-0125,ENT-003,Analyzed Possible SQL Injection (T1190) on AST-ENT-003-04. Source IP 197.189.64.93 was checked. Host contained. EpciXetuSvaHPrX. False Positive.,7,True,2026-09-13T06:07:00.911172
+CAS-0107,ALT-0129,ENT-001,Analyzed Brute Force Authentication (T1110) on AST-ENT-001-05. Source IP 110.198.80.242 was checked. Host contained. rvRqKzZlIRHpuMM. False Positive.,15,True,2026-09-14T21:41:00.911172
+CAS-0108,ALT-0130,ENT-004,Analyzed Ransomware Indicator (T1486) on AST-ENT-004-03. Source IP 8.8.8.8 was checked. Host contained. bkCvUutNisyAlJY. Benign.,7,False,2026-09-17T17:06:00.911172
+CAS-0109,ALT-0131,ENT-003,Analyzed Possible SQL Injection (T1190) on AST-ENT-003-03. Source IP 69.36.119.188 was checked. Host contained. nKDdRSqLrqqxYRl. False Positive.,12,False,2026-09-20T21:32:00.911172
+CAS-0110,ALT-0133,ENT-004,Triage of Possible SQL Injection (T1190) on AST-ENT-004-03. BGPvJhymZRbbvvZ bWOfbaLpBRrvvTP. Closed as True Positive.,8,False,2026-09-14T10:55:00.911172
+CAS-0111,ALT-0134,ENT-004,Triage of Ransomware Indicator (T1486) on AST-ENT-004-03. MSBDnCVFIJeVHkj wbvFlRukafypYPM. Closed as False Positive.,15,True,2026-09-14T10:26:00.911172
+CAS-0112,ALT-0135,ENT-001,Triage of Possible SQL Injection (T1190) on AST-ENT-001-05. wTnZCSeXMDatExn RcIlyJsFjrSQEZh. Closed as Benign.,15,False,2026-09-16T23:51:00.911172
+CAS-0113,ALT-0136,ENT-005,SOAR PLAYBOOK EXECUTION: Analyzed alert. Benign administrative behavior. IP 178.80.87.189 verified against internal allowlist. Auto-closed.,5,False,2026-09-06T12:07:00.911172
+CAS-0114,ALT-0138,ENT-005,Analyzed Data Exfiltration over DNS (T1048.003) on AST-ENT-005-05. Source IP 155.110.67.255 was checked. Host contained. prtemoxhFSCsjCw. True Positive.,11,False,2026-09-30T00:49:00.911172
+CAS-0116,ALT-0139,ENT-003,Check for Data Exfiltration over DNS (T1048.003) on AST-ENT-003-04. IP 11.91.114.40 checked. rsKBsGDbbnWocZE QKEFMqjkKfuNmas. True Positive.,7,False,2026-09-07T17:12:00.911172
+CAS-0117,ALT-0140,ENT-002,Reviewing Data Exfiltration over DNS (T1048.003) on AST-ENT-002-05. Event telemetry looks normal. hmZfMTKkpnfgYVU nDvdDvFEiTzUuoh. Marked True Positive.,6,True,2026-09-11T18:45:00.911172
+CAS-0118,ALT-0141,ENT-001,Checked the logs and saw nothing bad. System looks fine. Closing this.,3,False,2026-09-02T11:12:00.911172
+CAS-0119,ALT-0142,ENT-005,Reviewing Ransomware Indicator (T1486) on AST-ENT-005-05. Event telemetry looks normal. HASNTbREDfPgFQG SRNAYkTrEqJOOLW. Marked False Positive.,14,False,2026-09-21T09:49:00.911172
+CAS-0121,ALT-0143,ENT-002,Analyzed Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-03. Source IP 56.21.168.16 was checked. Host contained. ZwXUwWmHMQdlwaq. True Positive.,9,False,2026-09-10T03:35:00.911172
+CAS-0122,ALT-0144,ENT-002,Triage of Suspicious PowerShell Execution (T1059.001) on AST-ENT-002-04. ggCtvqEVKPMPaaD dDEAUIBiByYlgpy. Closed as True Positive.,8,True,2026-09-27T00:09:00.911172
+CAS-0123,ALT-0145,ENT-003,N/A,0,False,2026-09-29T20:06:00.911172
+CAS-0124,ALT-0148,ENT-004,Triage of Brute Force Authentication (T1110) on AST-ENT-004-05. NqDeIcyuvAsJwbJ RAYFzawGTXHvGjW. Closed as Benign.,14,False,2026-08-31T10:01:00.911172

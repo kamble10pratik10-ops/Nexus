@@ -1,9 +1,5 @@
 import json
 import pandas as pd
-from collections import defaultdict
-import sys
-
-# Import engines
 from main import (
     get_metric_integrity,
     get_evidence_forensics,
@@ -13,44 +9,41 @@ from main import (
     get_nlp_findings
 )
 
+ENGINE_TARGETS = {
+    'get_metric_integrity': ['Severity Downgrade', 'SLA Clock Reset', 'Metric Lineage Tampering', 'Alert Status Toggling', 'MTTR Definition Spread', 'Metric Definition Sensitivity'],
+    'get_investigation_quality': ['Rubric Grounding Failure (Gaming)', 'Zombie Case (No Evidence)', 'Broken Evidence Chain (No Escalation)'],
+    'get_nlp_findings': ['Templated Investigation (Semantic)'],
+    'get_evidence_forensics': ['Round-Number Duration Clustering', 'Case-ID Sequence Gap (Deleted Records)', 'Timestamp Digit Anomaly (Benford\'s Law)'],
+    'get_execution_gaps': ['Fast Closure', 'Uniform Inter-Arrival (Fabrication Risk)', 'Capacity Overload Risk'],
+    'get_peer_blindspot': ['Peer Blind-Spot (Missing Detection)']
+}
+
+def get_cases_for_finding(finding):
+    ev = finding.get('evidence', {})
+    cases = set()
+    for key in ['case_id', 'case_ids', 'alert_id', 'alert_ids', 'entity_id']:
+        val = ev.get(key)
+        if val is not None:
+            if isinstance(val, list):
+                cases.update(val)
+            else:
+                cases.add(val)
+    if not cases and finding.get('entity_id'):
+        cases.add(finding.get('entity_id'))
+    return cases
+
 def run_benchmark():
-    # 1. Load Ground Truth
+    import os
     try:
-        with open("data/ground_truth.json", "r") as f:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_dir, 'data', 'ground_truth.json'), 'r') as f:
             gt_data = json.load(f)
     except Exception as e:
         print(f"Error loading ground truth: {e}")
         return
 
-    # Aggregate ground truth to (type, entity_id) tuples since findings are often entity-level
-    gt_set = set()
-    for item in gt_data:
-        ent = item.get("entity_id", "ALL")
-        gt_set.add((item["type"], ent))
-        
-    # We must also handle the fact that some ground truth is target specific, but the engine outputs "ALL".
-    # E.g. "Case-ID Sequence Gap (Deleted Records)" is "ALL" in ground truth and prediction.
-    # "Round-Number Duration Clustering" is "ALL" in prediction, but GT might have specific entities.
-    # Let's map GT to "ALL" if the engine design aggregates globally.
-    global_engines = [
-        "Case-ID Sequence Gap (Deleted Records)", 
-        "Round-Number Duration Clustering",
-        "Timestamp Digit Anomaly (Benford's Law)",
-        "Shift-End Quality Degradation",
-        "Capacity Overload Risk"
-    ]
-    
-    normalized_gt_set = set()
-    for t, e in gt_set:
-        if t in global_engines:
-            normalized_gt_set.add((t, "ALL"))
-        else:
-            normalized_gt_set.add((t, e))
+    print(f"Loaded {len(gt_data)} raw injected anomalies.")
 
-    print(f"Loaded {len(gt_data)} raw injected anomalies -> {len(normalized_gt_set)} unique entity-level signals to detect.")
-
-    # 2. Collect Predictions
-    predictions = []
     engines = [
         get_metric_integrity,
         get_evidence_forensics,
@@ -59,39 +52,36 @@ def run_benchmark():
         get_peer_blindspot,
         get_nlp_findings
     ]
-    
-    for engine in engines:
-        print(f"Running {engine.__name__}...")
-        res = engine()
-        count = len(res.get("findings", []))
-        print(f"  -> Found {count} findings.")
-        for finding in res.get("findings", []):
-            predictions.append({
-                "type": finding["type"],
-                "entity_id": finding["entity_id"]
-            })
-            
-    pred_set = set((p["type"], p["entity_id"]) for p in predictions)
-    
-    # 3. Calculate Metrics per Type
-    all_types = set(t for t, e in normalized_gt_set).union(set(t for t, e in pred_set))
-    
+
     results = []
     total_tp = total_fp = total_fn = 0
-    
-    for t in sorted(all_types):
-        t_gt = set(e for typ, e in normalized_gt_set if typ == t)
+
+    for engine in engines:
+        engine_name = engine.__name__
+        targets = ENGINE_TARGETS.get(engine_name, [])
+        print(f"Running {engine_name}...")
+        res = engine()
+        findings = res.get('findings', [])
         
-        # Skip evaluating natural noise categories that were not explicitly seeded
-        if len(t_gt) == 0:
+        # Filter GT to only this engine's targets
+        engine_gt = [g for g in gt_data if g['type'] in targets]
+        
+        # Build GT case set
+        gt_cases = set()
+        for g in engine_gt:
+            gt_cases.add(g.get('target_id') or g.get('case_id') or g.get('alert_id') or g.get('entity_id', 'ALL'))
+            
+        pred_cases = set()
+        for f in findings:
+            pred_cases.update(get_cases_for_finding(f))
+            
+        tp = len(gt_cases.intersection(pred_cases))
+        fp = len(pred_cases - gt_cases)
+        fn = len(gt_cases - pred_cases)
+        
+        if len(gt_cases) == 0 and len(pred_cases) == 0:
             continue
             
-        t_pred = set(e for typ, e in pred_set if typ == t)
-        
-        tp = len(t_gt.intersection(t_pred))
-        fp = len(t_pred - t_gt)
-        fn = len(t_gt - t_pred)
-        
         total_tp += tp
         total_fp += fp
         total_fn += fn
@@ -101,27 +91,29 @@ def run_benchmark():
         f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
         
         results.append({
-            "Finding Type": t,
-            "Injected (Ground Truth)": len(t_gt),
-            "Detected (Predictions)": len(t_pred),
+            "Engine": engine_name,
+            "Injected (GT)": len(gt_cases),
+            "Detected (Preds)": len(pred_cases),
+            "TP": tp,
+            "FP": fp,
+            "FN": fn,
             "Precision": f"{precision*100:.1f}%",
             "Recall": f"{recall*100:.1f}%",
             "F1 Score": f"{f1*100:.1f}%"
         })
-    
-    # 4. Print Report
-    print("\n# SAT-SA Nexus: Seeded-Fault Benchmark Report\n")
+
+    print("\n# SAT-SA Nexus: Engine-Level Benchmark Report\n")
     df = pd.DataFrame(results)
     print(df.to_markdown(index=False))
-    
+
     total_precision = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 0
     total_recall = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 0
     total_f1 = 2 * (total_precision * total_recall) / (total_precision + total_recall) if (total_precision + total_recall) > 0 else 0
-    
-    print("\n### Overall Platform Performance")
-    print(f"- **Precision:** {total_precision*100:.1f}% (When the engine flags something, how often is it a real injected fault?)")
-    print(f"- **Recall:** {total_recall*100:.1f}% (Out of all injected faults, how many did the engine catch?)")
+
+    print("\n### Overall Platform Performance (Case-Level)")
+    print(f"- **Precision:** {total_precision*100:.1f}%")
+    print(f"- **Recall:** {total_recall*100:.1f}%")
     print(f"- **F1 Score:** {total_f1*100:.1f}%")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_benchmark()
