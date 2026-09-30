@@ -8,75 +8,55 @@ SAT-SA Nexus is an offline supervisory assurance platform that converts periodic
 
 **Market Positioning:** We are not replacing the SOC stack (SIEM, SOAR, UEBA, etc.). We independently assess the evidence produced by the SOC stack. The system sits above SOCs to determine whether the SOC's operational evidence demonstrates that the SOC is actually functioning effectively. This addresses regulatory demands (e.g., SEBI's CSCRF, NIST frameworks) that require measurable, evidence-backed efficacy reports rather than self-scored checklists.
 
+## Unique Selling Propositions (USPs)
+1. **Evidence-Driven Efficacy:** Moves beyond checklist compliance by strictly measuring *demonstrated* capabilities against *declared* capabilities using statistical and NLP-driven anomaly detection.
+2. **Air-Gapped / Privacy-First AI:** 100% offline and local NLP. Uses lightweight HuggingFace transformers (`all-MiniLM-L6-v2`) and local ML algorithms (DBSCAN, Isolation Forest) without relying on any external, cloud-based LLM APIs (No OpenAI/Anthropic/Gemini). Ensures absolute data privacy for sensitive SOC telemetry.
+3. **Multi-Seed Scientific Validation:** The platform includes an integrated benchmarking harness (`benchmark_harness.py`) that uses deterministic synthetic fault injection to scientifically prove and measure the exact precision, recall, and False Positive Rate of its own detection engines.
+4. **Metric & Automation Integrity:** Detects silent operational decay, such as SOAR auto-closure defects, severity downgrades to meet SLAs, and "zombie cases" (cases closed instantly without required investigation actions).
+5. **Cryptographic Provenance:** Generates a signed submission manifest using offline HMAC-SHA256 signing keys to guarantee chain-of-custody for audit trails.
+
+## Tech Stack
+**Backend:** 
+- Python 3.12, FastAPI (REST API framework)
+- Data Processing: Pandas, NumPy
+- Machine Learning & NLP: Scikit-learn (DBSCAN for clustering, Z-Score for statistical anomalies), Sentence-Transformers (`all-MiniLM-L6-v2` for semantic textual embeddings)
+- Security: `python-dotenv` for local secret management (e.g., `OFFLINE_SIGNING_KEY`), HMAC-SHA256 for manifest signing.
+
+**Frontend:**
+- React 18, TypeScript, Vite
+- Styling: Tailwind CSS
+- Visualizations: Recharts
+
+**Data Persistence:** 
+- Periodic batch submissions (CSV files for `mock_alerts.csv`, `mock_cases.csv`, `mock_assets.csv`)
+- System State: JSON files (`ground_truth.json`, `reviews.json`)
+
 ## Architecture & Key Principles
-- **Batch-First:** Designed for periodic submissions (CSV, JSON, DB, API). Explicitly excludes continuous collection, real-time monitoring, and SIEM functionality.
-- **Offline / Air-gapped:** 100% local processing. No internet, no SaaS, no external AI APIs. Reproducible and auditable.
-- **Evidence -> Capability Assessment -> Supervisory Priority:** We do not calculate "Cyber Risk". We assess evidence quality and output "Supervisory Priority".
-- **Three-State Assessment:** Findings evaluate claims as **SUPPORTED**, **CONTRADICTED**, or **UNVERIFIABLE**. We do not say "The SOC lied" or "The SOC failed." We state what the evidence substantiates.
-- **Explainability (Why Selected?):** Every finding explains WHAT happened, WHY it is unusual, WHAT evidence supports it, WHAT benchmark was used, WHAT evidence is missing, and WHAT the supervisor should inspect.
-
-## The Six Assurance Engines
-1. **Evidence Assurance (Question 1: Can I trust the evidence?)**
-   - Completeness, Schema validity, Linkage, Timestamp integrity, Provenance, Signed Submission integrity.
-2. **Capability Assurance (Question 2: Does the evidence demonstrate the claimed capability?)**
-   - Expected evidence, Detection coverage, Execution gaps, Negative space, Evidence chains.
-3. **KPI & Metric Assurance (Question 3: Is there contradictory or missing evidence?)**
-   - Metric lineage, Definition consistency (Metric Definition Sensitivity), KPI/evidence divergence, SLA clock analysis.
-4. **Longitudinal Assurance (Question 4: Is this entity changing abnormally over time?)**
-   - Detection drift, Coverage debt, Control decay, Remediation effectiveness, Recurrence.
-5. **Comparative Assurance (Question 5: How does this entity compare to peers?)**
-   - Peer benchmarking, Peer trajectory, Coverage differences, Unknown patterns.
-6. **Supervisory Sampling (Question 6: Where should I spend my limited review time?)**
-   - Intelligent sampling of High concern, Outliers, Negative space, Representative normal, Random control, and Unknown cases to avoid selection bias.
-
-## Hybrid Analysis Architecture
-Deliberately avoids relying on a single "Black-Box LLM". AI is an implementation component, not the USP.
-- **Layer 1 - Deterministic (Python/Pandas/Polars):** Rules engine for missing cases, rapid closures, missing escalations, schema validation.
-- **Layer 2 - Statistical (Robust Z-score, MAD, IQR):** Multiple-comparison-aware anomaly thresholds for workload distribution and peer deviations.
-- **Layer 3 - Correlation & ML (Isolation Forest, DBScan):** Candidate generation for entity anomalies, cross-signal corroboration.
-- **Layer 4 - NLP (sentence-transformers locally):** Textual similarity analysis (post-entity masking) to identify Investigation Pattern Anomalies, serving as a candidate generator prior to deterministic grounding.
-
-## Data Model (Entities)
-- `SUBMISSION`: submission_id, entity_id, observation_window, signed_manifest.
-- `ANALYSIS_RUN`: run_id, dataset_hash, rule_version, model_version, taxonomy_version.
-- `ENTITY`: sector, size_band, criticality.
-- `ASSET`: asset_type, criticality, monitoring_expected.
-- `SOURCE` & `TELEMETRY`: log_source, expected_event_rate, health_status.
-- `DETECTION_RULE`: rule_id, technique, taxonomy.
-- `ALERT`: severity, category, status, timestamps, disposition.
-- `CASE`: investigation_text, investigation_actions, timestamps.
-- `ESCALATION` & `RESPONSE`: escalated, response_action, result.
-- `CLAIM`: claim_type, declared_value, evidence_requirement.
-- `EVIDENCE_ARTIFACT`: Linkage to underlying raw records.
-- `FINDING`: finding_type, severity, priority, confidence, explanation.
-- `REVIEW`: finding_id, reviewer, decision (Confirmed/Dismissed/Unverifiable), reason, timestamp.
-- `REMEDIATION` & `METRIC_DEFINITION`: Linkage for longitudinal and KPI assurance.
+- **Batch-First:** Designed for periodic submissions. Explicitly excludes continuous collection, real-time monitoring, and SIEM functionality.
+- **Three-State Assessment:** Findings evaluate claims as **SUPPORTED**, **CONTRADICTED**, or **UNVERIFIABLE**. We state what the evidence substantiates.
+- **Hybrid Analysis Architecture:** 
+  - **Deterministic (Pandas):** Fast closure rules, SLA resets, Zombie cases.
+  - **Statistical (Robust Z-score):** Anomaly thresholds for peer deviations (e.g., MTTR deviations).
+  - **NLP (Sentence-Transformers + DBSCAN):** Identifies semantic templating and repeated, low-effort SOC investigation notes disguised as unique text.
+- **Explainability (Why Selected?):** Every finding explains WHAT happened, WHY it is unusual, and WHAT evidence supports it.
 
 ## Execution Roadmap (Ruthless Prioritization)
 
 **P0 - Non-negotiable (Scientific Validation & Integrity)**
-- Seeded-fault benchmark (with positive, hard negative, edge case, and missing-data cases).
-- Hard-negative dataset.
-- Evidence provenance (Investigation claim -> underlying evidence).
-- Three-state outcome formulation (Supported / Contradicted / Unverifiable).
-- Signed submission manifest (Proves submission integrity, not truthfulness).
-- Reproducible analysis runs (Hash everything needed to reproduce a finding).
-- Reviewer feedback loop.
+- Multi-seed benchmark validation (Proving high precision/recall over multiple random generator runs).
+- Hard-negative dataset and varied honest-analyst text generation to eliminate NLP false positives.
+- Signed submission manifest (Proves submission integrity).
 
 **P1 - Core Product Differentiation (The Pitch)**
 - Declared vs Demonstrated (Claims Verification Matrix).
 - Detection Capability Drift (Is the SOC silently degrading?).
 - Validated Coverage (Asset -> Log Source -> Rule -> Technique -> Observed/Tested).
 - Adaptive Supervisory Sampling (The intelligent review queue).
-- Random Control Sample (To validate SAT-SA's own prioritization).
-- Cross-Signal Correlation (Asset count up + Telemetry down + MTTR down = Capability degradation).
 
 **P2 - Domain & Expansion**
 - Remediation effectiveness (Does the same root cause recur?).
 - Peer taxonomy normalization (Mapping disparate SIEM alerts to MITRE ATT&CK).
-- OT/ICS evidence pack (Domain-specific expected evidence graphs).
 - Automation assurance (AI/SOAR vs human accuracy).
-- Closure regret analysis (Missed early warnings).
 
 ## North Star Metric
 *Supervisory Assurance Coverage* — Measuring Review Yield (confirmed findings / reviewed cases), Search-Space Reduction (1 - selected_cases / total_cases), and Review Efficiency (confirmed findings / review minutes) to prove the platform's ability to radically scale evidence-backed oversight without linearly scaling human auditors.
