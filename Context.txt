@@ -14,7 +14,13 @@ SAT-SA Nexus is an offline supervisory assurance platform that converts periodic
 3. **Multi-Seed Scientific Validation:** The platform includes an integrated benchmarking harness (`benchmark_harness.py`) that uses deterministic synthetic fault injection to scientifically prove and measure the exact precision, recall, and False Positive Rate of its own detection engines.
 4. **Metric & Automation Integrity:** Detects silent operational decay, such as SOAR auto-closure defects, severity downgrades to meet SLAs, and "zombie cases" (cases closed instantly without required investigation actions).
 5. **Cryptographic Provenance:** Generates a signed submission manifest using offline HMAC-SHA256 signing keys to guarantee chain-of-custody for audit trails.
-
+6. **Comprehensive 16+ Assurance Engines:** Deep-dive analytical engines mapping to specific SOC failure domains, including:
+   - **Execution Gaps:** Fast closures, un-escalated criticals, shallow investigations.
+   - **NLP Investigation Analysis:** Copy-paste and templated notes detection via Sentence-Transformers/DBSCAN.
+   - **Negative Space & Peer Benchmarking:** Critical assets with zero alerts, entity vs peer closure-speed comparisons, and peer blind spots.
+   - **Metric & Evidence Integrity:** Severity downgrades, SLA clock resets, MTTR variance, Benford-style duration analysis, and round-number closure forensics.
+   - **Capability Drift & Regret:** Decaying telemetry/alert activity on critical assets, recurring alerts, and closure regret (missed early warnings).
+   - **Claims Verification & Governance:** 24/7 monitoring proofs, efficacy reports, automation vs human accuracy assurance, and coverage indices.
 ## Tech Stack
 **Backend:** 
 - Python 3.12, FastAPI (REST API framework)
