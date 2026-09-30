@@ -1,26 +1,26 @@
 asset_id,entity_id,asset_type,criticality,monitoring_expected
-AST-ENT-001-01,ENT-001,Palo Alto Firewall,High,True
-AST-ENT-001-02,ENT-001,AWS EC2 Instance,Medium,True
-AST-ENT-001-03,ENT-001,Employee Laptop,High,True
-AST-ENT-001-04,ENT-001,Employee Laptop,High,True
-AST-ENT-001-05,ENT-001,Linux Ubuntu 22.04,Low,True
-AST-ENT-002-01,ENT-002,Employee Laptop,Low,True
-AST-ENT-002-02,ENT-002,Palo Alto Firewall,High,True
-AST-ENT-002-03,ENT-002,Windows Server 2019,Low,True
-AST-ENT-002-04,ENT-002,AWS EC2 Instance,Medium,True
-AST-ENT-002-05,ENT-002,AWS EC2 Instance,Medium,True
-AST-ENT-003-01,ENT-003,Windows Server 2019,Low,True
-AST-ENT-003-02,ENT-003,AWS EC2 Instance,High,True
-AST-ENT-003-03,ENT-003,Employee Laptop,Low,True
-AST-ENT-003-04,ENT-003,Linux Ubuntu 22.04,Medium,True
-AST-ENT-003-05,ENT-003,Windows Server 2019,Medium,True
-AST-ENT-004-01,ENT-004,Windows Server 2019,Low,True
-AST-ENT-004-02,ENT-004,Windows Server 2019,Medium,True
-AST-ENT-004-03,ENT-004,Employee Laptop,Low,True
-AST-ENT-004-04,ENT-004,Palo Alto Firewall,Low,True
-AST-ENT-004-05,ENT-004,Employee Laptop,Low,True
-AST-ENT-005-01,ENT-005,Employee Laptop,High,True
-AST-ENT-005-02,ENT-005,Windows Server 2019,Low,True
-AST-ENT-005-03,ENT-005,Palo Alto Firewall,Low,True
-AST-ENT-005-04,ENT-005,AWS EC2 Instance,Low,True
-AST-ENT-005-05,ENT-005,Employee Laptop,Low,True
+AST-ENT-001-01,ENT-001,Database,Medium,True
+AST-ENT-001-02,ENT-001,Database,Low,True
+AST-ENT-001-03,ENT-001,Server,High,True
+AST-ENT-001-04,ENT-001,Endpoint,High,True
+AST-ENT-001-05,ENT-001,Firewall,Medium,True
+AST-ENT-002-01,ENT-002,Firewall,Medium,True
+AST-ENT-002-02,ENT-002,Firewall,Medium,True
+AST-ENT-002-03,ENT-002,Server,Medium,True
+AST-ENT-002-04,ENT-002,Database,Low,True
+AST-ENT-002-05,ENT-002,Server,High,True
+AST-ENT-003-01,ENT-003,Endpoint,Medium,True
+AST-ENT-003-02,ENT-003,Firewall,Medium,True
+AST-ENT-003-03,ENT-003,Database,Medium,True
+AST-ENT-003-04,ENT-003,Server,High,True
+AST-ENT-003-05,ENT-003,Firewall,Medium,True
+AST-ENT-004-01,ENT-004,Firewall,Medium,True
+AST-ENT-004-02,ENT-004,Database,High,True
+AST-ENT-004-03,ENT-004,Server,Medium,True
+AST-ENT-004-04,ENT-004,Endpoint,Low,True
+AST-ENT-004-05,ENT-004,Server,High,True
+AST-ENT-005-01,ENT-005,Server,High,True
+AST-ENT-005-02,ENT-005,Database,Medium,True
+AST-ENT-005-03,ENT-005,Firewall,Medium,True
+AST-ENT-005-04,ENT-005,Endpoint,Medium,True
+AST-ENT-005-05,ENT-005,Endpoint,Low,True

@@ -1,9 +1,11 @@
 fastapi
 uvicorn
-pandas
-polars
-scikit-learn
-sentence-transformers
-faiss-cpu
 pydantic
+pydantic-settings
+sqlalchemy
+psycopg2-binary
 python-multipart
+pandas
+numpy
+scikit-learn
+polars
