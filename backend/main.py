@@ -23,6 +23,11 @@ app.add_middleware(
 )
 
 import os
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+load_dotenv(dotenv_path)
+load_dotenv()
 
 def load_data():
     try:
@@ -1714,8 +1719,9 @@ def generate_signed_manifest():
     }
     
     # Normally this would be a secure offline key managed via HSM or Vault.
-    # For demonstration, we use a mocked air-gapped key.
-    OFFLINE_SIGNING_KEY = b"NEXUS_GOV_SECURE_KEY_2026"
+    # We now securely load it from the environment.
+    key_str = os.getenv("OFFLINE_SIGNING_KEY", "DEFAULT_INSECURE_DEV_KEY")
+    OFFLINE_SIGNING_KEY = key_str.encode()
     
     manifest_payload = ""
     
