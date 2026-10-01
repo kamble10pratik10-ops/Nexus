@@ -1,150 +1,206 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BarChart3, Activity, ShieldCheck, Clock, Zap, Target, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = "http://localhost:8000/api";
 
 export function Reports() {
   const [efficacy, setEfficacy] = useState<any>(null);
   const [coverage, setCoverage] = useState<any>(null);
+  const [failed, setFailed] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     Promise.allSettled([
       axios.get(`${API_URL}/reports/efficacy`),
-      axios.get(`${API_URL}/reports/coverage-index`)
-    ]).then(([effRes, covRes]) => {
-      if (effRes.status === 'fulfilled') setEfficacy(effRes.value.data);
-      if (covRes.status === 'fulfilled') setCoverage(covRes.value.data);
-    }).finally(() => setLoading(false));
+      axios.get(`${API_URL}/reports/coverage-index`),
+    ])
+      .then(([effRes, covRes]) => {
+        if (effRes.status === "fulfilled") setEfficacy(effRes.value.data);
+        else setFailed((current) => [...current, "efficacy"]);
+        if (covRes.status === "fulfilled") setCoverage(covRes.value.data);
+        else setFailed((current) => [...current, "coverage"]);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="flex items-center justify-center py-20 text-indigo-400">
-        <Activity className="w-8 h-8 animate-spin" />
+      <div className="page-shell flex min-h-[60vh] items-center justify-center text-slate-400">
+        Loading validation reports…
       </div>
     );
-  }
+  const efficacyMetrics = efficacy
+    ? [
+        [
+          "Critical SLA compliance",
+          `${efficacy.soc_cmm_domains.Business.critical_sla_compliance_rate.toFixed(1)}%`,
+        ],
+        [
+          "Automation offload",
+          `${efficacy.soc_cmm_domains.People.automation_offload_rate.toFixed(1)}%`,
+        ],
+        [
+          "Deep investigation rate",
+          `${efficacy.soc_cmm_domains.Process.deep_investigation_rate.toFixed(1)}%`,
+        ],
+        [
+          "Zero-action closures",
+          efficacy.soc_cmm_domains.Process.zero_action_closures,
+        ],
+      ]
+    : [];
+  const generatedAt = efficacy?.report_generated_at
+    ? new Date(efficacy.report_generated_at)
+    : null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex items-center justify-between border-b border-slate-800 pb-6">
-        <div className="flex items-center space-x-4">
-          <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-            <BarChart3 className="text-indigo-400 w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Reports & Validation</h1>
-            <p className="text-sm text-slate-400 mt-1">Independent validation reports and operational efficacy benchmarks</p>
-          </div>
-        </div>
+    <div className="page-shell space-y-8">
+      <header className="page-header">
+        <p className="page-eyebrow">Independent validation</p>
+        <h1 className="page-title">Reports and validation</h1>
+        <p className="page-description">
+          Operational efficacy, coverage proof, and source-utilisation measures
+          derived from submitted telemetry.
+        </p>
       </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* SOC CMM & Efficacy Report */}
-        {efficacy && (
-          <div className="bg-card rounded-2xl border border-slate-800 p-6 flex flex-col gap-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/50">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-400" />
-                Operational Efficacy
-              </h2>
-              <span className="text-xs text-slate-500">As of {new Date(efficacy.report_generated_at).toLocaleString()}</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">Critical SLA Compliance</p>
-                <div className="text-3xl font-bold text-white">{efficacy.soc_cmm_domains.Business.critical_sla_compliance_rate.toFixed(1)}%</div>
-              </div>
-              <div className="p-4 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">Automation Offload</p>
-                <div className="text-3xl font-bold text-white">{efficacy.soc_cmm_domains.People.automation_offload_rate.toFixed(1)}%</div>
-              </div>
-              <div className="p-4 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">Deep Investigation Rate</p>
-                <div className="text-3xl font-bold text-white">{efficacy.soc_cmm_domains.Process.deep_investigation_rate.toFixed(1)}%</div>
-              </div>
-              <div className="p-4 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-semibold">Zero-Action Closures</p>
-                <div className="text-3xl font-bold text-white">{efficacy.soc_cmm_domains.Process.zero_action_closures}</div>
-              </div>
-            </div>
-
+      {failed.length > 0 && (
+        <div
+          role="alert"
+          className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200"
+        >
+          <AlertCircle className="h-5 w-5" />
+          {failed.length === 2
+            ? "Report data could not be loaded."
+            : `${failed[0] === "efficacy" ? "Operational efficacy" : "Coverage index"} data could not be loaded.`}
+        </div>
+      )}
+      {efficacy && (
+        <section className="panel">
+          <div className="panel-header flex-col items-start gap-2 sm:flex-row sm:items-center">
             <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4" /> 24x7 Coverage Proof (MTTR)
+              <p className="page-eyebrow">SOC capability maturity</p>
+              <h2 className="text-lg font-semibold text-white">
+                Operational efficacy
+              </h2>
+            </div>
+            {generatedAt && !Number.isNaN(generatedAt.getTime()) && (
+              <time
+                className="text-xs text-slate-500"
+                dateTime={generatedAt.toISOString()}
+              >
+                Generated {generatedAt.toLocaleString()}
+              </time>
+            )}
+          </div>
+          <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
+            {efficacyMetrics.map(([label, value]) => (
+              <div
+                key={String(label)}
+                className="rounded-xl border border-slate-800 bg-slate-950/25 p-4"
+              >
+                <p className="metric-label">{label}</p>
+                <p className="mt-2 text-2xl font-semibold text-white">
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-slate-800 p-5">
+            <h3 className="text-sm font-semibold text-slate-200">
+              24×7 coverage proof · MTTR by shift
+            </h3>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[460px] text-left text-sm">
+                <thead className="text-xs uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="pb-3">Shift</th>
+                    <th className="pb-3 text-right">Mean time to respond</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {Object.entries(efficacy.coverage_proof.shift_breakdown).map(
+                    ([shift, data]: any) => (
+                      <tr key={shift}>
+                        <td className="py-3 text-slate-300">{shift}</td>
+                        <td className="py-3 text-right font-mono text-blue-300">
+                          {data.mttr_minutes.toFixed(0)} min
+                        </td>
+                      </tr>
+                    ),
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+      {coverage && (
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <p className="page-eyebrow">Detection landscape</p>
+              <h2 className="text-lg font-semibold text-white">
+                Coverage index
+              </h2>
+            </div>
+          </div>
+          <div className="grid gap-8 p-5 lg:grid-cols-[18rem_1fr]">
+            <div>
+              <p className="metric-label">Validated technique coverage</p>
+              <p className="mt-2 text-4xl font-semibold text-white">
+                {coverage.validated_technique_coverage.coverage_percentage}%
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                {coverage.validated_technique_coverage.techniques_firing} of{" "}
+                {
+                  coverage.validated_technique_coverage
+                    .total_expected_techniques
+                }{" "}
+                expected techniques are firing.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200">
+                Log source utilisation
               </h3>
-              <div className="space-y-3">
-                {Object.entries(efficacy.coverage_proof.shift_breakdown).map(([shift, data]: any) => (
-                  <div key={shift} className="flex justify-between items-center text-sm p-3 bg-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-800/30">
-                    <span className="text-slate-300 font-medium">{shift}</span>
-                    <span className="font-mono text-indigo-300">{data.mttr_minutes.toFixed(0)} min</span>
-                  </div>
-                ))}
+              <div className="mt-4 space-y-4">
+                {Object.entries(
+                  coverage.log_source_utilization_percentages,
+                ).map(([source, raw]: any) => {
+                  const pct = Number(raw);
+                  return (
+                    <div key={source}>
+                      <div className="mb-1.5 flex justify-between text-sm">
+                        <span className="text-slate-300">{source}</span>
+                        <span className="font-mono text-slate-400">
+                          {pct.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                        <div
+                          className="h-full rounded-full bg-blue-500"
+                          style={{
+                            width: `${Math.min(Math.max(pct, 0), 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Coverage Index Report */}
-        {coverage && (
-          <div className="bg-card rounded-2xl border border-slate-800 p-6 flex flex-col gap-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/50">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Target className="w-5 h-5 text-emerald-400" />
-                Coverage Index
-              </h2>
-            </div>
-
-            <div className="p-6 bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800/50 relative overflow-hidden">
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1 font-semibold">Validated Technique Coverage</p>
-                  <div className="text-4xl font-bold text-white mb-2">
-                    {coverage.validated_technique_coverage.coverage_percentage}%
-                  </div>
-                  <p className="text-sm text-slate-400">
-                    {coverage.validated_technique_coverage.techniques_firing} of {coverage.validated_technique_coverage.total_expected_techniques} expected techniques firing
-                  </p>
-                </div>
-                <div className="w-24 h-24 rounded-full border-8 border-slate-800 flex items-center justify-center relative">
-                  <div 
-                    className="absolute inset-0 rounded-full border-8 border-emerald-500 border-l-transparent border-b-transparent transform rotate-45"
-                    style={{ clipPath: `polygon(0 0, 100% 0, 100% ${coverage.validated_technique_coverage.coverage_percentage}%, 0 ${coverage.validated_technique_coverage.coverage_percentage}%)` }}
-                  />
-                  <Zap className="w-8 h-8 text-emerald-500" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Log Source Utilization</h3>
-              <div className="space-y-4">
-                {Object.entries(coverage.log_source_utilization_percentages).map(([source, pct]: any) => (
-                  <div key={source}>
-                    <div className="flex justify-between items-center text-sm mb-1">
-                      <span className="text-slate-300">{source}</span>
-                      <span className="font-mono text-xs">{pct.toFixed(1)}%</span>
-                    </div>
-                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-emerald-500/80 rounded-full" style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mt-auto pt-4 border-t border-slate-800/50">
-              <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-sm text-emerald-400">
-                <CheckCircle2 className="w-5 h-5 shrink-0" />
-                <p>{coverage.rule_level_silence.coverage_decay_status}</p>
-              </div>
-            </div>
+          <div className="flex items-start gap-3 border-t border-slate-800 px-5 py-4 text-sm text-slate-300">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-300" />
+            <span>{coverage.rule_level_silence.coverage_decay_status}</span>
           </div>
-        )}
-      </div>
+        </section>
+      )}
+      {!efficacy && !coverage && failed.length === 2 && (
+        <div className="panel p-12 text-center text-slate-500">
+          No report content is currently available.
+        </div>
+      )}
     </div>
   );
 }

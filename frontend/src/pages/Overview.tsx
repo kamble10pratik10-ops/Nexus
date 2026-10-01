@@ -1,808 +1,674 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Shield, AlertTriangle, FileText, Clock } from 'lucide-react';
-import ClaimsVerificationMatrix from '../components/ClaimsVerificationMatrix';
-import EvidenceReviewModal from '../components/EvidenceReviewModal';
-import ReviewFindingButton from '../components/ReviewFindingButton';
-import type { Finding } from '../components/types';
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { ChevronDown } from "lucide-react";
+import ClaimsVerificationMatrix from "../components/ClaimsVerificationMatrix";
+import EvidenceReviewModal from "../components/EvidenceReviewModal";
+import ReviewFindingButton from "../components/ReviewFindingButton";
+import type { Finding } from "../components/types";
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = "http://localhost:8000/api";
+
+type Summary = {
+  total_alerts: number;
+  total_cases: number;
+  data_quality: {
+    case_coverage_pct: number;
+    field_completeness_pct: number;
+    linkage_integrity_pct: number;
+    asset_coverage_pct: number;
+    audit_trail_present: boolean;
+    audit_event_count: number;
+  };
+};
+
+type QueueEntity = {
+  entity_id: string;
+  score: number;
+  critical_findings: number;
+  high_findings: number;
+  total_findings: number;
+};
+
+type EngineKey =
+  | "executionGaps"
+  | "nlpFindings"
+  | "negativeSpace"
+  | "peerBenchmarks"
+  | "evidenceChains"
+  | "capabilityDrift"
+  | "remediationEffectiveness"
+  | "metricIntegrity"
+  | "evidenceForensics"
+  | "investigationQuality"
+  | "detectionDecay"
+  | "capacityStress"
+  | "peerBlindspot";
+
+const EMPTY_SUMMARY: Summary = {
+  total_alerts: 0,
+  total_cases: 0,
+  data_quality: {
+    case_coverage_pct: 0,
+    field_completeness_pct: 0,
+    linkage_integrity_pct: 0,
+    asset_coverage_pct: 0,
+    audit_trail_present: false,
+    audit_event_count: 0,
+  },
+};
+
+const engineMeta: Array<{
+  key: EngineKey;
+  title: string;
+  description: string;
+  empty: string;
+  category:
+    | "Evidence integrity"
+    | "Investigation quality"
+    | "Operational resilience";
+}> = [
+  {
+    key: "executionGaps",
+    title: "Execution gaps",
+    description: "Closure speed and investigation-depth anomalies.",
+    empty: "No execution gaps detected.",
+    category: "Investigation quality",
+  },
+  {
+    key: "nlpFindings",
+    title: "Templated investigations",
+    description: "Narrative similarity and copy-paste signals.",
+    empty: "No templated investigations detected.",
+    category: "Investigation quality",
+  },
+  {
+    key: "investigationQuality",
+    title: "Investigation quality",
+    description: "Signals that case handling lacks sufficient depth.",
+    empty: "No investigation quality issues detected.",
+    category: "Investigation quality",
+  },
+  {
+    key: "negativeSpace",
+    title: "Missing evidence",
+    description: "Expected artifacts absent from the submitted record.",
+    empty: "No missing evidence detected.",
+    category: "Evidence integrity",
+  },
+  {
+    key: "evidenceChains",
+    title: "Broken evidence chains",
+    description: "Alert-to-case linkage integrity exceptions.",
+    empty: "No broken evidence chains detected.",
+    category: "Evidence integrity",
+  },
+  {
+    key: "metricIntegrity",
+    title: "Metric integrity",
+    description: "Reported metrics compared with underlying telemetry.",
+    empty: "No metric integrity issues detected.",
+    category: "Evidence integrity",
+  },
+  {
+    key: "evidenceForensics",
+    title: "Evidence forensics",
+    description: "Potential fabrication or evidence-quality signals.",
+    empty: "No evidence fabrication signals detected.",
+    category: "Evidence integrity",
+  },
+  {
+    key: "peerBenchmarks",
+    title: "Peer benchmarking",
+    description: "Material deviations from comparable entities.",
+    empty: "No peer anomalies detected.",
+    category: "Operational resilience",
+  },
+  {
+    key: "capabilityDrift",
+    title: "Capability drift",
+    description: "Degradation in demonstrated operating capability.",
+    empty: "No capability drift detected.",
+    category: "Operational resilience",
+  },
+  {
+    key: "remediationEffectiveness",
+    title: "Remediation effectiveness",
+    description: "Recurrence after prior remediation activity.",
+    empty: "No ineffective remediation detected.",
+    category: "Operational resilience",
+  },
+  {
+    key: "detectionDecay",
+    title: "Silent detection decay",
+    description: "Rules with declining or absent detection activity.",
+    empty: "No silent detection rules found.",
+    category: "Operational resilience",
+  },
+  {
+    key: "capacityStress",
+    title: "Capacity stress",
+    description: "Workload and handling-pressure indicators.",
+    empty: "No capacity stress signals detected.",
+    category: "Operational resilience",
+  },
+  {
+    key: "peerBlindspot",
+    title: "Peer blind-spot",
+    description: "Coverage gaps visible through peer comparison.",
+    empty: "No peer blind-spots detected.",
+    category: "Operational resilience",
+  },
+];
+
+const severityClass = (severity?: string) => {
+  if (severity === "Critical")
+    return "border-red-500/30 bg-red-500/10 text-red-300";
+  if (severity === "High")
+    return "border-orange-500/30 bg-orange-500/10 text-orange-300";
+  if (severity === "Medium")
+    return "border-amber-500/30 bg-amber-500/10 text-amber-300";
+  return "border-slate-700 bg-slate-800 text-slate-300";
+};
+
+function EvidenceSummary({ evidence }: { evidence?: Record<string, unknown> }) {
+  if (!evidence || Object.keys(evidence).length === 0) return null;
+  return (
+    <dl className="mt-3 grid gap-x-4 gap-y-2 rounded-lg border border-slate-800 bg-slate-950/35 p-3 sm:grid-cols-2">
+      {Object.entries(evidence).map(([key, value]) => (
+        <div key={key} className="min-w-0">
+          <dt className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+            {key.replaceAll("_", " ")}
+          </dt>
+          <dd className="mt-0.5 break-words font-mono text-xs text-slate-300">
+            {typeof value === "string" ? value : JSON.stringify(value)}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function FindingCard({
+  finding,
+  onInspect,
+}: {
+  finding: Finding;
+  onInspect: (finding: Finding) => void;
+}) {
+  return (
+    <article className="rounded-xl border border-slate-800 bg-slate-950/25 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <span className="font-mono text-xs text-blue-300">
+          {finding.finding_id}
+        </span>
+        <span
+          className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${severityClass(finding.severity)}`}
+        >
+          {finding.severity || "Review"}
+        </span>
+      </div>
+      {finding.type && (
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {finding.type}
+        </p>
+      )}
+      <p className="mt-1 text-sm leading-6 text-slate-200">
+        {finding.description || "No description provided."}
+      </p>
+      {finding.entity_id && (
+        <p className="mt-2 text-xs text-slate-500">
+          Entity{" "}
+          <span className="font-mono text-slate-300">{finding.entity_id}</span>
+        </p>
+      )}
+      <EvidenceSummary evidence={finding.evidence} />
+      <ReviewFindingButton finding={finding} onInspect={onInspect} />
+    </article>
+  );
+}
 
 export function Overview() {
-  const [summary, setSummary] = useState({ total_alerts: 0, total_cases: 0, data_quality: { case_coverage_pct: 0, field_completeness_pct: 0, linkage_integrity_pct: 0, asset_coverage_pct: 0, audit_trail_present: false, audit_event_count: 0 } });
-  const [executionGaps, setExecutionGaps] = useState<Finding[]>([]);
-  const [nlpFindings, setNlpFindings] = useState<Finding[]>([]);
-  const [negativeSpace, setNegativeSpace] = useState<Finding[]>([]);
-  const [peerBenchmarks, setPeerBenchmarks] = useState<Finding[]>([]);
-  const [evidenceChains, setEvidenceChains] = useState<Finding[]>([]);
-  const [capabilityDrift, setCapabilityDrift] = useState<Finding[]>([]);
-  const [remediationEffectiveness, setRemediationEffectiveness] = useState<Finding[]>([]);
-  const [adaptiveSampling, setAdaptiveSampling] = useState<Array<{ case_id: string; reason: string }>>([]);
-  const [metricIntegrity, setMetricIntegrity] = useState<Finding[]>([]);
-  const [evidenceForensics, setEvidenceForensics] = useState<Finding[]>([]);
-  const [investigationQuality, setInvestigationQuality] = useState<Finding[]>([]);
-  const [detectionDecay, setDetectionDecay] = useState<Finding[]>([]);
-  const [capacityStress, setCapacityStress] = useState<Finding[]>([]);
-  const [peerBlindspot, setPeerBlindspot] = useState<Finding[]>([]);
-  const [priorityQueue, setPriorityQueue] = useState<Array<{ entity_id: string; score: number; critical_findings: number; high_findings: number; total_findings: number }>>([]);
+  const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
+  const [summaryFailed, setSummaryFailed] = useState(false);
+  const [engines, setEngines] = useState<Record<EngineKey, Finding[]>>(() => ({
+    executionGaps: [],
+    nlpFindings: [],
+    negativeSpace: [],
+    peerBenchmarks: [],
+    evidenceChains: [],
+    capabilityDrift: [],
+    remediationEffectiveness: [],
+    metricIntegrity: [],
+    evidenceForensics: [],
+    investigationQuality: [],
+    detectionDecay: [],
+    capacityStress: [],
+    peerBlindspot: [],
+  }));
+  const [failedEngines, setFailedEngines] = useState<Set<EngineKey>>(new Set());
+  const [adaptiveSampling, setAdaptiveSampling] = useState<
+    Array<{ case_id: string; reason: string }>
+  >([]);
+  const [samplingFailed, setSamplingFailed] = useState(false);
+  const [priorityQueue, setPriorityQueue] = useState<QueueEntity[]>([]);
+  const [queueFailed, setQueueFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
+  const [activeCategory, setActiveCategory] = useState(engineMeta[0].category);
 
   useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/dashboard/summary`);
-        setSummary(res.data);
-      } catch (error) {
-        console.error("Error fetching summary:", error);
-      } finally {
-        setLoading(false);
-      }
+    const endpointByKey: Record<EngineKey, string> = {
+      executionGaps: "execution-gaps",
+      nlpFindings: "nlp-templated",
+      negativeSpace: "negative-space",
+      peerBenchmarks: "peer-benchmarking",
+      evidenceChains: "evidence-chains",
+      capabilityDrift: "capability-drift",
+      remediationEffectiveness: "remediation-effectiveness",
+      metricIntegrity: "metric-integrity",
+      evidenceForensics: "evidence-forensics",
+      investigationQuality: "investigation-quality",
+      detectionDecay: "detection-decay",
+      capacityStress: "capacity-stress",
+      peerBlindspot: "peer-blindspot",
     };
 
-    const fetchGaps = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/execution-gaps`);
-        setExecutionGaps(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching gaps:", error);
-      }
-    };
-
-    const fetchNlp = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/nlp-templated`);
-        setNlpFindings(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching NLP findings:", error);
-      }
-    };
-
-    const fetchNegativeSpace = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/negative-space`);
-        setNegativeSpace(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching negative space findings:", error);
-      }
-    };
-
-    const fetchPeerBenchmarks = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/peer-benchmarking`);
-        setPeerBenchmarks(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching peer benchmarks:", error);
-      }
-    };
-
-    const fetchEvidenceChains = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/evidence-chains`);
-        setEvidenceChains(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching evidence chains:", error);
-      }
-    };
-
-    const fetchPriorityQueue = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/entities/priority-queue`);
-        setPriorityQueue(res.data.queue || []);
-      } catch (error) {
-        console.error("Error fetching priority queue:", error);
-      }
-    };
-
-    const fetchDrift = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/capability-drift`);
-        setCapabilityDrift(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching drift:", error);
-      }
-    };
-
-    const fetchRemediation = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/remediation-effectiveness`);
-        setRemediationEffectiveness(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching remediation:", error);
-      }
-    };
-
-    const fetchAdaptiveSampling = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/adaptive-sampling`);
-        setAdaptiveSampling(res.data.sampled_cases || []);
-      } catch (error) {
-        console.error("Error fetching adaptive sampling:", error);
-      }
-    };
-
-    const fetchMetricIntegrity = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/metric-integrity`);
-        setMetricIntegrity(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching metric integrity:", error);
-      }
-    };
-
-    const fetchEvidenceForensics = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/evidence-forensics`);
-        setEvidenceForensics(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching evidence forensics:", error);
-      }
-    };
-
-    const fetchInvestigationQuality = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/investigation-quality`);
-        setInvestigationQuality(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching investigation quality:", error);
-      }
-    };
-
-    fetchSummary();
-    fetchGaps();
-    fetchNlp();
-    fetchNegativeSpace();
-    fetchPeerBenchmarks();
-    fetchEvidenceChains();
-    fetchDrift();
-    fetchRemediation();
-    fetchAdaptiveSampling();
-    fetchMetricIntegrity();
-    fetchEvidenceForensics();
-    fetchInvestigationQuality();
-
-    const fetchDetectionDecay = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/detection-decay`);
-        setDetectionDecay(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching detection decay:", error);
-      }
-    };
-
-    const fetchCapacityStress = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/capacity-stress`);
-        setCapacityStress(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching capacity stress:", error);
-      }
-    };
-
-    const fetchPeerBlindspot = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/findings/peer-blindspot`);
-        setPeerBlindspot(res.data.findings || []);
-      } catch (error) {
-        console.error("Error fetching peer blindspot:", error);
-      }
-    };
-
-    fetchDetectionDecay();
-    fetchCapacityStress();
-    fetchPeerBlindspot();
-    fetchPriorityQueue();
+    const controller = new AbortController();
+    const options = { signal: controller.signal };
+    const requests = [
+      axios
+        .get(`${API_URL}/dashboard/summary`, options)
+        .then((r) => setSummary(r.data))
+        .catch(() => {
+          if (!controller.signal.aborted) setSummaryFailed(true);
+        }),
+      axios
+        .get(`${API_URL}/entities/priority-queue`, options)
+        .then((r) => setPriorityQueue(r.data.queue || []))
+        .catch(() => {
+          if (!controller.signal.aborted) setQueueFailed(true);
+        }),
+      axios
+        .get(`${API_URL}/findings/adaptive-sampling`, options)
+        .then((r) => setAdaptiveSampling(r.data.sampled_cases || []))
+        .catch(() => {
+          if (!controller.signal.aborted) setSamplingFailed(true);
+        }),
+      ...engineMeta.map(({ key }) =>
+        axios
+          .get(`${API_URL}/findings/${endpointByKey[key]}`, options)
+          .then((r) =>
+            setEngines((current) => ({
+              ...current,
+              [key]: r.data.findings || [],
+            })),
+          )
+          .catch(() => {
+            if (!controller.signal.aborted)
+              setFailedEngines((current) => new Set(current).add(key));
+          }),
+      ),
+    ];
+    Promise.allSettled(requests).finally(() => {
+      if (!controller.signal.aborted) setLoading(false);
+    });
+    return () => controller.abort();
   }, []);
 
+  const categories = useMemo(
+    () => Array.from(new Set(engineMeta.map((item) => item.category))),
+    [],
+  );
+  const activeEngines = engineMeta.filter(
+    (item) => item.category === activeCategory,
+  );
+  const totalEngineFindings = Object.values(engines).reduce(
+    (total, list) => total + list.length,
+    0,
+  );
   const dq = summary.data_quality;
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background text-white">Loading Command Centre...</div>;
-  }
+  if (loading)
+    return (
+      <div className="page-shell flex min-h-[60vh] items-center justify-center text-slate-400">
+        Loading supervisory overview…
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-background text-white p-8">
-      <header className="flex items-center justify-between mb-8 border-b border-slate-800 pb-4">
-        <div className="flex items-center space-x-3">
-          <Shield className="text-primary w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">SAT-SA NEXUS <span className="text-slate-500 text-sm font-normal">Supervisory Command Centre</span></h1>
-        </div>
-        <div className="text-sm text-slate-400">
-          Last updated: {new Date().toLocaleTimeString()}
-        </div>
+    <div className="page-shell space-y-8">
+      <header className="page-header">
+        <p className="page-eyebrow">Supervisory command centre</p>
+        <h1 className="page-title">Operational assurance overview</h1>
+        <p className="page-description">
+          Prioritised evidence, data-quality signals, and engine findings across
+          the submitted control environment.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-card rounded-xl p-6 border border-slate-800 flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm uppercase tracking-wider mb-1">Total Alerts Ingested</p>
-            <h2 className="text-3xl font-bold">{summary.total_alerts}</h2>
-          </div>
-          <AlertTriangle className="text-yellow-500 w-10 h-10 opacity-50" />
+      {summaryFailed && (
+        <div
+          role="alert"
+          className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200"
+        >
+          Summary metrics could not be loaded. Values below are unavailable, not
+          confirmed zeroes.
         </div>
-        
-        <div className="bg-card rounded-xl p-6 border border-slate-800 flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm uppercase tracking-wider mb-1">Cases Processed</p>
-            <h2 className="text-3xl font-bold">{summary.total_cases}</h2>
-          </div>
-          <FileText className="text-blue-500 w-10 h-10 opacity-50" />
+      )}
+
+      <section
+        aria-label="Overview metrics"
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <div className="metric-card">
+          <p className="metric-label">Alerts ingested</p>
+          <p className="metric-value">
+            {summaryFailed ? "—" : summary.total_alerts}
+          </p>
         </div>
-        
-        <div className="bg-card rounded-xl p-6 border border-slate-800 relative overflow-hidden">
-          <div className="z-10">
-            <p className="text-slate-400 text-sm uppercase tracking-wider mb-3">Submission Data Quality</p>
-            <div className="space-y-2">
-              {[
-                { label: 'Case Coverage', value: dq.case_coverage_pct },
-                { label: 'Field Completeness', value: dq.field_completeness_pct },
-                { label: 'Linkage Integrity', value: dq.linkage_integrity_pct },
-                { label: 'Asset Coverage', value: dq.asset_coverage_pct },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 w-[110px] shrink-0">{item.label}</span>
-                  <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${item.value >= 90 ? 'bg-emerald-500' : item.value >= 70 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                      style={{ width: `${Math.min(item.value, 100)}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-mono w-[40px] text-right">{item.value}%</span>
+        <div className="metric-card">
+          <p className="metric-label">Cases processed</p>
+          <p className="metric-value">
+            {summaryFailed ? "—" : summary.total_cases}
+          </p>
+        </div>
+        <div className="metric-card">
+          <p className="metric-label">Engine findings</p>
+          <p className="metric-value">
+            {failedEngines.size === engineMeta.length
+              ? "—"
+              : totalEngineFindings}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Across {engineMeta.length - failedEngines.size} available engines
+          </p>
+        </div>
+        <div className="metric-card">
+          <p className="metric-label">Priority entities</p>
+          <p className="metric-value">
+            {queueFailed ? "—" : priorityQueue.length}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Ranked by supervisory priority score
+          </p>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <p className="page-eyebrow">Submission health</p>
+            <h2 className="text-lg font-semibold text-white">
+              Data quality and auditability
+            </h2>
+          </div>
+        </div>
+        <div className="grid gap-5 p-5 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Case coverage", dq.case_coverage_pct],
+            ["Field completeness", dq.field_completeness_pct],
+            ["Linkage integrity", dq.linkage_integrity_pct],
+            ["Asset coverage", dq.asset_coverage_pct],
+          ].map(([label, raw]) => {
+            const value = Number(raw);
+            return (
+              <div key={String(label)}>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">{label}</span>
+                  <span className="font-mono text-slate-200">
+                    {summaryFailed ? "—" : `${value}%`}
+                  </span>
                 </div>
-              ))}
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs text-slate-400 w-[110px] shrink-0">Audit Trail</span>
-                <span className={`text-xs font-semibold ${dq.audit_trail_present ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {dq.audit_trail_present ? `✓ Present (${dq.audit_event_count} events)` : '✗ Missing'}
-                </span>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                  <div
+                    className="h-full rounded-full bg-blue-500"
+                    style={{
+                      width: summaryFailed ? "0%" : `${Math.min(value, 100)}%`,
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      </div>
+        <div className="border-t border-slate-800 px-5 py-3 text-sm text-slate-400">
+          Audit trail:{" "}
+          <span
+            className={
+              dq.audit_trail_present ? "text-emerald-300" : "text-red-300"
+            }
+          >
+            {summaryFailed
+              ? "Unavailable"
+              : dq.audit_trail_present
+                ? `Present · ${dq.audit_event_count} events`
+                : "Missing"}
+          </span>
+        </div>
+      </section>
 
       <ClaimsVerificationMatrix apiUrl={API_URL} />
 
-      {/* Supervisory Priority Queue */}
-      <div className="mb-8 bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Shield className="text-primary w-5 h-5" />
-            <h3 className="font-semibold text-lg">Supervisory Priority Queue</h3>
+      <section className="panel overflow-hidden">
+        <div className="panel-header">
+          <div>
+            <p className="page-eyebrow">Priority register</p>
+            <h2 className="text-lg font-semibold text-white">
+              Entities requiring attention
+            </h2>
           </div>
-          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">Top {priorityQueue.length} Entities</span>
+          <span className="text-sm text-slate-400">
+            {queueFailed ? "Unavailable" : `${priorityQueue.length} ranked`}
+          </span>
         </div>
-        <div className="p-4 overflow-x-auto">
-          {priorityQueue.length === 0 ? (
-            <p className="text-slate-500 italic">No entities to prioritize.</p>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-slate-400 text-sm">
-                  <th className="pb-3 pr-4">Rank</th>
-                  <th className="pb-3 pr-4">Entity ID</th>
-                  <th className="pb-3 pr-4">SPS Score</th>
-                  <th className="pb-3 pr-4">Critical Findings</th>
-                  <th className="pb-3 pr-4">High Findings</th>
-                  <th className="pb-3">Total Findings</th>
+        {queueFailed ? (
+          <p className="p-5 text-sm text-red-300">
+            Priority data could not be loaded.
+          </p>
+        ) : priorityQueue.length === 0 ? (
+          <p className="p-5 text-sm text-slate-500">
+            No entities currently require prioritisation.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="border-b border-slate-800 bg-slate-950/30 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-5 py-3">Rank</th>
+                  <th className="px-5 py-3">Entity</th>
+                  <th className="px-5 py-3">SPS</th>
+                  <th className="px-5 py-3">Critical</th>
+                  <th className="px-5 py-3">High</th>
+                  <th className="px-5 py-3">Total</th>
                 </tr>
               </thead>
-              <tbody>
-                {priorityQueue.map((entity, idx) => (
-                  <tr key={idx} className="border-b border-slate-800/50 hover:bg-white/5 transition-colors">
-                    <td className="py-3 pr-4 font-bold text-slate-300">#{idx + 1}</td>
-                    <td className="py-3 pr-4 font-mono text-blue-400">{entity.entity_id}</td>
-                    <td className="py-3 pr-4">
-                      <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded font-bold">{entity.score}</span>
+              <tbody className="divide-y divide-slate-800">
+                {priorityQueue.map((entity, index) => (
+                  <tr key={entity.entity_id} className="hover:bg-slate-800/30">
+                    <td className="px-5 py-3 text-slate-500">{index + 1}</td>
+                    <td className="px-5 py-3 font-mono text-blue-300">
+                      {entity.entity_id}
                     </td>
-                    <td className="py-3 pr-4 text-red-400 font-bold">{entity.critical_findings}</td>
-                    <td className="py-3 pr-4 text-orange-400 font-bold">{entity.high_findings}</td>
-                    <td className="py-3 text-slate-300">{entity.total_findings}</td>
+                    <td className="px-5 py-3 font-semibold text-white">
+                      {entity.score}
+                    </td>
+                    <td className="px-5 py-3 text-red-300">
+                      {entity.critical_findings}
+                    </td>
+                    <td className="px-5 py-3 text-orange-300">
+                      {entity.high_findings}
+                    </td>
+                    <td className="px-5 py-3 text-slate-300">
+                      {entity.total_findings}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Execution Gaps Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Clock className="text-danger w-5 h-5" />
-              <h3 className="font-semibold text-lg">Execution Gap Engine</h3>
-            </div>
-            <span className="bg-danger/20 text-danger px-3 py-1 rounded-full text-xs font-bold">{executionGaps.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {executionGaps.length === 0 ? (
-              <p className="text-slate-500 italic">No execution gaps detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {executionGaps.map((gap, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-red-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{gap.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        gap.severity === 'High' 
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30' 
-                          : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        {gap.severity} Priority
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{gap.description}</p>
-                    <div className="bg-black/40 rounded p-2 text-xs font-mono text-slate-400">
-                      Entity: {gap.entity_id} | Alert: {gap.evidence.alert_id} 
-                      {gap.type === 'Fast Closure' && ` | Closed In: ${gap.evidence.time_to_close}s`}
-                      {gap.type === 'Shallow Investigation' && ` | Actions: ${gap.evidence.actions_logged}`}
-                    </div>
-                    <ReviewFindingButton finding={gap} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
+      <section aria-labelledby="engine-browser-title">
+        <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <p className="page-eyebrow">Detection engines</p>
+            <h2
+              id="engine-browser-title"
+              className="text-xl font-semibold text-white"
+            >
+              Browse findings by control domain
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Expand an engine to inspect every finding and its submitted
+              evidence.
+            </p>
           </div>
         </div>
-
-        {/* NLP Templated Investigations Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <FileText className="text-orange-400 w-5 h-5" />
-              <h3 className="font-semibold text-lg">NLP Anomalies (Copy-Paste)</h3>
-            </div>
-            <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold">{nlpFindings.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {nlpFindings.length === 0 ? (
-              <p className="text-slate-500 italic">No templated investigations detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {nlpFindings.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-orange-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-0.5 rounded border border-orange-500/30">Medium Priority</span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                    <div className="bg-black/40 rounded p-2 text-xs text-slate-400 italic border-l-2 border-orange-500/50">
-                      "{finding.evidence.text_snippet}"
-                    </div>
-                    <div className="mt-2 text-xs text-slate-500 font-mono">
-                      Cases: {finding.evidence.case_ids.join(', ')}
-                    </div>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div
+          role="tablist"
+          aria-label="Engine categories"
+          className="mb-4 flex gap-2 overflow-x-auto border-b border-slate-800"
+        >
+          {categories.map((category, index) => (
+            <button
+              key={category}
+              role="tab"
+              id={`engine-tab-${index}`}
+              aria-controls="engine-panel"
+              tabIndex={activeCategory === category ? 0 : -1}
+              aria-selected={activeCategory === category}
+              onClick={() => setActiveCategory(category)}
+              onKeyDown={(event) => {
+                if (
+                  !["ArrowLeft", "ArrowRight", "Home", "End"].includes(
+                    event.key,
+                  )
+                )
+                  return;
+                event.preventDefault();
+                const next =
+                  event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                      ? categories.length - 1
+                      : (index +
+                          (event.key === "ArrowRight" ? 1 : -1) +
+                          categories.length) %
+                        categories.length;
+                setActiveCategory(categories[next]);
+                document.getElementById(`engine-tab-${next}`)?.focus();
+              }}
+              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium ${activeCategory === category ? "border-blue-500 text-blue-300" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+            >
+              {category}
+              <span className="ml-2 rounded-full bg-slate-800 px-2 py-0.5 text-xs">
+                {engineMeta
+                  .filter((item) => item.category === category)
+                  .reduce((sum, item) => sum + engines[item.key].length, 0)}
+              </span>
+            </button>
+          ))}
         </div>
-      </div>
-      
-      {/* Bottom Grid for Negative Space & Peer Benchmarking & Evidence Chains */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        
-        {/* Negative Space Engine Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-            <AlertTriangle className="text-purple-400 w-5 h-5" />
-            <h3 className="font-semibold text-lg">Negative Space Engine (Missing Evidence)</h3>
-          </div>
-          <span className="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold">{negativeSpace.length} Findings</span>
-        </div>
-        <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-          {negativeSpace.length === 0 ? (
-            <p className="text-slate-500 italic">No missing evidence detected.</p>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {negativeSpace.map((finding, idx) => (
-                <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-purple-900/30">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded border ${
-                      finding.severity === 'Critical' 
-                        ? 'bg-red-500/20 text-red-400 border-red-500/30' 
-                        : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                    }`}>
-                      {finding.severity} Priority
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                  <div className="bg-black/40 rounded p-2 text-xs font-mono text-slate-400">
-                    Entity: {finding.entity_id} | Type: {finding.type}
-                  </div>
-                  <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
+        <div
+          role="tabpanel"
+          id="engine-panel"
+          aria-labelledby={`engine-tab-${categories.indexOf(activeCategory)}`}
+          className="space-y-3"
+        >
+          {activeEngines.map((meta) => (
+            <details
+              key={meta.key}
+              className="panel group"
+              open={activeEngines.indexOf(meta) === 0}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <div>
+                  <h3 className="font-semibold text-slate-100">{meta.title}</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {meta.description}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-        
-      {/* Peer Benchmarking Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Peer Benchmarking</h3>
-            </div>
-            <span className="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold">{peerBenchmarks.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {peerBenchmarks.length === 0 ? (
-              <p className="text-slate-500 italic">No peer anomalies detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {peerBenchmarks.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-indigo-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded border border-red-500/30">High Priority</span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                    <div className="bg-black/40 rounded p-2 text-xs font-mono text-slate-400">
-                      Entity: {finding.entity_id} | Entity Median: {finding.evidence.entity_median_s}s | Peer Median: {finding.evidence.peer_median_s}s
-                    </div>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
+                    {failedEngines.has(meta.key)
+                      ? "Unavailable"
+                      : `${engines[meta.key].length} findings`}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-slate-500 transition-transform group-open:rotate-180" />
+                </div>
+              </summary>
+              <div className="border-t border-slate-800 p-4">
+                {failedEngines.has(meta.key) ? (
+                  <p className="text-sm text-red-300">
+                    This engine could not be loaded.
+                  </p>
+                ) : engines[meta.key].length === 0 ? (
+                  <p className="text-sm text-slate-500">{meta.empty}</p>
+                ) : (
+                  <div className="grid gap-4 xl:grid-cols-2">
+                    {engines[meta.key].map((finding) => (
+                      <FindingCard
+                        key={finding.finding_id}
+                        finding={finding}
+                        onInspect={setSelectedFinding}
+                      />
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
+            </details>
+          ))}
         </div>
+      </section>
 
-        {/* Evidence Chains Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Broken Evidence Chains</h3>
-            </div>
-            <span className="bg-pink-500/20 text-pink-400 px-3 py-1 rounded-full text-xs font-bold">{evidenceChains.length} Findings</span>
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <p className="page-eyebrow">Quality assurance</p>
+            <h2 className="text-lg font-semibold text-white">
+              Adaptive sampling queue
+            </h2>
           </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {evidenceChains.length === 0 ? (
-              <p className="text-slate-500 italic">No broken evidence chains detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {evidenceChains.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-pink-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded border border-red-500/30">Critical Priority</span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                    <div className="bg-black/40 rounded p-2 text-xs font-mono text-slate-400">
-                      Entity: {finding.entity_id} | Alert: {finding.evidence.alert_id} | Case: {finding.evidence.case_id}
-                    </div>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <span className="text-sm text-slate-400">
+            {samplingFailed
+              ? "Unavailable"
+              : `${adaptiveSampling.length} cases`}
+          </span>
         </div>
+        {samplingFailed ? (
+          <p className="p-5 text-sm text-red-300">
+            Sampling data could not be loaded.
+          </p>
+        ) : adaptiveSampling.length === 0 ? (
+          <p className="p-5 text-sm text-slate-500">
+            No cases selected for adaptive sampling.
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-800">
+            {adaptiveSampling.map((sample) => (
+              <li
+                key={sample.case_id}
+                className="grid gap-1 px-5 py-4 sm:grid-cols-[12rem_1fr]"
+              >
+                <span className="font-mono text-sm text-blue-300">
+                  {sample.case_id}
+                </span>
+                <span className="text-sm text-slate-300">{sample.reason}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        
-        {/* Capability Drift & Remediation */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Capability Drift & Remediation</h3>
-            </div>
-            <span className="bg-teal-500/20 text-teal-400 px-3 py-1 rounded-full text-xs font-bold">{capabilityDrift.length + remediationEffectiveness.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {capabilityDrift.length === 0 && remediationEffectiveness.length === 0 ? (
-              <p className="text-slate-500 italic">No capability drift or ineffective remediation detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {capabilityDrift.map((finding, idx) => (
-                  <div key={`drift-${idx}`} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-teal-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded border border-red-500/30">High Priority</span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-                {remediationEffectiveness.map((finding, idx) => (
-                  <div key={`remed-${idx}`} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-teal-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-orange-500/20 text-orange-400 text-xs px-2 py-0.5 rounded border border-orange-500/30">Medium Priority</span>
-                    </div>
-                    <p className="text-sm text-slate-300 mb-3">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Adaptive Sampling Queue */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Adaptive Sampling Queue</h3>
-            </div>
-            <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">{adaptiveSampling.length} Cases</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {adaptiveSampling.length === 0 ? (
-              <p className="text-slate-500 italic">No cases sampled.</p>
-            ) : (
-              <div className="space-y-4">
-                {adaptiveSampling.map((sample, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-green-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{sample.case_id}</span>
-                    </div>
-                    <p className="text-sm text-slate-300"><span className="text-green-400 font-semibold">Reason:</span> {sample.reason}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-      </div>
-
-      {/* ═══ NEW ENGINES: Metric Integrity, Evidence Forensics, Investigation Quality ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-
-        {/* Metric Integrity Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Metric Integrity Auditor</h3>
-            </div>
-            <span className="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-bold">{metricIntegrity.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {metricIntegrity.length === 0 ? (
-              <p className="text-slate-500 italic">No metric integrity issues detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {metricIntegrity.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-amber-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        finding.severity === 'High'
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                          : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        {finding.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-amber-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Evidence Forensics Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Evidence Forensics</h3>
-            </div>
-            <span className="bg-rose-500/20 text-rose-400 px-3 py-1 rounded-full text-xs font-bold">{evidenceForensics.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {evidenceForensics.length === 0 ? (
-              <p className="text-slate-500 italic">No evidence fabrication signals detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {evidenceForensics.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-rose-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        finding.severity === 'Critical'
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                          : finding.severity === 'High'
-                            ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                            : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                      }`}>
-                        {finding.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-rose-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Investigation Quality Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Investigation Quality</h3>
-            </div>
-            <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full text-xs font-bold">{investigationQuality.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {investigationQuality.length === 0 ? (
-              <p className="text-slate-500 italic">No investigation quality issues detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {investigationQuality.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-cyan-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        finding.severity === 'Critical'
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                          : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        {finding.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-cyan-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-      </div>
-
-      {/* === Detection Decay, Capacity Stress, Peer Blind-Spot === */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-
-        {/* Detection Decay Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Silent Detection Decay</h3>
-            </div>
-            <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold">{detectionDecay.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {detectionDecay.length === 0 ? (
-              <p className="text-slate-500 italic">No silent detection rules found.</p>
-            ) : (
-              <div className="space-y-4">
-                {detectionDecay.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-orange-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        finding.severity === 'Critical'
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                          : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        {finding.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-orange-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Capacity Stress Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Capacity Stress Index</h3>
-            </div>
-            <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold">{capacityStress.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {capacityStress.length === 0 ? (
-              <p className="text-slate-500 italic">No capacity stress signals detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {capacityStress.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-yellow-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded border ${
-                        finding.severity === 'High'
-                          ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                          : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                      }`}>
-                        {finding.severity}
-                      </span>
-                    </div>
-                    <p className="text-xs font-semibold text-yellow-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Peer Blind-Spot Signal Panel */}
-        <div className="bg-card rounded-xl border border-slate-800 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <h3 className="font-semibold text-lg">Peer Blind-Spot Signal</h3>
-            </div>
-            <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-bold">{peerBlindspot.length} Findings</span>
-          </div>
-          <div className="p-4 flex-1 overflow-y-auto max-h-[400px]">
-            {peerBlindspot.length === 0 ? (
-              <p className="text-slate-500 italic">No peer blind-spots detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {peerBlindspot.map((finding, idx) => (
-                  <div key={idx} className="bg-slate-800/40 backdrop-blur-sm p-4 rounded-lg border border-red-900/30">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-mono text-xs text-blue-400">{finding.finding_id}</span>
-                      <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded border border-red-500/30">Critical</span>
-                    </div>
-                    <p className="text-xs font-semibold text-red-400 mb-1">{finding.type}</p>
-                    <p className="text-sm text-slate-300">{finding.description}</p>
-                    <ReviewFindingButton finding={finding} onInspect={setSelectedFinding} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-      </div>
-      {selectedFinding && <EvidenceReviewModal key={selectedFinding.finding_id} finding={selectedFinding} apiUrl={API_URL} onClose={() => setSelectedFinding(null)} />}
+      {selectedFinding && (
+        <EvidenceReviewModal
+          key={selectedFinding.finding_id}
+          finding={selectedFinding}
+          apiUrl={API_URL}
+          onClose={() => setSelectedFinding(null)}
+        />
+      )}
     </div>
   );
 }

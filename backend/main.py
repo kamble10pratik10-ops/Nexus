@@ -66,39 +66,91 @@ def get_dummy_models():
 
 
 import os
+import time
 from dotenv import load_dotenv
 
 dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
 load_dotenv(dotenv_path)
 load_dotenv()
 
-def load_data():
-    try:
-        engine = get_engine()
-        with engine.connect() as connection:
-            alerts = pd.read_sql_table("alerts", connection)
-            cases = pd.read_sql_table("cases", connection)
-            try:
-                events = pd.read_sql_table("events", connection)
-            except ValueError:
-                events = pd.DataFrame()
+# ═══════════════════════════════════════════════════════════════════════════════
+# DATA CACHE — prevents 15+ concurrent endpoints from each doing full table
+# scans on every page load.  A 30-second TTL keeps data fresh enough for a
+# supervisory dashboard while ensuring a single DB round-trip per burst.
+# ═══════════════════════════════════════════════════════════════════════════════
+import threading
 
-        if not events.empty:
-            events['timestamp'] = pd.to_datetime(events['timestamp'])
-        alerts['created_at'] = pd.to_datetime(alerts['created_at'])
-        alerts['closed_at'] = pd.to_datetime(alerts['closed_at'])
-        return alerts, cases, events
-    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
-        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
+_data_cache = {"result": None, "ts": 0.0}
+_data_cache_lock = threading.Lock()
+_assets_cache = {"result": None, "ts": 0.0}
+_assets_cache_lock = threading.Lock()
+_CACHE_TTL = 30  # seconds
+
+
+def invalidate_data_cache():
+    """Clear cached data so the next request fetches fresh rows."""
+    _data_cache["result"] = None
+    _data_cache["ts"] = 0.0
+    _assets_cache["result"] = None
+    _assets_cache["ts"] = 0.0
+
+
+def load_data():
+    now = time.monotonic()
+    cached = _data_cache["result"]
+    if cached is not None and (now - _data_cache["ts"]) < _CACHE_TTL:
+        return cached
+
+    with _data_cache_lock:
+        # Double-check after acquiring lock (another thread may have refreshed)
+        cached = _data_cache["result"]
+        if cached is not None and (time.monotonic() - _data_cache["ts"]) < _CACHE_TTL:
+            return cached
+
+        try:
+            engine = get_engine()
+            with engine.connect() as connection:
+                alerts = pd.read_sql_table("alerts", connection)
+                cases = pd.read_sql_table("cases", connection)
+                try:
+                    events = pd.read_sql_table("events", connection)
+                except ValueError:
+                    events = pd.DataFrame()
+
+            if not events.empty:
+                events['timestamp'] = pd.to_datetime(events['timestamp'])
+            alerts['created_at'] = pd.to_datetime(alerts['created_at'])
+            alerts['closed_at'] = pd.to_datetime(alerts['closed_at'])
+
+            result = (alerts, cases, events)
+            _data_cache["result"] = result
+            _data_cache["ts"] = time.monotonic()
+            return result
+        except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+            raise HTTPException(status_code=503, detail="Database service unavailable") from exc
+
 
 def load_assets():
-    try:
-        engine = get_engine()
-        with engine.connect() as connection:
-            assets = pd.read_sql_table("assets", connection)
-        return assets
-    except (DatabaseConfigurationError, SQLAlchemyError) as exc:
-        raise HTTPException(status_code=503, detail="Database service unavailable") from exc
+    now = time.monotonic()
+    cached = _assets_cache["result"]
+    if cached is not None and (now - _assets_cache["ts"]) < _CACHE_TTL:
+        return cached
+
+    with _assets_cache_lock:
+        cached = _assets_cache["result"]
+        if cached is not None and (time.monotonic() - _assets_cache["ts"]) < _CACHE_TTL:
+            return cached
+
+        try:
+            engine = get_engine()
+            with engine.connect() as connection:
+                assets = pd.read_sql_table("assets", connection)
+
+            _assets_cache["result"] = assets
+            _assets_cache["ts"] = time.monotonic()
+            return assets
+        except (DatabaseConfigurationError, SQLAlchemyError) as exc:
+            raise HTTPException(status_code=503, detail="Database service unavailable") from exc
 
 @app.get("/")
 def read_root():
@@ -140,6 +192,7 @@ def ingest_simulation(payload: SimulationPayload):
                 """),
                 {"cid": payload.case_id, "aid": payload.alert_id, "eid": payload.entity_id, "itxt": payload.investigation_text, "iact": payload.investigation_actions, "esc": payload.escalated, "cat_at": payload.created_at}
             )
+        invalidate_data_cache()
         return {"status": "success", "message": f"Ingested {payload.alert_id} into Supabase"}
     except IntegrityError as exc:
         raise HTTPException(status_code=409, detail="Simulation data conflicts with an existing record") from exc

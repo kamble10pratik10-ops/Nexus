@@ -1,58 +1,82 @@
-import React from 'react';
-import { Database, WifiOff, Calendar, Menu } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronRight, Menu, PanelLeftClose, Sun, Moon } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
-export function TopBar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
+const routeLabels: Record<string, string> = {
+  '/': 'Overview',
+  '/claims': 'Claims Assurance',
+  '/findings': 'Findings',
+  '/review': 'Review Queue',
+  '/entities': 'Entities',
+  '/reports': 'Reports & Validation',
+};
+
+interface TopBarProps {
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
+}
+
+export function TopBar({ sidebarOpen, onToggleSidebar }: TopBarProps) {
+  const { pathname } = useLocation();
+  const sectionName = routeLabels[pathname] ?? 'Workspace';
+
+  const [isLight, setIsLight] = useState(() => {
+    return document.documentElement.classList.contains('theme-light') || 
+           localStorage.getItem('theme') === 'light';
+  });
+
+  useEffect(() => {
+    if (isLight) {
+      document.documentElement.classList.add('theme-light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('theme-light');
+      localStorage.setItem('theme', 'dark');
+    }
+  }, [isLight]);
+
+  const toggleTheme = () => setIsLight((prev) => !prev);
+
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 shrink-0 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)] z-10">
-      <div className="flex items-center space-x-6 text-sm text-slate-400">
-        <button 
+    <header className="z-20 flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-slate-800 bg-background/95 px-4 backdrop-blur-md sm:px-6 xl:px-8">
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
           onClick={onToggleSidebar}
-          className="p-1.5 hover:bg-slate-800/50 rounded-lg text-slate-400 hover:text-white transition-colors border border-transparent hover:border-slate-700"
-          title="Toggle Sidebar"
+          aria-controls="primary-navigation"
+          aria-expanded={sidebarOpen}
+          aria-label={sidebarOpen ? 'Collapse navigation' : 'Open navigation'}
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-slate-700/80 text-slate-400 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
         >
-          <Menu className="w-5 h-5" />
+          {sidebarOpen ? (
+            <PanelLeftClose className="hidden size-[18px] lg:block" aria-hidden="true" />
+          ) : null}
+          <Menu className={sidebarOpen ? 'size-[18px] lg:hidden' : 'size-[18px]'} aria-hidden="true" />
         </button>
-        
-        <div className="flex items-center space-x-2">
-          <BuildingIcon />
-          <span className="font-semibold text-white">Entity: FIN-CORP-01 (Demo)</span>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Calendar className="w-4 h-4" />
-          <span>Obs Window: Oct 2023</span>
-        </div>
+
+        <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-sm">
+          <span className="hidden text-slate-500 sm:inline">NEXUS</span>
+          <ChevronRight className="hidden size-4 text-slate-700 sm:block" aria-hidden="true" />
+          <span className="truncate font-medium text-slate-200" aria-current="page">
+            {sectionName}
+          </span>
+        </nav>
       </div>
-      
-      <div className="flex items-center space-x-4 text-xs">
-        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800/50 rounded-full border border-slate-700 text-slate-300 backdrop-blur-sm">
-          <Database className="w-3.5 h-3.5" />
-          <span>Dataset: Q4 Export (Offline)</span>
-        </div>
-        
-        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-500 rounded-full border border-amber-500/20">
-          <WifiOff className="w-3.5 h-3.5" />
-          <span>Air-Gapped Mode</span>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-slate-700/80 text-slate-400 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-slate-100"
+        >
+          {isLight ? <Moon className="size-[18px]" /> : <Sun className="size-[18px]" />}
+        </button>
+        <div className="hidden items-center gap-2 rounded-full border border-slate-800 bg-card/70 px-3 py-1.5 text-xs font-medium text-slate-400 sm:flex">
+          <span className="size-1.5 rounded-full bg-blue-400" aria-hidden="true" />
+          Analytics workspace
         </div>
       </div>
     </header>
-  );
-}
-
-function BuildingIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
-      <path d="M9 22v-4h6v4"/>
-      <path d="M8 6h.01"/>
-      <path d="M16 6h.01"/>
-      <path d="M12 6h.01"/>
-      <path d="M12 10h.01"/>
-      <path d="M12 14h.01"/>
-      <path d="M16 10h.01"/>
-      <path d="M16 14h.01"/>
-      <path d="M8 10h.01"/>
-      <path d="M8 14h.01"/>
-    </svg>
   );
 }

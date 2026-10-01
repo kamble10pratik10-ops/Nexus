@@ -49,11 +49,12 @@ def get_engine() -> Engine:
         try:
             _engine = create_engine(
                 _database_url(),
-                pool_size=3,
-                max_overflow=0,
-                pool_timeout=10,
+                pool_size=15,
+                max_overflow=10,
+                pool_timeout=30,
                 pool_pre_ping=True,
-                connect_args={"connect_timeout": 10},
+                pool_recycle=300,
+                connect_args={"connect_timeout": 15},
             )
         except DatabaseConfigurationError:
             raise
