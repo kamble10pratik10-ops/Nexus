@@ -38,6 +38,27 @@ def get_entities(db: Session = Depends(get_db)):
         ))
     return result
 
+@router.get("/priority-queue")
+def get_entity_priority_queue(db: Session = Depends(get_db)) -> Dict[str, Any]:
+    entities = db.query(Entity).all()
+    queue = []
+    for ent in entities:
+        findings = db.query(Finding).filter(Finding.entity_id == ent.id).all()
+        crit = sum(1 for f in findings if f.severity == "CRITICAL")
+        high = sum(1 for f in findings if f.severity == "HIGH")
+        total = len(findings)
+        score = crit * 10 + high * 5 + total
+        if total > 0:
+            queue.append({
+                "entity_id": ent.id,
+                "score": score,
+                "critical_findings": crit,
+                "high_findings": high,
+                "total_findings": total
+            })
+    queue.sort(key=lambda x: -x["score"])
+    return {"queue": queue}
+
 @router.get("/{entity_id}")
 def get_entity_detail(entity_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Section 13: Entity Detail Overview, Evidence Counts & 4-Question Findings List"""

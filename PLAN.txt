@@ -1,0 +1,43 @@
+# NEXUS DEVELOPMENT PLAN
+
+## 1. System Improvements (Priority: P0 - Must Fix Before Judging)  (COMPLETED)
+Based on the executive verdict, the primary risk is credibility. The product story is strong, but the implementation must consistently prove it. The first focus must be on making the existing core undeniable: one working pipeline, one trustworthy benchmark, one clear evidence graph, and one spectacular demonstration.
+
+- **Unify Backend Architecture:** Resolve the split between `backend/main.py` (older raw backend) and `backend/app/main.py` (newer SQLAlchemy analytics engine). Ensure the benchmark, UI, and Docker all use the exact same, latest backend implementation.
+- **Fix Docker Deployment:** Update the Docker configuration to launch the newer SQLAlchemy application (`backend/app/main.py`). Ensure the PostgreSQL database initializes, migrates, and seeds the correct schema cleanly on startup.
+- **Ensure API & Schema Consistency:** The frontend and backend must strictly use the same API and data schemas (entity IDs, alert structures, case structures, etc.).
+- **Fix Data Ingestion & Risk Scoring:**
+  - Stop silently correcting evidence during ingestion (e.g., converting unknown severity to MEDIUM or assigning missing entity IDs to CSE-01). Use explicit states: Valid, Invalid, or Unverifiable.
+  - Standardize severity casing (e.g., "Critical" vs "CRITICAL") to ensure the risk engine correctly calculates and connects to the active analysis path.
+- **Expose Demo / Reset Workflow:** Add a clear path in the active UI for judges to load a demo dataset, run the analysis, and review findings without manual backend intervention.
+- **Realign Documentation:** Remove or properly qualify unsupported claims in the documentation (e.g., XLSX support, robust IQR/MAD peer statistics, cryptographic audit ledger) so the implementation matches the promises.
+
+## 2. Benchmark Improvements
+The benchmark must pivot from merely showing "AI accuracy" to proving that NEXUS reduces supervisory workload while detecting high-risk SOC failures.
+
+- **Implement a Three-Level Evaluation Model:**
+  - Level 1: Record detection (Did it find the right alert/case/asset?)
+  - Level 2: Finding correctness (Did it identify the correct defect, rule, and missing evidence?)
+  - Level 3: Supervisory usefulness (Did it save reviewer time and rank entities correctly?)
+- **Build a Proper Benchmark Corpus:**
+  - *Tier A (Controlled Synthetic):* Generate normal SOC behavior alongside both obvious and subtle failures.
+  - *Tier B (Semi-Synthetic):* Use realistic operational records and inject non-obvious defects.
+  - *Tier C (Expert-Adjudicated):* Data classified by experts, crucially including an "UNVERIFIABLE" label.
+- **Enforce Strict Structured Matching:** Ground-truth validation must require exact matches on entity, rule/finding type, target record, and evidence scope (not just loose ID matching).
+- **Add Meaningful Operational Metrics:** Focus on metrics judges care about: Confirmed findings per 100 cases, review minutes per confirmed defect, and search-space reduction.
+- **Establish Baselines & Robustness:**
+  - Compare NEXUS against random sampling and simple threshold rules to prove its multiplier effect (e.g., "4.2x more critical failures found").
+  - Test for robustness against benign changes (different analyst names, shifts, paraphrase variations).
+- **Create a Benchmark Manifest:** Make results reproducible by recording dataset hashes, code commits, random seeds, and ruleset versions for each run.
+
+## 3. Missing Unique Selling Propositions (USPs) to Implement
+After reviewing the current codebase, the "Evidence-backed abstention" (Supported/Unverifiable) and "Claim-to-evidence contract" (Claims Assurance) concepts already exist in some form. The following highly impactful USPs do not yet exist in the product and should be added to our roadmap:
+
+1. **Evidence Coverage Graph:** A visual graph (Asset → Log Source → Alert → Case → Escalation → Response → Closure) showing missing, delayed, or contradictory links.
+2. **Supervisory Digital Twin:** A digital operational profile/health record for every critical-sector entity showing expected vs. observed evidence and peer positioning.
+3. **Counterfactual Audit Simulator:** A "what-if" engine allowing supervisors to test how changing parameters (e.g., excluding night-shift alerts) impacts the overall conclusion.
+4. **Review-Budget Optimizer:** A feature where the supervisor inputs their available time (e.g., "Review 5% of records" or "2 hours"), and the system prioritizes the most critical queue to maximize review yield.
+5. **Remediation Recurrence Tracking:** A tracking flow to monitor if a specific failure type re-emerges after a SOC claims to have remediated it.
+6. **Privacy-Preserving National Benchmarking:** The ability for entities to share normalized, anonymized benchmark statistics for sector-level comparison without exposing raw telemetry.
+7. **Chain-of-Custody Report:** A highly visible, tamper-evident report generation that includes dataset hashes, ruleset versions, reviewer decisions, and export timestamps.
+8. **Sector-Specific Expected Evidence Packs:** Pre-configured profiles (Energy, Banking, Telecom, etc.) defining expected telemetry, threat techniques, and SLA expectations for that industry.

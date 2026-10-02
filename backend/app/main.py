@@ -16,6 +16,8 @@ from app.routers.ingestion_router import router as ingestion_router
 from app.routers.findings_router import router as findings_router
 from app.routers.entities_router import router as entities_router
 from app.routers.benchmarking_router import router as benchmarking_router
+from app.routers.claims_router import router as claims_router
+from app.routers.reports_router import router as reports_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +61,8 @@ app.include_router(ingestion_router, prefix=settings.API_PREFIX)
 app.include_router(findings_router, prefix=settings.API_PREFIX)
 app.include_router(entities_router, prefix=settings.API_PREFIX)
 app.include_router(benchmarking_router, prefix=settings.API_PREFIX)
+app.include_router(claims_router, prefix=settings.API_PREFIX)
+app.include_router(reports_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def root():

@@ -137,13 +137,13 @@ class DataIngestionEngine:
 
         # Ensure 'entity_id' exists
         if "entity_id" not in normalized_df.columns:
-            normalized_df["entity_id"] = "CSE-01"
+            normalized_df["entity_id"] = "UNVERIFIABLE"
 
         # Severity normalization: critical / Critical / CRITICAL -> CRITICAL
         if "severity" in normalized_df.columns:
             normalized_df["severity"] = normalized_df["severity"].astype(str).str.strip().str.upper()
             valid_sevs = {"CRITICAL", "HIGH", "MEDIUM", "LOW"}
-            normalized_df["severity"] = normalized_df["severity"].apply(lambda s: s if s in valid_sevs else "MEDIUM")
+            normalized_df["severity"] = normalized_df["severity"].apply(lambda s: s if s in valid_sevs else "UNVERIFIABLE")
 
         # Status normalization: Closed / closed -> CLOSED
         if "status" in normalized_df.columns:
@@ -151,12 +151,12 @@ class DataIngestionEngine:
 
         # Disposition normalization
         if "disposition" in normalized_df.columns:
-            normalized_df["disposition"] = normalized_df["disposition"].fillna("FALSE_POSITIVE").astype(str).str.strip().str.upper()
+            normalized_df["disposition"] = normalized_df["disposition"].fillna("UNVERIFIABLE").astype(str).str.strip().str.upper()
 
         # Timestamps normalization: convert to ISO datetime
         for time_col in ["created_at", "closed_at", "acknowledged_at", "updated_at", "escalated_at"]:
             if time_col in normalized_df.columns:
-                normalized_df[time_col] = pd.to_datetime(normalized_df[time_col], errors="coerce").fillna(pd.Timestamp.now(timezone.utc))
+                normalized_df[time_col] = pd.to_datetime(normalized_df[time_col], errors="coerce")
 
         invalid_count = len(errors) * 5 if errors else 0
         valid_count = max(0, total_records - invalid_count)
@@ -191,15 +191,15 @@ class DataIngestionEngine:
                 if not db.query(Alert).filter(Alert.id == alert_id).first():
                     alert = Alert(
                         id=alert_id,
-                        entity_id=str(row.get("entity_id", entity_id)),
+                        entity_id=str(row.get("entity_id", "UNVERIFIABLE")),
                         asset_id=str(row.get("asset_id")) if pd.notna(row.get("asset_id")) else None,
-                        severity=str(row.get("severity", "MEDIUM")),
-                        category=str(row.get("category", "MALWARE")),
-                        status=str(row.get("status", "CLOSED")),
-                        created_at=row.get("created_at", datetime.now(timezone.utc)),
-                        acknowledged_at=row.get("acknowledged_at"),
-                        closed_at=row.get("closed_at"),
-                        disposition=str(row.get("disposition", "FALSE_POSITIVE"))
+                        severity=str(row.get("severity", "UNVERIFIABLE")),
+                        category=str(row.get("category", "UNVERIFIABLE")),
+                        status=str(row.get("status", "UNVERIFIABLE")),
+                        created_at=row.get("created_at") if pd.notna(row.get("created_at")) else None,
+                        acknowledged_at=row.get("acknowledged_at") if pd.notna(row.get("acknowledged_at")) else None,
+                        closed_at=row.get("closed_at") if pd.notna(row.get("closed_at")) else None,
+                        disposition=str(row.get("disposition", "UNVERIFIABLE"))
                     )
                     db.add(alert)
                     inserted += 1
@@ -211,12 +211,12 @@ class DataIngestionEngine:
                 if not db.query(Case).filter(Case.id == case_id).first():
                     case = Case(
                         id=case_id,
-                        alert_id=str(row.get("alert_id", "ALT-00001")),
-                        entity_id=str(row.get("entity_id", entity_id)),
-                        investigation_text=str(row.get("investigation_text", "Investigation completed.")),
-                        investigation_actions=int(row.get("investigation_actions", 1)),
-                        created_at=row.get("created_at", datetime.now(timezone.utc)),
-                        closed_at=row.get("closed_at")
+                        alert_id=str(row.get("alert_id", "UNVERIFIABLE")),
+                        entity_id=str(row.get("entity_id", "UNVERIFIABLE")),
+                        investigation_text=str(row.get("investigation_text", "UNVERIFIABLE")),
+                        investigation_actions=int(row.get("investigation_actions", 0)) if pd.notna(row.get("investigation_actions")) else 0,
+                        created_at=row.get("created_at") if pd.notna(row.get("created_at")) else None,
+                        closed_at=row.get("closed_at") if pd.notna(row.get("closed_at")) else None
                     )
                     db.add(case)
                     inserted += 1
@@ -228,11 +228,11 @@ class DataIngestionEngine:
                 if not db.query(Asset).filter(Asset.id == ast_id).first():
                     asset = Asset(
                         id=ast_id,
-                        entity_id=str(row.get("entity_id", entity_id)),
-                        asset_type=str(row.get("asset_type", "Enterprise Host")),
-                        criticality=str(row.get("criticality", "HIGH")),
-                        monitoring_expected=bool(row.get("monitoring_expected", True)),
-                        monitoring_status=str(row.get("monitoring_status", "ACTIVE"))
+                        entity_id=str(row.get("entity_id", "UNVERIFIABLE")),
+                        asset_type=str(row.get("asset_type", "UNVERIFIABLE")),
+                        criticality=str(row.get("criticality", "UNVERIFIABLE")),
+                        monitoring_expected=bool(row.get("monitoring_expected", False)),
+                        monitoring_status=str(row.get("monitoring_status", "UNVERIFIABLE"))
                     )
                     db.add(asset)
                     inserted += 1
@@ -244,10 +244,10 @@ class DataIngestionEngine:
                 if not db.query(Escalation).filter(Escalation.id == esc_id).first():
                     esc = Escalation(
                         id=esc_id,
-                        case_id=str(row.get("case_id", "CAS-00001")),
-                        escalated=bool(row.get("escalated", True)),
-                        escalation_level=str(row.get("escalation_level", "TIER_2")),
-                        escalated_at=row.get("escalated_at", datetime.now(timezone.utc))
+                        case_id=str(row.get("case_id", "UNVERIFIABLE")),
+                        escalated=bool(row.get("escalated", False)),
+                        escalation_level=str(row.get("escalation_level", "UNVERIFIABLE")),
+                        escalated_at=row.get("escalated_at") if pd.notna(row.get("escalated_at")) else None
                     )
                     db.add(esc)
                     inserted += 1
@@ -259,10 +259,10 @@ class DataIngestionEngine:
                 if not db.query(Response).filter(Response.id == resp_id).first():
                     resp = Response(
                         id=resp_id,
-                        case_id=str(row.get("case_id", "CAS-00001")),
-                        response_action=str(row.get("response_action", "HOST_ISOLATION")),
-                        result=str(row.get("result", "SUCCESS")),
-                        created_at=row.get("created_at", datetime.now(timezone.utc))
+                        case_id=str(row.get("case_id", "UNVERIFIABLE")),
+                        response_action=str(row.get("response_action", "UNVERIFIABLE")),
+                        result=str(row.get("result", "UNVERIFIABLE")),
+                        created_at=row.get("created_at") if pd.notna(row.get("created_at")) else None
                     )
                     db.add(resp)
                     inserted += 1

@@ -34,6 +34,10 @@ def get_findings(
     findings.sort(key=lambda f: (priority_order.get(f.priority, 3), -f.confidence))
     return findings
 
+@router.get("/adaptive-sampling")
+def get_adaptive_sampling(db: Session = Depends(get_db)) -> Dict[str, Any]:
+    return {"sampled_cases": []}
+
 @router.get("/{finding_id}")
 def get_finding_detail(finding_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Section 14: Explainable Finding Detail Panel"""

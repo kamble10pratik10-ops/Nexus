@@ -9,6 +9,7 @@ import {
   Search,
   Shield,
   X,
+  Database,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -26,6 +27,10 @@ const navGroups = [
   {
     label: 'Outputs',
     items: [{ name: 'Reports & Validation', path: '/reports', icon: BarChart3 }],
+  },
+  {
+    label: 'Configuration',
+    items: [{ name: 'Data Ingestion', path: '/integrations', icon: Database }],
   },
 ];
 

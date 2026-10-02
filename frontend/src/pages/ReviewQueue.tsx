@@ -17,8 +17,19 @@ export function ReviewQueue() {
     error,
   } = useQuery<Finding[]>({
     queryKey: ["all-findings"],
-    queryFn: async () =>
-      (await axios.get(`${API_URL}/findings`)).data.findings || [],
+    queryFn: async () => {
+      const data = (await axios.get(`${API_URL}/findings`)).data;
+      const arr = Array.isArray(data) ? data : (data.findings || []);
+      return arr.map((item: any) => ({
+        finding_id: item.id || item.finding_id,
+        type: item.finding_type || item.type || "Unknown",
+        entity_id: item.entity_id || "Unknown",
+        severity: item.severity === "CRITICAL" ? "Critical" : item.severity === "HIGH" ? "High" : item.severity === "MEDIUM" ? "Medium" : "Low",
+        description: item.title || item.explanation || item.description || "",
+        outcome: item.reviewed ? (item.review_decision === "CONFIRMED_GAP" ? "SUPPORTED" : "CONTRADICTED") : undefined,
+        evidence: item.evidence
+      }));
+    }
   });
   const queue = useMemo(
     () =>

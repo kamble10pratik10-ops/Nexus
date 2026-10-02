@@ -258,19 +258,19 @@ export function Overview() {
 
   useEffect(() => {
     const endpointByKey: Record<EngineKey, string> = {
-      executionGaps: "execution-gaps",
-      nlpFindings: "nlp-templated",
-      negativeSpace: "negative-space",
-      peerBenchmarks: "peer-benchmarking",
-      evidenceChains: "evidence-chains",
-      capabilityDrift: "capability-drift",
-      remediationEffectiveness: "remediation-effectiveness",
-      metricIntegrity: "metric-integrity",
-      evidenceForensics: "evidence-forensics",
-      investigationQuality: "investigation-quality",
-      detectionDecay: "detection-decay",
-      capacityStress: "capacity-stress",
-      peerBlindspot: "peer-blindspot",
+      executionGaps: "?finding_type=EXECUTION_GAP",
+      nlpFindings: "?finding_type=NLP_TEMPLATED",
+      negativeSpace: "?finding_type=NEGATIVE_SPACE",
+      peerBenchmarks: "?finding_type=PEER_DEVIATION",
+      evidenceChains: "?finding_type=EVIDENCE_CHAIN",
+      capabilityDrift: "?finding_type=CAPABILITY_DRIFT",
+      remediationEffectiveness: "?finding_type=REMEDIATION_EFFECTIVENESS",
+      metricIntegrity: "?finding_type=METRIC_INTEGRITY",
+      evidenceForensics: "?finding_type=EVIDENCE_FORENSICS",
+      investigationQuality: "?finding_type=INVESTIGATION_QUALITY",
+      detectionDecay: "?finding_type=DETECTION_DECAY",
+      capacityStress: "?finding_type=CAPACITY_STRESS",
+      peerBlindspot: "?finding_type=PEER_BLINDSPOT",
     };
 
     const controller = new AbortController();
@@ -296,11 +296,11 @@ export function Overview() {
         }),
       ...engineMeta.map(({ key }) =>
         axios
-          .get(`${API_URL}/findings/${endpointByKey[key]}`, options)
+          .get(`${API_URL}/findings${endpointByKey[key]}`, options)
           .then((r) =>
             setEngines((current) => ({
               ...current,
-              [key]: r.data.findings || [],
+              [key]: Array.isArray(r.data) ? r.data : (r.data.findings || []),
             })),
           )
           .catch(() => {
@@ -337,13 +337,32 @@ export function Overview() {
 
   return (
     <div className="page-shell space-y-8">
-      <header className="page-header">
-        <p className="page-eyebrow">Supervisory command centre</p>
-        <h1 className="page-title">Operational assurance overview</h1>
-        <p className="page-description">
-          Prioritised evidence, data-quality signals, and engine findings across
-          the submitted control environment.
-        </p>
+      <header className="page-header flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <p className="page-eyebrow">Supervisory command centre</p>
+          <h1 className="page-title">Operational assurance overview</h1>
+          <p className="page-description">
+            Prioritised evidence, data-quality signals, and engine findings across
+            the submitted control environment.
+          </p>
+        </div>
+        <button
+          onClick={async () => {
+            const btn = document.getElementById("demo-btn");
+            if (btn) btn.innerText = "Loading...";
+            try {
+              await axios.post(`${API_URL}/ingestion/load-demo`);
+              window.location.reload();
+            } catch (err) {
+              alert("Failed to load demo dataset");
+              if (btn) btn.innerText = "Load Demo Dataset";
+            }
+          }}
+          id="demo-btn"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500 whitespace-nowrap shrink-0"
+        >
+          Load Demo Dataset
+        </button>
       </header>
 
       {summaryFailed && (

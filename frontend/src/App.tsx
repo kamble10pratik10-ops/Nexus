@@ -9,6 +9,7 @@ import { Findings } from './pages/Findings';
 import { ReviewQueue } from './pages/ReviewQueue';
 import { Entities } from './pages/Entities';
 import { Reports } from './pages/Reports';
+import { Integrations } from './pages/Integrations';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ function App() {
             <Route path="review" element={<ReviewQueue />} />
             <Route path="entities" element={<Entities />} />
             <Route path="reports" element={<Reports />} />
+            <Route path="integrations" element={<Integrations />} />
           </Route>
         </Routes>
       </BrowserRouter>

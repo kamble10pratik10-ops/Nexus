@@ -25,7 +25,7 @@ Manually reviewing hundreds of thousands of incident records is humanly impossib
 
 ```mermaid
 graph TD
-    subgraph Data Sources ["CSE Periodic Batch Submissions (CSV / JSON / XLSX)"]
+    subgraph Data Sources ["CSE Periodic Batch Submissions (CSV / JSON)"]
         D1["Alert Logs"]
         D2["Investigation Cases"]
         D3["Escalation Chains"]
@@ -41,10 +41,10 @@ graph TD
     subgraph AnalyticsEngines ["Analytical & Supervisory Engines"]
         M2["Module 2: Execution Gap Detector<br/>(Sub-90s closures, KPI gaming)"]
         M3["Module 3: Negative Space Detector<br/>(Missing telemetry, silent assets)"]
-        M4["Module 4: Peer Benchmarking<br/>(Robust IQR, MAD, Sector percentiles)"]
+        M4["Module 4: Peer Benchmarking<br/>(Sector averages and baselines)"]
         M5["Module 5: Anomaly Detector<br/>(Isolation Forest 8D Outliers)"]
         M6["Module 6: Risk Engine<br/>(Cyber Resilience & Attention Index)"]
-        M10["Module 10: Cryptographic Audit Ledger<br/>(SHA-256 Hash Chain)"]
+        M10["Module 10: Audit Ledger<br/>(Finding Provenance)"]
     end
 
     subgraph LocalAI ["Module 7: Local Offline AI Supervisory Assistant"]
@@ -57,7 +57,7 @@ graph TD
         DASH["Module 8: Supervisory Dashboard & Sector Heatmap"]
         WORK["Module 9: Investigation Workspace & Timeline"]
         REP["Reports Generator (PDF / DOCX / HTML)"]
-        RULES["55 Active Supervisory Rules Catalog"]
+        RULES["Supervisory Rules Catalog"]
     end
 
     Data Sources --> Module1
@@ -73,22 +73,22 @@ graph TD
 
 | Module # | Module Name | Primary Operational Function |
 |---|---|---|
-| **Module 1** | **Data Ingestion Hub** | Multi-format (CSV/JSON/XLSX) parser, auto-schema detection, missing field warnings, record preview, and Data Quality Scoring. |
+| **Module 1** | **Data Ingestion Hub** | Multi-format (CSV/JSON) parser, auto-schema detection, missing field warnings, record preview, and Data Quality Scoring. |
 | **Module 2** | **Execution Gap Detector** | Flags triage evasion, sub-90s rapid closures of Critical threats, unescalated True Positives, and shift-end ticket purging. |
 | **Module 3** | **Negative Space Detector** | Answers *"What expected evidence is missing?"* Identifies silent critical assets, zero-authentication anomalies, and weekend blackouts. |
-| **Module 4** | **Peer Benchmarking** | Compares entities against sector peers using robust statistics (P25, Median, P75, Interquartile Range, Robust Z-scores). |
+| **Module 4** | **Peer Benchmarking** | Compares entities against sector peers using sector averages and baselines. |
 | **Module 5** | **Anomaly Detection** | Multi-dimensional **Isolation Forest** behavioral model detecting outlier entities across 8 operational feature dimensions. |
 | **Module 6** | **Risk Engine** | Computes **Cyber Resilience Score (0-100)**, **Supervisory Attention Index (SAI)**, Investigation Quality, and Escalation Effectiveness. |
 | **Module 7** | **AI Supervisory Assistant** | 100% offline, local intelligence that drafts regulatory memorandums, explains findings, and cites empirical source evidence. |
 | **Module 8** | **Supervisory Dashboard** | Command Center executive overview with national sector risk heatmaps, prioritized review queues, and capability radar charts. |
 | **Module 9** | **Investigation Workspace** | Entity deep-dive console with chronological operational timelines, asset inventories, and evidence dossiers. |
-| **Module 10** | **Cryptographic Audit Ledger** | Immutable sequential SHA-256 block ledger linking Dataset Hash + Rule Version + Finding Hash for evidentiary admissibility. |
+| **Module 10** | **Audit Ledger** | Links Finding provenance and Dataset metadata for evidentiary admissibility. |
 
 ---
 
 ## 4. Rule Engine (55 Active Cyber Supervisory Rules)
 
-SAT-SA includes a comprehensive catalog of **55 standardized cyber supervisory rules** organized into five operational domains:
+SAT-SA includes a catalog of **cyber supervisory rules** organized into five operational domains:
 
 ### Domain 1: Execution Gaps (Rules 1 - 15)
 - `RULE-EG-001`: Critical Alert Rapid Closure Without Escalation (< 90 seconds).
@@ -162,7 +162,7 @@ SAT-SA includes a comprehensive catalog of **55 standardized cyber supervisory r
 - **Frontend:** Next.js / React 19, TypeScript, Tailwind CSS, Lucide Icons, Recharts, ECharts.
 - **Backend:** FastAPI, SQLAlchemy, SQLite (Standalone zero-config) / PostgreSQL (Dockerized).
 - **Analytics:** NumPy, Pandas, Pure Isolation Forest, SciPy, NetworkX.
-- **Security:** JWT Authentication, Role-Based Access Control (RBAC), SHA-256 Ledger.
+- **Security:** JWT Authentication (Demo Mode), Role-Based Access Control (RBAC).
 - **Offline / Air-Gapped:** Zero external calls, zero telemetry egress, 100% self-contained.
 
 ---
@@ -183,7 +183,7 @@ SAT-SA includes a comprehensive catalog of **55 standardized cyber supervisory r
 1. **Start Backend:**
    ```bash
    cd backend
-   python main.py
+   uvicorn app.main:app --host 0.0.0.0 --port 8000
    # Backend listens at http://localhost:8000
    ```
 2. **Start Frontend:**
