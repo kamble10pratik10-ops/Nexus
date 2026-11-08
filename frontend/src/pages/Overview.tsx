@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ChevronDown } from "lucide-react";
 import ClaimsVerificationMatrix from "../components/ClaimsVerificationMatrix";
@@ -228,6 +229,7 @@ function FindingCard({
 }
 
 export function Overview() {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
   const [summaryFailed, setSummaryFailed] = useState(false);
   const [engines, setEngines] = useState<Record<EngineKey, Finding[]>>(() => ({
@@ -347,21 +349,10 @@ export function Overview() {
           </p>
         </div>
         <button
-          onClick={async () => {
-            const btn = document.getElementById("demo-btn");
-            if (btn) btn.innerText = "Loading...";
-            try {
-              await axios.post(`${API_URL}/ingestion/load-demo`);
-              window.location.reload();
-            } catch (err) {
-              alert("Failed to load demo dataset");
-              if (btn) btn.innerText = "Load Demo Dataset";
-            }
-          }}
-          id="demo-btn"
+          onClick={() => navigate("/integrations")}
           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-500 whitespace-nowrap shrink-0"
         >
-          Load Demo Dataset
+          Load Data
         </button>
       </header>
 

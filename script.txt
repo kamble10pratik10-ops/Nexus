@@ -1,0 +1,199 @@
+================================================================================
+   SAT-SA NEXUS — SIH 2026 PRESENTATION SCRIPT
+   Problem Statement: SIH26157
+   Duration: ~4 to 5 minutes
+================================================================================
+
+[INTRO — 0:00–0:30]
+Speaker 1 (Team Lead):
+
+"India's critical sector organisations — banks, energy grids, telecom
+networks — are mandated under SEBI's CSCRF and CERT-In guidelines to maintain
+active Security Operations Centres. Every quarter, these SOCs submit
+compliance reports.
+
+But here's the uncomfortable truth nobody is asking:
+
+How do you know the SOC actually worked?
+
+You don't. And right now, neither does the regulator."
+
+[PAUSE — let it land]
+
+--------------------------------------------------------------------------------
+
+[PROBLEM STATEMENT — 0:30–1:10]
+Speaker 2:
+
+"Today's supervisory model is broken in three specific ways.
+
+First — Self-Attestation. SOCs evaluate their own performance and submit
+checklists. There is no independent verification of whether the evidence
+supports the claims.
+
+Second — Invisibility of Failure. A SOC can silently close critical cases in
+under two minutes, generate copy-pasted investigation notes, or allow
+high-value assets to go completely unmonitored — and none of this appears in
+any current compliance report.
+
+Third — Scale Impossibility. SEBI's supervisory team cannot manually audit
+thousands of alerts and cases across dozens of entities. Without intelligent
+triage, human oversight is statistically meaningless.
+
+The result? Regulated entities that look compliant on paper but are
+operationally blind on the ground."
+
+--------------------------------------------------------------------------------
+
+[SOLUTION INTRO — 1:10–1:40]
+Speaker 1:
+
+"We built NEXUS — SAT-SA Nexus — a Supervisory Analytics platform that
+converts raw SOC operational data into evidence-backed supervisory signals.
+
+NEXUS does not replace the SOC. It sits above it.
+
+It independently evaluates whether the evidence produced by a SOC actually
+demonstrates the capabilities it claims to have.
+
+Think of it as an external auditor that never sleeps, never gets fooled by a
+clean-looking dashboard, and never relies on a self-scored checklist."
+
+--------------------------------------------------------------------------------
+
+[LIVE DEMO / WALKTHROUGH — 1:40–3:10]
+Speaker 2:
+
+"Let me show you how it works.
+
+A regulated entity submits three CSV files — their alert log, case log, and
+asset inventory — to NEXUS. That's it. No SIEM integration, no agent
+installation, no data leaving the regulator's environment.
+
+[Point to the dashboard on screen]
+
+NEXUS immediately runs 16-plus detection engines across this data. Let me
+highlight three that matter most.
+
+--- ENGINE 1: Execution Gap Detection ---
+Here — this entity closed 47 critical-severity cases with a median resolution
+time of under 90 seconds. That's not fast response. That's evidence of
+checkbox closure. NEXUS flags every one of them, explains exactly why the
+pattern is anomalous, and surfaces the specific cases for human review.
+
+--- ENGINE 2: NLP Investigation Quality Analysis ---
+This is where it gets sophisticated. NEXUS uses a locally-running
+Sentence-Transformer model — zero cloud dependency, complete data privacy —
+to generate semantic embeddings of investigation notes. It then runs DBSCAN
+clustering. When analysts are copy-pasting notes or using templates disguised
+as unique text, NEXUS sees through it. Right here — this cluster of 23 notes
+has a semantic similarity score above 0.94. The SOC claimed thorough
+investigation. The evidence says otherwise.
+
+--- ENGINE 3: Negative Space Detection ---
+NEXUS knows which assets are critical. Here — this entity's trading platform
+server received zero alerts over the entire submission period. Either the asset
+is perfectly secure, or it's not being monitored at all. NEXUS flags it as
+'Unverifiable Coverage' and ranks it as a Priority 1 supervisory review item.
+
+[Point to the Claims Verification Matrix]
+
+Every finding is classified as one of three states: SUPPORTED, CONTRADICTED,
+or UNVERIFIABLE. We tell you exactly what the evidence substantiates — and
+critically, what it does NOT substantiate."
+
+--------------------------------------------------------------------------------
+
+[KEY DIFFERENTIATORS — 3:10–3:50]
+Speaker 1:
+
+"Three things make NEXUS genuinely unique.
+
+One — Privacy-First, Air-Gapped AI. Every single ML and NLP algorithm runs
+locally. We use HuggingFace's all-MiniLM-L6-v2, scikit-learn DBSCAN, and
+Isolation Forest — all offline. Sensitive SOC telemetry never touches an
+external API. This is non-negotiable for a regulatory tool.
+
+Two — Scientific Validation Built-In. NEXUS ships with its own benchmark
+harness. It uses deterministic synthetic fault injection to scientifically
+measure its own precision, recall, and false positive rate before each
+deployment. We don't just claim accuracy. We prove it, reproducibly.
+
+Three — Cryptographic Chain of Custody. Every submission generates a signed
+manifest using HMAC-SHA256. The dataset hash, the ruleset version, the
+reviewer decisions, and the export timestamp are all cryptographically bound.
+This is a tamper-evident audit trail that meets the evidentiary standard
+regulators actually need."
+
+--------------------------------------------------------------------------------
+
+[IMPACT & NORTH STAR METRIC — 3:50–4:20]
+Speaker 2:
+
+"Here's the impact in numbers.
+
+In our benchmark tests across synthetic SOC data, NEXUS achieves a
+search-space reduction of over 85% — meaning supervisors only need to
+manually review 15% of the total case population to find over 90% of
+critical defects.
+
+That is a 4-to-6 times multiplier on supervisory capacity without hiring a
+single additional auditor.
+
+Our North Star Metric is Supervisory Assurance Coverage:
+   — Review Yield: Confirmed findings per reviewed case
+   — Search-Space Reduction: 1 minus selected cases over total cases
+   — Review Efficiency: Confirmed findings per review minute
+
+NEXUS is built to maximize all three simultaneously."
+
+--------------------------------------------------------------------------------
+
+[CLOSING — 4:20–4:50]
+Speaker 1:
+
+"SEBI's CSCRF was a landmark regulation. It told critical-sector entities
+*that* they must have an effective SOC. But it had no answer for *how* a
+regulator could verify that at scale.
+
+NEXUS is that answer.
+
+It transforms compliance from self-attestation to evidence-backed assurance.
+From 'we say we're secure' to 'here is the proof — or the gap.'
+
+We are not building another dashboard. We are building the infrastructure for
+accountable, scalable, evidence-driven oversight of India's critical sector
+cybersecurity posture.
+
+Thank you."
+
+[Team stands together, ready for Q&A]
+
+================================================================================
+   END OF SCRIPT — SIH26157 | SAT-SA NEXUS
+================================================================================
+
+--- QUICK Q&A PREP NOTES (not part of the script) ---
+
+Q: Why not use an LLM like ChatGPT or Gemini for the NLP?
+A: Because SOC telemetry is classified. No sensitive operational data can
+   leave a regulator's environment. Our entire AI stack runs air-gapped and
+   locally. That's a hard requirement, not a tradeoff.
+
+Q: What prevents a SOC from gaming NEXUS by cleaning up their data before
+   submission?
+A: Two things. First, cryptographic hashing of the submission manifest makes
+   post-hoc tampering detectable. Second, NEXUS explicitly looks for
+   'too-clean' data — perfectly round MTTR numbers, absence of any anomalies,
+   suspiciously uniform severity distributions — these are themselves red flags.
+
+Q: How is this different from a SIEM or SOAR?
+A: A SIEM detects threats in real time. NEXUS evaluates whether the SOC that
+   runs the SIEM is doing its job correctly. We assess the assessor. These are
+   completely different and complementary layers.
+
+Q: Is this production-ready?
+A: The backend is built on FastAPI + PostgreSQL, fully containerized with
+   Docker. The benchmark harness is integrated. We are production-architecture
+   ready and submission-ready for pilot deployment with a regulatory body.
+

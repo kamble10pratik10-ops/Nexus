@@ -12,7 +12,7 @@ Based on the executive verdict, the primary risk is credibility. The product sto
 - **Expose Demo / Reset Workflow:** Add a clear path in the active UI for judges to load a demo dataset, run the analysis, and review findings without manual backend intervention.
 - **Realign Documentation:** Remove or properly qualify unsupported claims in the documentation (e.g., XLSX support, robust IQR/MAD peer statistics, cryptographic audit ledger) so the implementation matches the promises.
 
-## 2. Benchmark Improvements
+## 2. Benchmark Improvements(Completed)
 The benchmark must pivot from merely showing "AI accuracy" to proving that NEXUS reduces supervisory workload while detecting high-risk SOC failures.
 
 - **Implement a Three-Level Evaluation Model:**

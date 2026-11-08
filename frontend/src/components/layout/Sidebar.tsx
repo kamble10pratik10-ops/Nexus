@@ -26,7 +26,10 @@ const navGroups = [
   },
   {
     label: 'Outputs',
-    items: [{ name: 'Reports & Validation', path: '/reports', icon: BarChart3 }],
+    items: [
+      { name: 'Reports & Validation', path: '/reports', icon: BarChart3 },
+      { name: 'Benchmark Evaluation', path: '/benchmark', icon: BarChart3 }
+    ],
   },
   {
     label: 'Configuration',

@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from app.database import get_db
 from app.analytics.benchmarking import PeerBenchmarkingEngine
+from app.analytics.benchmark_evaluator import BenchmarkEvaluator
 
-router = APIRouter(prefix="/benchmarking", tags=["Peer Benchmarking"])
+router = APIRouter(prefix="/benchmarking", tags=["Peer Benchmarking", "Engine Evaluation"])
 
 @router.get("/metrics")
 def get_benchmarking_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
@@ -35,3 +36,8 @@ def get_benchmarking_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         "entity_metrics": table,
         "sector_averages": sector_averages
     }
+
+@router.get("/report")
+def get_benchmark_report(db: Session = Depends(get_db)) -> Dict[str, Any]:
+    """Retrieves the three-level evaluation model and operational metrics."""
+    return BenchmarkEvaluator.generate_benchmark_report(db)
