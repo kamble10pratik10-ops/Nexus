@@ -1,10 +1,14 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 pydantic-settings
 sqlalchemy
 psycopg2-binary
 python-multipart
-sqlalchemy
-psycopg2-binary
 python-dotenv
+PyJWT
+passlib[bcrypt]
+pandas
+numpy
+scikit-learn
+sentence-transformers
