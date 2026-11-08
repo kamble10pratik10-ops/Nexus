@@ -1,3 +1,4 @@
+import uuid
 import os
 import random
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
@@ -60,7 +61,7 @@ async def upload_dataset(
         val_status = "ERROR" if val_res["errors"] else ("WARNING" if val_res["warnings"] and len(val_res["warnings"]) > 1 else "SUCCESS")
 
         job = IngestionJob(
-            id=f"JOB-{random.randint(10000, 99999)}",
+            id=f"JOB-{uuid.uuid4().hex[:8].upper()}",
             file_name=file.filename,
             entity_id=entity_id,
             file_type=file_type,
