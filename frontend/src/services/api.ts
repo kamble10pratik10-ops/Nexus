@@ -11,7 +11,9 @@ import {
   User
 } from '../types';
 
-export const API_BASE_URL = 'http://localhost:8000/api';
+export const API_BASE_URL = typeof window !== 'undefined' && (window.location.port === '5173' || window.location.port === '5174')
+  ? '/api'
+  : 'http://127.0.0.1:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

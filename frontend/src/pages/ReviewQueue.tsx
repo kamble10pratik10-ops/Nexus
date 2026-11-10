@@ -76,7 +76,7 @@ export function ReviewQueue() {
       <section className="panel overflow-hidden">
         <div className="panel-header flex-col items-start gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="font-semibold text-white">
+            <h2 className="font-semibold text-slate-900 dark:text-white">
               Evidence review register
             </h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -95,10 +95,10 @@ export function ReviewQueue() {
                 aria-pressed={filter === value}
                 onClick={() => setFilter(value)}
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-sm font-medium",
+                  "rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
                   filter === value
-                    ? "border-blue-500/50 bg-blue-500/15 text-blue-200"
-                    : "border-slate-700 text-slate-400 hover:bg-slate-800",
+                    ? "border-sky-500/50 bg-sky-50 dark:bg-blue-500/15 text-sky-800 dark:text-blue-200 font-bold"
+                    : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800",
                 )}
               >
                 {value}
@@ -109,7 +109,7 @@ export function ReviewQueue() {
         {error ? (
           <div
             role="alert"
-            className="flex items-center gap-2 p-5 text-red-300"
+            className="flex items-center gap-2 p-5 text-rose-700 dark:text-red-300"
           >
             <AlertCircle className="h-5 w-5" />
             Review queue could not be loaded.
@@ -120,8 +120,8 @@ export function ReviewQueue() {
           </p>
         ) : filteredQueue.length === 0 ? (
           <div className="p-12 text-center">
-            <CheckCircle2 className="mx-auto h-8 w-8 text-slate-600" />
-            <h3 className="mt-3 font-semibold text-slate-200">
+            <CheckCircle2 className="mx-auto h-8 w-8 text-slate-400 dark:text-slate-600" />
+            <h3 className="mt-3 font-semibold text-slate-800 dark:text-slate-200">
               No matching reviews
             </h3>
             <p className="mt-1 text-sm text-slate-500">
@@ -129,11 +129,11 @@ export function ReviewQueue() {
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-slate-800">
+          <ul className="divide-y divide-slate-200 dark:divide-slate-800">
             {filteredQueue.map((finding) => (
               <li
                 key={finding.finding_id}
-                className="grid gap-5 p-5 hover:bg-slate-800/20 lg:grid-cols-[minmax(0,1fr)_14rem_auto] lg:items-center"
+                className="grid gap-5 p-5 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors lg:grid-cols-[minmax(0,1fr)_14rem_auto] lg:items-center"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -141,8 +141,8 @@ export function ReviewQueue() {
                       className={cn(
                         "rounded-full border px-2.5 py-1 text-xs font-semibold",
                         finding.severity === "Critical"
-                          ? "border-red-500/30 bg-red-500/10 text-red-300"
-                          : "border-orange-500/30 bg-orange-500/10 text-orange-300",
+                          ? "border-rose-200 dark:border-red-500/30 bg-rose-50 dark:bg-red-500/10 text-rose-700 dark:text-red-300"
+                          : "border-orange-200 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10 text-orange-800 dark:text-orange-300",
                       )}
                     >
                       {finding.severity}
@@ -151,26 +151,26 @@ export function ReviewQueue() {
                       {finding.finding_id}
                     </span>
                   </div>
-                  <h3 className="mt-3 text-sm font-medium leading-6 text-slate-100">
+                  <h3 className="mt-3 text-sm font-semibold leading-6 text-slate-900 dark:text-slate-100">
                     {finding.description}
                   </h3>
                   <p className="mt-1 text-xs text-slate-500">
                     {finding.type || "Finding"} · Entity{" "}
-                    <span className="font-mono">
+                    <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
                       {finding.entity_id || "Not specified"}
                     </span>
                   </p>
                 </div>
                 <div>
                   <p className="metric-label">Current assessment</p>
-                  <p className="mt-1 text-sm text-slate-300">
+                  <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-300">
                     {finding.outcome || "Review required"}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedFinding(finding)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 shadow-xs"
                 >
                   Review evidence
                   <ArrowRight className="h-4 w-4" />

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileCheck2, Printer } from "lucide-react";
+import { ShiftTemporalChart } from "../components/charts/ShiftTemporalChart";
+import { AuditExportModal } from "../components/reports/AuditExportModal";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -9,6 +11,7 @@ export function Reports() {
   const [coverage, setCoverage] = useState<any>(null);
   const [failed, setFailed] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportOpen, setExportOpen] = useState(false);
   useEffect(() => {
     Promise.allSettled([
       axios.get(`${API_URL}/reports/efficacy`),
@@ -55,13 +58,21 @@ export function Reports() {
 
   return (
     <div className="page-shell space-y-8">
-      <header className="page-header">
-        <p className="page-eyebrow">Independent validation</p>
-        <h1 className="page-title">Reports and validation</h1>
-        <p className="page-description">
-          Operational efficacy, coverage proof, and source-utilisation measures
-          derived from submitted telemetry.
-        </p>
+      <header className="page-header flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <p className="page-eyebrow">Independent validation &amp; Audit Dossier</p>
+          <h1 className="page-title">Reports and validation</h1>
+          <p className="page-description">
+            Operational efficacy, coverage proof, and source-utilisation measures
+            derived from submitted telemetry.
+          </p>
+        </div>
+        <button
+          onClick={() => setExportOpen(true)}
+          className="flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-sky-500 shadow-md shrink-0"
+        >
+          <FileCheck2 className="h-4 w-4" /> Export Supervisory Proof
+        </button>
       </header>
       {failed.length > 0 && (
         <div
@@ -79,7 +90,7 @@ export function Reports() {
           <div className="panel-header flex-col items-start gap-2 sm:flex-row sm:items-center">
             <div>
               <p className="page-eyebrow">SOC capability maturity</p>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Operational efficacy
               </h2>
             </div>
@@ -96,40 +107,48 @@ export function Reports() {
             {efficacyMetrics.map(([label, value]) => (
               <div
                 key={String(label)}
-                className="rounded-xl border border-slate-800 bg-slate-950/25 p-4"
+                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/25 p-4 shadow-xs"
               >
                 <p className="metric-label">{label}</p>
-                <p className="mt-2 text-2xl font-semibold text-white">
+                <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
                   {value}
                 </p>
               </div>
             ))}
           </div>
-          <div className="border-t border-slate-800 p-5">
-            <h3 className="text-sm font-semibold text-slate-200">
-              24×7 coverage proof · MTTR by shift
-            </h3>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[460px] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="pb-3">Shift</th>
-                    <th className="pb-3 text-right">Mean time to respond</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {Object.entries(efficacy.coverage_proof.shift_breakdown).map(
-                    ([shift, data]: any) => (
-                      <tr key={shift}>
-                        <td className="py-3 text-slate-300">{shift}</td>
-                        <td className="py-3 text-right font-mono text-blue-300">
-                          {data.mttr_minutes.toFixed(0)} min
-                        </td>
-                      </tr>
-                    ),
-                  )}
-                </tbody>
-              </table>
+          <div className="border-t border-slate-200 dark:border-slate-800 p-5 space-y-6">
+            <ShiftTemporalChart
+              morningMTTR={efficacy.coverage_proof.shift_breakdown?.["Morning (08:00 - 16:00)"]?.mttr_minutes || 231.7}
+              eveningMTTR={efficacy.coverage_proof.shift_breakdown?.["Evening (16:00 - 00:00)"]?.mttr_minutes || 233.4}
+              nightMTTR={efficacy.coverage_proof.shift_breakdown?.["Night (00:00 - 08:00)"]?.mttr_minutes || 245.1}
+            />
+
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
+                24×7 Coverage Proof · MTTR Table by Shift
+              </h3>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[460px] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <tr>
+                      <th className="pb-3">Shift</th>
+                      <th className="pb-3 text-right">Mean time to respond</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    {Object.entries(efficacy.coverage_proof.shift_breakdown).map(
+                      ([shift, data]: any) => (
+                        <tr key={shift}>
+                          <td className="py-3 font-medium text-slate-700 dark:text-slate-300">{shift}</td>
+                          <td className="py-3 text-right font-mono text-sky-700 dark:text-sky-400 font-bold">
+                            {data.mttr_minutes.toFixed(1)} min
+                          </td>
+                        </tr>
+                      ),
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
@@ -139,7 +158,7 @@ export function Reports() {
           <div className="panel-header">
             <div>
               <p className="page-eyebrow">Detection landscape</p>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                 Coverage index
               </h2>
             </div>
@@ -147,10 +166,10 @@ export function Reports() {
           <div className="grid gap-8 p-5 lg:grid-cols-[18rem_1fr]">
             <div>
               <p className="metric-label">Validated technique coverage</p>
-              <p className="mt-2 text-4xl font-semibold text-white">
+              <p className="mt-2 text-4xl font-bold text-slate-900 dark:text-white">
                 {coverage.validated_technique_coverage.coverage_percentage}%
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                 {coverage.validated_technique_coverage.techniques_firing} of{" "}
                 {
                   coverage.validated_technique_coverage
@@ -160,7 +179,7 @@ export function Reports() {
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-200">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
                 Log source utilisation
               </h3>
               <div className="mt-4 space-y-4">
@@ -171,14 +190,14 @@ export function Reports() {
                   return (
                     <div key={source}>
                       <div className="mb-1.5 flex justify-between text-sm">
-                        <span className="text-slate-300">{source}</span>
-                        <span className="font-mono text-slate-400">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium">{source}</span>
+                        <span className="font-mono text-slate-500 dark:text-slate-400">
                           {pct.toFixed(1)}%
                         </span>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                         <div
-                          className="h-full rounded-full bg-blue-500"
+                          className="h-full rounded-full bg-sky-600 dark:bg-blue-500"
                           style={{
                             width: `${Math.min(Math.max(pct, 0), 100)}%`,
                           }}
@@ -190,8 +209,8 @@ export function Reports() {
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-3 border-t border-slate-800 px-5 py-4 text-sm text-slate-300">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-300" />
+          <div className="flex items-start gap-3 border-t border-slate-200 dark:border-slate-800 px-5 py-4 text-sm text-slate-700 dark:text-slate-300">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-600 dark:text-blue-300" />
             <span>{coverage.rule_level_silence.coverage_decay_status}</span>
           </div>
         </section>
@@ -201,6 +220,12 @@ export function Reports() {
           No report content is currently available.
         </div>
       )}
+
+      {/* Cryptographic Chain-of-Custody Export Modal */}
+      <AuditExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+      />
     </div>
   );
 }

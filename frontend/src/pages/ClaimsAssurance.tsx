@@ -23,17 +23,17 @@ interface Claim {
 const statusConfig = {
   SUPPORTED: {
     icon: CheckCircle2,
-    style: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
+    style: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
     label: "Supported by evidence",
   },
   CONTRADICTED: {
     icon: XCircle,
-    style: "border-red-500/25 bg-red-500/10 text-red-300",
+    style: "border-rose-200 dark:border-red-500/25 bg-rose-50 dark:bg-red-500/10 text-rose-700 dark:text-red-300",
     label: "Contradicted by evidence",
   },
   UNVERIFIABLE: {
     icon: HelpCircle,
-    style: "border-amber-500/25 bg-amber-500/10 text-amber-300",
+    style: "border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-300",
     label: "Evidence unverifiable",
   },
 };
@@ -105,27 +105,27 @@ export function ClaimsAssurance() {
           >
             <div className="panel-header">
               <div>
-                <h2 className="font-semibold text-white">
+                <h2 className="font-semibold text-slate-900 dark:text-white">
                   Declared capability register
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
                   Select a row to inspect its evidentiary basis.
                 </p>
               </div>
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
                 {isLoading ? "Loading…" : `${data.length} claims`}
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[650px] text-left text-sm">
-                <thead className="border-b border-slate-800 bg-slate-950/30 text-xs uppercase tracking-wide text-slate-500">
+                <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/30 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   <tr>
                     <th className="px-5 py-3">Declared capability</th>
                     <th className="px-5 py-3">Assessment</th>
                     <th className="px-5 py-3 text-right">Details</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                   {isLoading ? (
                     <tr>
                       <td
@@ -153,8 +153,8 @@ export function ClaimsAssurance() {
                         <tr
                           key={item.claim}
                           className={cn(
-                            "hover:bg-slate-800/30",
-                            selected && "bg-blue-500/10",
+                            "hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors",
+                            selected && "bg-sky-50 dark:bg-blue-500/10",
                           )}
                         >
                           <td className="px-5 py-4">
@@ -163,12 +163,12 @@ export function ClaimsAssurance() {
                               onClick={() =>
                                 setSelectedClaim(selected ? null : item.claim)
                               }
-                              className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                              className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                             >
-                              <span className="block font-medium text-slate-100">
+                              <span className="block font-semibold text-slate-900 dark:text-slate-100">
                                 {item.claim}
                               </span>
-                              <span className="mt-1 block max-w-2xl truncate text-xs text-slate-500">
+                              <span className="mt-1 block max-w-2xl truncate text-xs text-slate-500 dark:text-slate-400">
                                 {item.demo_text}
                               </span>
                             </button>
@@ -176,7 +176,7 @@ export function ClaimsAssurance() {
                           <td className="px-5 py-4">
                             <span
                               className={cn(
-                                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+                                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
                                 config.style,
                               )}
                             >
@@ -191,7 +191,7 @@ export function ClaimsAssurance() {
                               onClick={() =>
                                 setSelectedClaim(selected ? null : item.claim)
                               }
-                              className="rounded-md p-2 text-slate-400 hover:bg-slate-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                              className="rounded-md p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                             >
                               <ChevronRight className="h-4 w-4" />
                             </button>
@@ -213,7 +213,7 @@ export function ClaimsAssurance() {
               <div className="panel-header items-start">
                 <div>
                   <p className="page-eyebrow">Claim detail</p>
-                  <h2 className="mt-1 font-semibold text-white">
+                  <h2 className="mt-1 font-semibold text-slate-900 dark:text-white">
                     {selectedData.claim}
                   </h2>
                 </div>
@@ -221,7 +221,7 @@ export function ClaimsAssurance() {
                   type="button"
                   aria-label="Close claim details"
                   onClick={() => setSelectedClaim(null)}
-                  className="rounded-md p-1.5 text-slate-500 hover:bg-slate-800 hover:text-white"
+                  className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -229,7 +229,7 @@ export function ClaimsAssurance() {
               <div className="space-y-6 p-5">
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+                    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
                     statusConfig[selectedData.status].style,
                   )}
                 >
@@ -240,7 +240,7 @@ export function ClaimsAssurance() {
                     <FileSearch className="h-4 w-4" />
                     Evidentiary basis
                   </h3>
-                  <p className="mt-2 rounded-lg border border-slate-800 bg-slate-950/30 p-4 text-sm leading-6 text-slate-300">
+                  <p className="mt-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/30 p-4 text-sm leading-6 text-slate-800 dark:text-slate-300">
                     {selectedData.demo_text}
                   </p>
                 </div>
@@ -248,7 +248,7 @@ export function ClaimsAssurance() {
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                     Supervisory interpretation
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                  <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
                     {selectedData.status === "SUPPORTED"
                       ? "No immediate intervention is indicated by the submitted evidence."
                       : selectedData.status === "CONTRADICTED"
@@ -256,7 +256,7 @@ export function ClaimsAssurance() {
                         : "The current dataset is insufficient to validate the claim; additional source evidence may be required."}
                   </p>
                 </div>
-                <p className="border-t border-slate-800 pt-4 text-xs text-slate-500">
+                <p className="border-t border-slate-200 dark:border-slate-800 pt-4 text-xs text-slate-500">
                   This view is read-only. Formal report workflow is not
                   available from this screen.
                 </p>

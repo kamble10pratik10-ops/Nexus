@@ -291,6 +291,14 @@ class DataIngestionEngine:
                     db.add(alert)
                     known_alerts.add(alert_id)
                     inserted += 1
+                else:
+                    al = db.query(Alert).filter(Alert.id == alert_id).first()
+                    if al:
+                        if pd.notna(row.get("severity")):
+                            al.severity = str(row.get("severity"))
+                        if pd.notna(row.get("disposition")):
+                            al.disposition = str(row.get("disposition"))
+                        inserted += 1
             db.commit()
 
         elif detected_type == "case":
@@ -312,6 +320,13 @@ class DataIngestionEngine:
                     db.add(case)
                     known_cases.add(case_id)
                     inserted += 1
+                else:
+                    c = db.query(Case).filter(Case.id == case_id).first()
+                    if c:
+                        c.investigation_text = str(row.get("investigation_text", c.investigation_text))
+                        if pd.notna(row.get("investigation_actions")):
+                            c.investigation_actions = int(row.get("investigation_actions"))
+                        inserted += 1
             db.commit()
 
         elif detected_type == "asset":
@@ -331,6 +346,12 @@ class DataIngestionEngine:
                     db.add(asset)
                     known_assets.add(ast_id)
                     inserted += 1
+                else:
+                    ast = db.query(Asset).filter(Asset.id == ast_id).first()
+                    if ast:
+                        if pd.notna(row.get("monitoring_status")):
+                            ast.monitoring_status = str(row.get("monitoring_status"))
+                        inserted += 1
             db.commit()
 
         elif detected_type == "escalation":

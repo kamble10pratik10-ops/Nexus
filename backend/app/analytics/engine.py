@@ -15,7 +15,7 @@ def prioritize_finding(severity: str, confidence: float, criticality: str, findi
         return "P1"
     if criticality == "CRITICAL" and severity == "HIGH" and confidence >= 0.90:
         return "P1"
-    if finding_type in ["EXECUTION_GAP", "NEGATIVE_SPACE"] and severity == "HIGH" and confidence >= 0.90:
+    if finding_type in ["EXECUTION_GAP", "NEGATIVE_SPACE", "EVIDENCE_CHAIN", "METRIC_INTEGRITY"] and severity == "HIGH" and confidence >= 0.90:
         return "P1"
     if severity == "HIGH" or confidence >= 0.88:
         return "P2"

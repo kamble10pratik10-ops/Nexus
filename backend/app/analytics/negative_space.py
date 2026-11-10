@@ -28,7 +28,8 @@ class NegativeSpaceEngine:
         alert_categories = {a.category for a in alerts if a.category}
 
         # -----------------------------------------------------------------
-        # 1. Critical asset with monitoring_expected = TRUE but no monitoring evidence
+        # 1. Critical asset with monitoring_expected = TRUE but silent
+        # Type: NEGATIVE_SPACE
         # -----------------------------------------------------------------
         critical_assets = [ast for ast in assets if ast.criticality in ["CRITICAL", "HIGH"] and ast.monitoring_expected]
         silent_assets = [ast for ast in critical_assets if ast.id not in alert_asset_ids or ast.monitoring_status == "SILENT"]
@@ -40,7 +41,7 @@ class NegativeSpaceEngine:
                 entity_id=entity_id,
                 finding_type="NEGATIVE_SPACE",
                 rule_id="NEG_SPACE_1",
-                title="Critical assets with missing monitoring evidence",
+                title="Missing evidence: Crown-jewel assets exhibiting telemetry vacuum",
                 severity="CRITICAL",
                 priority="P1",
                 confidence=0.96,
@@ -58,8 +59,8 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 2. Expected alert category absent during observation period
+        # Type: DETECTION_DECAY
         # -----------------------------------------------------------------
-        # Look up expected categories for entity sector
         expected_cats = {"BRUTE_FORCE", "AUTHENTICATION", "PRIVILEGE_ESCALATION", "RANSOMWARE"}
         if ent.sector == "Energy":
             expected_cats.add("SCADA_TAMPERING")
@@ -69,15 +70,15 @@ class NegativeSpaceEngine:
         missing_categories = list(expected_cats - alert_categories)
         if missing_categories:
             findings.append(Finding(
-                id=f"FND-NS-2-{entity_id}",
+                id=f"FND-DD-2-{entity_id}",
                 entity_id=entity_id,
-                finding_type="NEGATIVE_SPACE",
+                finding_type="DETECTION_DECAY",
                 rule_id="NEG_SPACE_2",
-                title="Expected alert category absent during observation period",
+                title="Silent detection decay: Expected threat detection categories absent",
                 severity="HIGH",
                 priority="P2",
                 confidence=0.88,
-                explanation=f"Potential Negative Space: Expected security categories ({', '.join(missing_categories)}) were absent during the 90-day observation window. Expected evidence not observed. Requires supervisory verification.",
+                explanation=f"Potential Detection Decay: Core security categories ({', '.join(missing_categories)}) were absent during the observation window. Rules may have silently lapsed.",
                 evidence={
                     "missing_categories": missing_categories,
                     "observed_categories": list(alert_categories)
@@ -90,21 +91,22 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 3. Critical alerts without corresponding CASE records
+        # Type: EVIDENCE_CHAIN
         # -----------------------------------------------------------------
         critical_alerts = [a for a in alerts if a.severity == "CRITICAL"]
         orphaned_criticals = [a.id for a in critical_alerts if a.id not in case_by_alert]
 
         if orphaned_criticals:
             findings.append(Finding(
-                id=f"FND-NS-3-{entity_id}",
+                id=f"FND-EC-3-{entity_id}",
                 entity_id=entity_id,
-                finding_type="NEGATIVE_SPACE",
+                finding_type="EVIDENCE_CHAIN",
                 rule_id="NEG_SPACE_3",
-                title="Critical alerts without corresponding CASE records",
+                title="Broken evidence chains: Critical alerts lacking corresponding investigation cases",
                 severity="CRITICAL",
                 priority="P1",
                 confidence=0.93,
-                explanation=f"Potential Negative Space: {len(orphaned_criticals)} critical alerts were registered without an investigation case record created. Expected evidence not observed. Requires supervisory verification.",
+                explanation=f"Broken Evidence Chain: {len(orphaned_criticals)} critical alerts were registered without an investigation case record created.",
                 evidence={
                     "orphaned_critical_count": len(orphaned_criticals),
                     "sample_alerts": orphaned_criticals[:8]
@@ -117,24 +119,25 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 4. Cases without expected ESCALATION records
+        # Type: CAPABILITY_DRIFT
         # -----------------------------------------------------------------
         critical_cases = [c for c in cases if c.alert_id in {a.id for a in critical_alerts}]
         unescalated_cases = [c.id for c in critical_cases if c.id not in escalation_by_case]
 
-        if len(unescalated_cases) >= 5:
+        if len(unescalated_cases) >= 3:
             findings.append(Finding(
-                id=f"FND-NS-4-{entity_id}",
+                id=f"FND-CD-4-{entity_id}",
                 entity_id=entity_id,
-                finding_type="NEGATIVE_SPACE",
+                finding_type="CAPABILITY_DRIFT",
                 rule_id="NEG_SPACE_4",
-                title="Cases without expected ESCALATION records",
+                title="Capability drift: Critical incident handling bypassing required Tier-2 escalation",
                 severity="HIGH",
                 priority="P2",
                 confidence=0.89,
-                explanation=f"Potential Negative Space: {len(unescalated_cases)} critical cases concluded without secondary tier escalation records. Expected evidence not observed. Requires supervisory verification.",
+                explanation=f"Demonstrated Capability Drift: {len(unescalated_cases)} critical cases concluded without secondary tier escalation records.",
                 evidence={
                     "cases_without_escalation_count": len(unescalated_cases),
-                    "sample_case_ids": unescalated_cases[:6]
+                    "sample_cases": unescalated_cases[:6]
                 },
                 expected_workflow=["CASE_ANALYSIS", "TIER_2_ESCALATION_RECORD"],
                 observed_workflow=["CASE_ANALYSIS", "LOCAL_CLOSURE"],
@@ -144,22 +147,23 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 5. High-severity alerts without RESPONSE evidence
+        # Type: NEGATIVE_SPACE
         # -----------------------------------------------------------------
         high_alerts = [a for a in alerts if a.severity in ["CRITICAL", "HIGH"]]
         cases_for_high = [case_by_alert[a.id] for a in high_alerts if a.id in case_by_alert]
         unresponded_cases = [c.id for c in cases_for_high if c.id not in response_by_case]
 
-        if len(unresponded_cases) >= 10:
+        if len(unresponded_cases) >= 5:
             findings.append(Finding(
                 id=f"FND-NS-5-{entity_id}",
                 entity_id=entity_id,
                 finding_type="NEGATIVE_SPACE",
                 rule_id="NEG_SPACE_5",
-                title="High-severity alerts without RESPONSE evidence",
+                title="Missing evidence: High-severity cases lacking active response artifacts",
                 severity="HIGH",
                 priority="P1",
                 confidence=0.91,
-                explanation=f"Potential Negative Space: {len(unresponded_cases)} high/critical cases show zero incident response evidence (e.g. host isolation, credential revocation). Expected evidence not observed. Requires supervisory verification.",
+                explanation=f"Potential Negative Space: {len(unresponded_cases)} high/critical cases show zero incident response evidence (e.g. host isolation, credential revocation).",
                 evidence={
                     "unresponded_case_count": len(unresponded_cases),
                     "sample_cases": unresponded_cases[:6]
@@ -172,19 +176,20 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 6. Unexpectedly low activity compared with peer entities
+        # Type: PEER_BLINDSPOT
         # -----------------------------------------------------------------
         total_alerts = len(alerts)
-        if total_alerts < 60:
+        if total_alerts < 70:
             findings.append(Finding(
-                id=f"FND-NS-6-{entity_id}",
+                id=f"FND-PB-6-{entity_id}",
                 entity_id=entity_id,
-                finding_type="NEGATIVE_SPACE",
+                finding_type="PEER_BLINDSPOT",
                 rule_id="NEG_SPACE_6",
-                title="Unexpectedly low activity compared with peer entities",
+                title="Peer blind-spot: Unusually low alert volume indicates unmonitored subnets",
                 severity="MEDIUM",
                 priority="P3",
                 confidence=0.86,
-                explanation=f"Potential Negative Space: Entity recorded only {total_alerts} alerts over 90 days, significantly lower than peer baseline (>180 alerts). Expected evidence not observed. Requires supervisory verification.",
+                explanation=f"Peer Blindspot: Entity recorded only {total_alerts} alerts over observation window, significantly lower than sector peer average (>180 alerts).",
                 evidence={
                     "observed_alert_count": total_alerts,
                     "peer_expected_minimum": 150
@@ -197,25 +202,25 @@ class NegativeSpaceEngine:
 
         # -----------------------------------------------------------------
         # 7. Expected workflows absent
+        # Type: EVIDENCE_CHAIN
         # -----------------------------------------------------------------
-        # Check if entire chain Alert -> Investigation -> Escalation -> Response exists
         has_full_workflow = False
         for c in cases:
             if (c.id in escalation_by_case) and (c.id in response_by_case):
                 has_full_workflow = True
                 break
 
-        if not has_full_workflow and len(alerts) >= 50:
+        if not has_full_workflow and len(alerts) >= 30:
             findings.append(Finding(
-                id=f"FND-NS-7-{entity_id}",
+                id=f"FND-EC-7-{entity_id}",
                 entity_id=entity_id,
-                finding_type="NEGATIVE_SPACE",
+                finding_type="EVIDENCE_CHAIN",
                 rule_id="NEG_SPACE_7",
-                title="Expected supervisory workflow absent across observation window",
+                title="Broken evidence chains: Full supervisory lifecycle absent across observation window",
                 severity="HIGH",
                 priority="P2",
                 confidence=0.90,
-                explanation="Potential Negative Space: Zero cases completed the full standard lifecycle (Alert → Investigation → Escalation → Response). Expected evidence not observed. Requires supervisory verification.",
+                explanation="Broken Evidence Chain: Zero cases completed the full standard lifecycle (Alert → Investigation → Escalation → Response).",
                 evidence={
                     "total_cases_analyzed": len(cases),
                     "cases_with_full_workflow": 0

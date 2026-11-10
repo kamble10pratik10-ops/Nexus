@@ -22,7 +22,7 @@ export function AppLayout() {
   }, []);
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-background text-slate-200">
+    <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 transition-colors duration-150">
       <a
         href="#main-content"
         className="fixed left-4 top-3 z-[60] -translate-y-20 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform focus:translate-y-0"

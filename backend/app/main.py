@@ -18,6 +18,7 @@ from app.routers.entities_router import router as entities_router
 from app.routers.benchmarking_router import router as benchmarking_router
 from app.routers.claims_router import router as claims_router
 from app.routers.reports_router import router as reports_router
+from app.routers.evidence_router import router as evidence_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +49,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"],
+    allow_origin_regex=r"^https?://.*$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,6 +64,7 @@ app.include_router(entities_router, prefix=settings.API_PREFIX)
 app.include_router(benchmarking_router, prefix=settings.API_PREFIX)
 app.include_router(claims_router, prefix=settings.API_PREFIX)
 app.include_router(reports_router, prefix=settings.API_PREFIX)
+app.include_router(evidence_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 def root():

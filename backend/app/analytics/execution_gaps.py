@@ -27,6 +27,7 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 1: Critical alert closed unusually quickly (< 3 minutes)
+        # Type: EXECUTION_GAP
         # -----------------------------------------------------------------
         rapid_critical_alerts = []
         for a in alerts:
@@ -34,7 +35,6 @@ class ExecutionGapEngine:
                 diff_sec = (a.closed_at - a.created_at).total_seconds()
                 if 0 < diff_sec < 180: # Closed under 3 minutes (180s)
                     c = case_by_alert.get(a.id)
-                    # Check if escalation exists
                     has_esc = c and (c.id in escalation_by_case)
                     if not has_esc:
                         rapid_critical_alerts.append((a, int(diff_sec)))
@@ -47,7 +47,7 @@ class ExecutionGapEngine:
                 entity_id=entity_id,
                 finding_type="EXECUTION_GAP",
                 rule_id="RULE_1",
-                title="Critical alerts closed unusually quickly",
+                title="Critical alerts closed unusually quickly without investigation",
                 severity="CRITICAL",
                 priority="P1",
                 confidence=0.94,
@@ -66,6 +66,7 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 2: Critical alert closed without escalation
+        # Type: EXECUTION_GAP
         # -----------------------------------------------------------------
         critical_alerts = [a for a in alerts if a.severity == "CRITICAL"]
         unescalated_criticals = []
@@ -81,14 +82,14 @@ class ExecutionGapEngine:
                 entity_id=entity_id,
                 finding_type="EXECUTION_GAP",
                 rule_id="RULE_2",
-                title="Critical alert closed without escalation",
+                title="Critical alert closed without Tier-2 escalation",
                 severity="HIGH",
                 priority="P1",
                 confidence=0.91,
                 explanation=f"{len(unescalated_criticals)} confirmed critical alerts were closed as True Positive without any Tier-2 or CISO escalation recorded.",
                 evidence={
                     "unescalated_critical_count": len(unescalated_criticals),
-                    "sample_alert_ids": unescalated_criticals[:8]
+                    "sample_alerts": unescalated_criticals[:8]
                 },
                 expected_workflow=["ALERT", "INVESTIGATION", "ESCALATION", "RESPONSE"],
                 observed_workflow=["ALERT", "INVESTIGATION", "CLOSED"],
@@ -97,24 +98,25 @@ class ExecutionGapEngine:
             ))
 
         # -----------------------------------------------------------------
-        # RULE 3: Alert acknowledged but no meaningful investigation exists
+        # RULE 3: Shallow cases / superficial investigation notes
+        # Type: INVESTIGATION_QUALITY
         # -----------------------------------------------------------------
         shallow_cases = []
         for c in cases:
             if c.investigation_actions <= 1 and len(c.investigation_text.split()) < 8:
                 shallow_cases.append(c.id)
 
-        if len(shallow_cases) >= 4:
+        if len(shallow_cases) >= 3:
             findings.append(Finding(
-                id=f"FND-EG-R3-{entity_id}",
+                id=f"FND-IQ-R3-{entity_id}",
                 entity_id=entity_id,
-                finding_type="EXECUTION_GAP",
+                finding_type="INVESTIGATION_QUALITY",
                 rule_id="RULE_3",
-                title="Alert acknowledged but no meaningful investigation exists",
+                title="Superficial case triage and single-action investigation closures",
                 severity="MEDIUM",
                 priority="P2",
                 confidence=0.88,
-                explanation=f"{len(shallow_cases)} alerts were acknowledged to stop the operational SLA timer, but closed with single-action superficial notes.",
+                explanation=f"{len(shallow_cases)} cases were closed with single-action superficial notes (< 8 words) without detailed forensic investigation.",
                 evidence={
                     "shallow_case_count": len(shallow_cases),
                     "sample_cases": shallow_cases[:6]
@@ -126,25 +128,26 @@ class ExecutionGapEngine:
             ))
 
         # -----------------------------------------------------------------
-        # RULE 4: Repeated alerts on same asset without evidence of remediation
+        # RULE 4: Repeated alerts on same asset without permanent remediation
+        # Type: REMEDIATION_EFFECTIVENESS
         # -----------------------------------------------------------------
         asset_alert_counts = {}
         for a in alerts:
             if a.asset_id:
                 asset_alert_counts[a.asset_id] = asset_alert_counts.get(a.asset_id, 0) + 1
 
-        recurring_assets = [ast_id for ast_id, cnt in asset_alert_counts.items() if cnt >= 15]
+        recurring_assets = [ast_id for ast_id, cnt in asset_alert_counts.items() if cnt >= 12]
         if recurring_assets:
             findings.append(Finding(
-                id=f"FND-EG-R4-{entity_id}",
+                id=f"FND-RE-R4-{entity_id}",
                 entity_id=entity_id,
-                finding_type="EXECUTION_GAP",
+                finding_type="REMEDIATION_EFFECTIVENESS",
                 rule_id="RULE_4",
-                title="Repeated alerts on same asset without evidence of remediation",
+                title="Repeated threat recurrence on crown-jewel assets without permanent remediation",
                 severity="HIGH",
                 priority="P2",
                 confidence=0.89,
-                explanation=f"{len(recurring_assets)} crown-jewel assets suffered over 15 recurring threat detections with zero recorded permanent remediation.",
+                explanation=f"{len(recurring_assets)} crown-jewel assets suffered repeated security alerts (≥12 detections) with zero recorded root-cause remediation.",
                 evidence={
                     "recurring_asset_ids": recurring_assets[:5],
                     "total_recurring_assets": len(recurring_assets)
@@ -157,8 +160,9 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 5: Investigation text/actions are highly repetitive
+        # Type: NLP_TEMPLATED
         # -----------------------------------------------------------------
-        if len(cases) >= 10:
+        if len(cases) >= 6:
             text_counts = {}
             for c in cases:
                 norm_text = " ".join(c.investigation_text.lower().split()[:12])
@@ -166,13 +170,14 @@ class ExecutionGapEngine:
 
             max_repetition = max(text_counts.values()) if text_counts else 0
             repetition_pct = (max_repetition / len(cases)) * 100
-            if repetition_pct >= 40.0:
+            if repetition_pct >= 35.0 or max_repetition >= 5:
+                sample_cases = [c.id for c in cases if " ".join(c.investigation_text.lower().split()[:12]) == list(text_counts.keys())[0]]
                 findings.append(Finding(
-                    id=f"FND-EG-R5-{entity_id}",
+                    id=f"FND-NLP-R5-{entity_id}",
                     entity_id=entity_id,
-                    finding_type="EXECUTION_GAP",
+                    finding_type="NLP_TEMPLATED",
                     rule_id="RULE_5",
-                    title="Investigation text and actions are highly repetitive",
+                    title="Templated investigations: Identical copy-paste notes across disparate cases",
                     severity="HIGH",
                     priority="P2",
                     confidence=0.95,
@@ -180,6 +185,7 @@ class ExecutionGapEngine:
                     evidence={
                         "repetition_percentage": round(repetition_pct, 1),
                         "repeated_instances_count": max_repetition,
+                        "sample_cases": sample_cases[:6],
                         "sample_boilerplate": list(text_counts.keys())[0] if text_counts else ""
                     },
                     expected_workflow=["CASE", "INDEPENDENT_EVIDENCE_GATHERING", "UNIQUE_NOTES"],
@@ -190,6 +196,7 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 6: High-severity alert has no response evidence
+        # Type: EVIDENCE_FORENSICS
         # -----------------------------------------------------------------
         high_critical_alerts = [a for a in alerts if a.severity in ["CRITICAL", "HIGH"]]
         unresponded_highs = []
@@ -200,17 +207,17 @@ class ExecutionGapEngine:
                 unresponded_highs.append(a.id)
 
         unresp_pct = (len(unresponded_highs) / max(1, len(high_critical_alerts))) * 100
-        if unresp_pct >= 60.0 and len(unresponded_highs) >= 8:
+        if len(unresponded_highs) >= 4:
             findings.append(Finding(
-                id=f"FND-EG-R6-{entity_id}",
+                id=f"FND-EF-R6-{entity_id}",
                 entity_id=entity_id,
-                finding_type="EXECUTION_GAP",
+                finding_type="EVIDENCE_FORENSICS",
                 rule_id="RULE_6",
-                title="High-severity alert has no response evidence",
+                title="Evidence forensics: High-severity incidents missing containment evidence",
                 severity="HIGH",
                 priority="P2",
                 confidence=0.87,
-                explanation=f"{len(unresponded_highs)} high or critical threats ({unresp_pct:.1f}%) were closed with zero quarantine, IP block, or host isolation recorded.",
+                explanation=f"{len(unresponded_highs)} high or critical threats ({unresp_pct:.1f}%) were closed without verified host isolation, IP block, or containment actions.",
                 evidence={
                     "unresponded_count": len(unresponded_highs),
                     "percentage_unresponded": round(unresp_pct, 1),
@@ -224,24 +231,27 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 7: Investigation workload is inconsistent with alert workload
+        # Type: CAPACITY_STRESS
         # -----------------------------------------------------------------
         total_alerts_count = len(alerts)
         total_cases_count = len(cases)
+        uninvestigated_count = max(0, total_alerts_count - total_cases_count)
         investigation_ratio = total_cases_count / max(1, total_alerts_count)
-        if total_alerts_count >= 50 and investigation_ratio < 0.25:
+        if total_alerts_count >= 50 and (investigation_ratio < 0.85 or uninvestigated_count >= 25):
             findings.append(Finding(
-                id=f"FND-EG-R7-{entity_id}",
+                id=f"FND-CS-R7-{entity_id}",
                 entity_id=entity_id,
-                finding_type="EXECUTION_GAP",
+                finding_type="CAPACITY_STRESS",
                 rule_id="RULE_7",
-                title="Investigation workload is inconsistent with alert workload",
+                title="Capacity stress: Alert influx outpacing investigation throughput",
                 severity="MEDIUM",
                 priority="P3",
-                confidence=0.82,
-                explanation=f"Entity received {total_alerts_count} alerts but opened only {total_cases_count} cases ({investigation_ratio*100:.1f}% investigation rate). Severe backlog suppression suspected.",
+                confidence=0.84,
+                explanation=f"Entity received {total_alerts_count} alerts with {uninvestigated_count} alerts left uninvestigated ({investigation_ratio*100:.1f}% investigation rate), indicating operational triage stress under high alert load.",
                 evidence={
                     "total_alerts": total_alerts_count,
                     "cases_opened": total_cases_count,
+                    "uninvestigated_alerts": uninvestigated_count,
                     "investigation_ratio": round(investigation_ratio, 2)
                 },
                 expected_workflow=["ALERT_GENERATION", "MANDATORY_CASE_CREATION"],
@@ -252,6 +262,7 @@ class ExecutionGapEngine:
 
         # -----------------------------------------------------------------
         # RULE 8: Escalation activity is unexpectedly low for critical alerts
+        # Type: METRIC_INTEGRITY
         # -----------------------------------------------------------------
         critical_count = len(critical_alerts)
         critical_escalated_count = 0
@@ -261,13 +272,14 @@ class ExecutionGapEngine:
                 critical_escalated_count += 1
 
         esc_rate = (critical_escalated_count / max(1, critical_count)) * 100
-        if critical_count >= 15 and esc_rate < 8.0:
+        if critical_count >= 8 and esc_rate < 15.0:
+            sample_crit_unsc = [a.id for a in critical_alerts if not (case_by_alert.get(a.id) and case_by_alert.get(a.id).id in escalation_by_case)]
             findings.append(Finding(
-                id=f"FND-EG-R8-{entity_id}",
+                id=f"FND-MI-R8-{entity_id}",
                 entity_id=entity_id,
-                finding_type="EXECUTION_GAP",
+                finding_type="METRIC_INTEGRITY",
                 rule_id="RULE_8",
-                title="Escalation activity is unexpectedly low for critical alerts",
+                title="Metric integrity: Abnormally low critical escalation rate masking true risk",
                 severity="CRITICAL",
                 priority="P1",
                 confidence=0.92,
@@ -275,7 +287,8 @@ class ExecutionGapEngine:
                 evidence={
                     "critical_alerts_count": critical_count,
                     "escalated_count": critical_escalated_count,
-                    "escalation_rate_pct": round(esc_rate, 1)
+                    "escalation_rate_pct": round(esc_rate, 1),
+                    "sample_alerts": sample_crit_unsc[:6]
                 },
                 expected_workflow=["CRITICAL_ALERT", "TIER_2_ESCALATION", "INCIDENT_DISPATCH"],
                 observed_workflow=["CRITICAL_ALERT", "L1_SILENT_DISPOSAL"],

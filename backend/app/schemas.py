@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -127,6 +127,32 @@ class FindingOut(BaseModel):
     review_notes: Optional[str] = None
     created_at: datetime
 
+    @computed_field
+    @property
+    def finding_id(self) -> str:
+        return self.id
+
+    @computed_field
+    @property
+    def type(self) -> str:
+        return self.finding_type
+
+    @computed_field
+    @property
+    def description(self) -> str:
+        return self.explanation
+
+    @computed_field
+    @property
+    def outcome(self) -> Optional[str]:
+        if self.reviewed:
+            if self.review_decision in ["CONFIRMED_GAP", "APPROVED", "confirm"]:
+                return "SUPPORTED"
+            elif self.review_decision in ["DISMISSED", "REJECTED", "dismiss"]:
+                return "CONTRADICTED"
+            return "UNVERIFIABLE"
+        return None
+
     class Config:
         from_attributes = True
 
@@ -151,6 +177,32 @@ class IngestionJobOut(BaseModel):
     normalized: bool
     status: str
     created_at: datetime
+
+    @computed_field
+    @property
+    def finding_id(self) -> str:
+        return self.id
+
+    @computed_field
+    @property
+    def type(self) -> str:
+        return self.finding_type
+
+    @computed_field
+    @property
+    def description(self) -> str:
+        return self.explanation
+
+    @computed_field
+    @property
+    def outcome(self) -> Optional[str]:
+        if self.reviewed:
+            if self.review_decision in ["CONFIRMED_GAP", "APPROVED", "confirm"]:
+                return "SUPPORTED"
+            elif self.review_decision in ["DISMISSED", "REJECTED", "dismiss"]:
+                return "CONTRADICTED"
+            return "UNVERIFIABLE"
+        return None
 
     class Config:
         from_attributes = True
